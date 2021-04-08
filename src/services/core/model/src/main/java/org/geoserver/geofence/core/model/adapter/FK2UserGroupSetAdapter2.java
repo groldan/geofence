@@ -5,26 +5,19 @@
 
 package org.geoserver.geofence.core.model.adapter;
 
-import org.geoserver.geofence.core.model.adapter.dual.IdNameBundle;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-
-import org.locationtech.jts.io.ParseException;
-import org.geoserver.geofence.core.model.UserGroup;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import org.geoserver.geofence.core.model.UserGroup;
+import org.locationtech.jts.io.ParseException;
 
-/**
- * Transform a UserGroup into its id.
- *
- */
+/** Transform a UserGroup into its id. */
 public class FK2UserGroupSetAdapter2 extends XmlAdapter<ArrayList<Long>, Set<UserGroup>> {
 
     @Override
     public Set<UserGroup> unmarshal(ArrayList<Long> inSet) throws ParseException {
-        if(inSet == null)
-            return null;
+        if (inSet == null) return null;
 
         Set<UserGroup> ret = new HashSet<UserGroup>();
         for (Long in : inSet) {
@@ -38,8 +31,7 @@ public class FK2UserGroupSetAdapter2 extends XmlAdapter<ArrayList<Long>, Set<Use
 
     @Override
     public ArrayList<Long> marshal(Set<UserGroup> inSet) throws ParseException {
-        if(inSet == null)
-            return null;
+        if (inSet == null) return null;
 
         System.out.println("Marshalling " + inSet.size() + " groups");
 

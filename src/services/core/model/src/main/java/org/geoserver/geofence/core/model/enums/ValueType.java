@@ -5,20 +5,18 @@
 
 package org.geoserver.geofence.core.model.enums;
 
-/**
- * The Enum ValueType.
- */
+/** The Enum ValueType. */
 public enum ValueType {
-    
+
     /** The BOOL. */
     BOOL,
-    
+
     /** The INT. */
     INT,
-    
+
     /** The STRING. */
     STRING,
-    
+
     /** The STRINGLIST. */
     STRINGLIST
 }

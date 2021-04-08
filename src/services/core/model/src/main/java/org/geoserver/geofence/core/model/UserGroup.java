@@ -8,7 +8,6 @@ package org.geoserver.geofence.core.model;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -19,13 +18,13 @@ import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * A grouping for {@link GSUser}s.
- * <P>
+ *
+ * <p>
  *
  * @author ETj (etj at geo-solutions.it)
  */
@@ -33,43 +32,37 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Table(name = "gf_usergroup")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "usergroup")
 @XmlRootElement(name = "UserGroup")
-@XmlType(propOrder={"id","extId","name","dateCreation"/*,"customProps"*/})
+@XmlType(propOrder = {"id", "extId", "name", "dateCreation" /*,"customProps"*/})
 public class UserGroup implements Identifiable, Serializable {
 
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 8457036587275531556L;
 
     /** The id. */
-    @Id
-    @GeneratedValue
-    @Column
-    private Long id;
+    @Id @GeneratedValue @Column private Long id;
 
-    /** External Id.
-     * An ID used in an external systems.
-     * This field should simplify Geofence integration in complex systems.
+    /**
+     * External Id. An ID used in an external systems. This field should simplify Geofence
+     * integration in complex systems.
      */
-    @Column(nullable=true, updatable=false, unique=true)
+    @Column(nullable = true, updatable = false, unique = true)
     private String extId;
 
     /** The name. */
-    @Column(nullable=false, updatable=true, unique=true)
+    @Column(nullable = false, updatable = true, unique = true)
     private String name;
 
     /** The date creation. */
-    @Column(updatable=false)
+    @Column(updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateCreation;
 
     /** The enabled. */
-    @Column(nullable=false)
+    @Column(nullable = false)
     private boolean enabled;
 
-    /**
-     * Instantiates a new profile.
-     */
-    public UserGroup() {
-    }
+    /** Instantiates a new profile. */
+    public UserGroup() {}
 
     /**
      * Gets the id.
@@ -83,8 +76,7 @@ public class UserGroup implements Identifiable, Serializable {
     /**
      * Sets the id.
      *
-     * @param id
-     *            the new id
+     * @param id the new id
      */
     public void setId(Long id) {
         this.id = id;
@@ -110,8 +102,7 @@ public class UserGroup implements Identifiable, Serializable {
     /**
      * Sets the name.
      *
-     * @param name
-     *            the new name
+     * @param name the new name
      */
     public void setName(String name) {
         this.name = name;
@@ -129,8 +120,7 @@ public class UserGroup implements Identifiable, Serializable {
     /**
      * Sets the date creation.
      *
-     * @param dateCreation
-     *            the new date creation
+     * @param dateCreation the new date creation
      */
     public void setDateCreation(Date dateCreation) {
         this.dateCreation = dateCreation;
@@ -149,16 +139,14 @@ public class UserGroup implements Identifiable, Serializable {
     /**
      * Sets the enabled.
      *
-     * @param enabled
-     *            the new enabled
+     * @param enabled the new enabled
      */
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         int hash = 7;
         hash = 97 * hash + Objects.hashCode(this.id);
         hash = 97 * hash + Objects.hashCode(this.extId);
@@ -169,8 +157,7 @@ public class UserGroup implements Identifiable, Serializable {
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -203,16 +190,11 @@ public class UserGroup implements Identifiable, Serializable {
     public String toString() {
         StringBuilder builder = new StringBuilder(this.getClass().getSimpleName());
         builder.append("[");
-        if(id != null)
-            builder.append("id:").append(id);
-        if(extId != null)
-            builder.append(" ext:").append(extId);
-        if (name != null)
-            builder.append(" name:").append(name);
-        if( ! enabled )
-            builder.append(" disabled");
+        if (id != null) builder.append("id:").append(id);
+        if (extId != null) builder.append(" ext:").append(extId);
+        if (name != null) builder.append(" name:").append(name);
+        if (!enabled) builder.append(" disabled");
         builder.append("]");
         return builder.toString();
     }
-
 }

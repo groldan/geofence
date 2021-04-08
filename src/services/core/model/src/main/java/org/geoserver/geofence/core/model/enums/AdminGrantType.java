@@ -5,9 +5,7 @@
 
 package org.geoserver.geofence.core.model.enums;
 
-/**
- * The Enum AdminGrantType.
- */
+/** The Enum AdminGrantType. */
 public enum AdminGrantType {
     ADMIN,
     USER

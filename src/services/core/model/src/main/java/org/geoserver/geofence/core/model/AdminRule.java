@@ -5,8 +5,6 @@
 
 package org.geoserver.geofence.core.model;
 
-import org.geoserver.geofence.core.model.adapter.FKGSInstanceAdapter;
-import org.geoserver.geofence.core.model.enums.AdminGrantType;
 import java.io.Serializable;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -24,6 +22,8 @@ import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import org.geoserver.geofence.core.model.adapter.FKGSInstanceAdapter;
+import org.geoserver.geofence.core.model.enums.AdminGrantType;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.ForeignKey;
@@ -31,28 +31,40 @@ import org.hibernate.annotations.Index;
 
 /**
  * An AdminRule expresses if a given combination of request access is allowed or not.
- * <P>
- * It's used for setting admin privileges on workspaces.
- * </P><P>
- * AdminRule filtering and selection is almost identical to {@see Rule}.
+ *
+ * <p>It's used for setting admin privileges on workspaces.
+ *
+ * <p>AdminRule filtering and selection is almost identical to {@see Rule}.
  *
  * @author ETj (etj at geo-solutions.it)
  */
 @Entity(name = "AdminRule")
-@Table(name = "gf_adminrule", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"username", "rolename", "instance_id", "workspace"})})
+@Table(
+    name = "gf_adminrule",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"username", "rolename", "instance_id", "workspace"})
+    }
+)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "Rule")
 @XmlRootElement(name = "AdminRule")
-@XmlType(propOrder={"id","priority","username","rolename","instance","addressRange","workspace","access"})
+@XmlType(
+    propOrder = {
+        "id",
+        "priority",
+        "username",
+        "rolename",
+        "instance",
+        "addressRange",
+        "workspace",
+        "access"
+    }
+)
 public class AdminRule implements Identifiable, Serializable, Prioritizable, IPRangeProvider {
 
     private static final long serialVersionUID = -5127129225384707999L;
 
     /** The id. */
-    @Id
-    @GeneratedValue
-    @Column
-    private Long id;
+    @Id @GeneratedValue @Column private Long id;
 
     /** Lower numbers have higher priority */
     @Column(nullable = false)
@@ -71,9 +83,10 @@ public class AdminRule implements Identifiable, Serializable, Prioritizable, IPR
 
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name="low", column=@Column(name="ip_low")),
-        @AttributeOverride(name="high", column=@Column(name="ip_high")),
-        @AttributeOverride(name="size", column=@Column(name="ip_size"))   })
+        @AttributeOverride(name = "low", column = @Column(name = "ip_low")),
+        @AttributeOverride(name = "high", column = @Column(name = "ip_high")),
+        @AttributeOverride(name = "size", column = @Column(name = "ip_size"))
+    })
     private IPAddressRange addressRange;
 
     @Column
@@ -84,11 +97,16 @@ public class AdminRule implements Identifiable, Serializable, Prioritizable, IPR
     @Column(name = "grant_type", nullable = false)
     private AdminGrantType access;
 
-    public AdminRule() {
-    }
+    public AdminRule() {}
 
-    public AdminRule(long priority, String username, String rolename, GSInstance instance, IPAddressRange addressRange,
-                               String workspace, AdminGrantType access) {
+    public AdminRule(
+            long priority,
+            String username,
+            String rolename,
+            GSInstance instance,
+            IPAddressRange addressRange,
+            String workspace,
+            AdminGrantType access) {
         this.priority = priority;
         this.username = username;
         this.rolename = rolename;
@@ -140,7 +158,6 @@ public class AdminRule implements Identifiable, Serializable, Prioritizable, IPR
         this.rolename = rolename;
     }
 
-
     @XmlJavaTypeAdapter(FKGSInstanceAdapter.class)
     public GSInstance getInstance() {
         return instance;
@@ -168,9 +185,12 @@ public class AdminRule implements Identifiable, Serializable, Prioritizable, IPR
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(getClass().getSimpleName())
-                .append("[id:").append(id)
-                .append(" pri:").append(priority);
+        StringBuilder sb =
+                new StringBuilder(getClass().getSimpleName())
+                        .append("[id:")
+                        .append(id)
+                        .append(" pri:")
+                        .append(priority);
 
         if (username != null) {
             sb.append(" user:").append(prepare(username));
@@ -197,15 +217,11 @@ public class AdminRule implements Identifiable, Serializable, Prioritizable, IPR
         sb.append(']');
 
         return sb.toString();
-
     }
-    
+
     private static String prepare(String s) {
-        if(s==null)
-            return "(null)";
-        else if (s.isEmpty())
-            return "(empty)";
-        else
-            return s;
+        if (s == null) return "(null)";
+        else if (s.isEmpty()) return "(empty)";
+        else return s;
     }
 }

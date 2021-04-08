@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 /**
  * A class that performs some subnet calculations given a network address and a subnet mask.
+ *
  * @see "http://www.faqs.org/rfcs/rfc1519.html"
  * @author rwinston@apache.org
  * @since 2.0
@@ -30,12 +31,12 @@ public class SubnetV4Utils {
     /** Whether the broadcast/network address are included in host count */
     private boolean inclusiveHostCount = true;
 
-
     /**
      * Constructor that takes a CIDR-notation string, e.g. "192.168.0.1/16"
+     *
      * @param cidrNotation A CIDR-notation string, e.g. "192.168.0.1/16"
-     * @throws IllegalArgumentException if the parameter is invalid,
-     * i.e. does not match n.n.n.n/m where n=1-3 decimal digits, m = 1-3 decimal digits in range 1-32
+     * @throws IllegalArgumentException if the parameter is invalid, i.e. does not match n.n.n.n/m
+     *     where n=1-3 decimal digits, m = 1-3 decimal digits in range 1-32
      */
     public SubnetV4Utils(String cidrNotation) {
         calculate(cidrNotation);
@@ -43,10 +44,11 @@ public class SubnetV4Utils {
 
     /**
      * Constructor that takes a dotted decimal address and a dotted decimal mask.
+     *
      * @param address An IP address, e.g. "192.168.0.1"
      * @param mask A dotted decimal netmask e.g. "255.255.0.0"
-     * @throws IllegalArgumentException if the address or mask is invalid,
-     * i.e. does not match n.n.n.n where n=1-3 decimal digits and the mask is not all zeros
+     * @throws IllegalArgumentException if the address or mask is invalid, i.e. does not match
+     *     n.n.n.n where n=1-3 decimal digits and the mask is not all zeros
      */
     public SubnetV4Utils(String address, String mask) {
         calculate(toCidrNotation(address, mask));
@@ -59,6 +61,7 @@ public class SubnetV4Utils {
     /**
      * Returns <code>true</code> if the return value of {@link SubnetInfo#getAddressCount()}
      * includes the network and broadcast addresses.
+     *
      * @since 2.2
      * @return true if the hostcount includes the network and broadcast addresses
      */
@@ -69,6 +72,7 @@ public class SubnetV4Utils {
     /**
      * Set to <code>true</code> if you want the return value of {@link SubnetInfo#getAddressCount()}
      * to include the network and broadcast addresses.
+     *
      * @param inclusiveHostCount true if network and broadcast addresses are to be included
      * @since 2.2
      */
@@ -76,49 +80,59 @@ public class SubnetV4Utils {
         this.inclusiveHostCount = inclusiveHostCount;
     }
 
-
-
-    /**
-     * Convenience container for subnet summary information.
-     *
-     */
+    /** Convenience container for subnet summary information. */
     public final class SubnetInfo {
         /* Mask to convert unsigned int to a long (i.e. keep 32 bits) */
         private static final long UNSIGNED_INT_MASK = 0x0FFFFFFFFL;
 
         private SubnetInfo() {}
 
-        private int netmask()       { return netmask; }
-        private int network()       { return network; }
-        private int address()       { return address; }
-        private int broadcast()     { return broadcast; }
+        private int netmask() {
+            return netmask;
+        }
+
+        private int network() {
+            return network;
+        }
+
+        private int address() {
+            return address;
+        }
+
+        private int broadcast() {
+            return broadcast;
+        }
 
         // long versions of the values (as unsigned int) which are more suitable for range checking
-        private long networkLong()  { return network &  UNSIGNED_INT_MASK; }
-        private long broadcastLong(){ return broadcast &  UNSIGNED_INT_MASK; }
+        private long networkLong() {
+            return network & UNSIGNED_INT_MASK;
+        }
+
+        private long broadcastLong() {
+            return broadcast & UNSIGNED_INT_MASK;
+        }
 
         private int low() {
-            return (isInclusiveHostCount() ? network() :
-                broadcastLong() - networkLong() > 1 ? network() + 1 : 0);
+            return (isInclusiveHostCount()
+                    ? network()
+                    : broadcastLong() - networkLong() > 1 ? network() + 1 : 0);
         }
 
         private int high() {
-            return (isInclusiveHostCount() ? broadcast() :
-                broadcastLong() - networkLong() > 1 ? broadcast() -1  : 0);
+            return (isInclusiveHostCount()
+                    ? broadcast()
+                    : broadcastLong() - networkLong() > 1 ? broadcast() - 1 : 0);
         }
 
-        /**
-         * @return the number of bits of the CIDR block
-         */
+        /** @return the number of bits of the CIDR block */
         public int getMaskSize() {
             return pop(netmask());
         }
 
-
         /**
-         * Returns true if the parameter <code>address</code> is in the
-         * range of usable endpoint addresses for this subnet. This excludes the
-         * network and broadcast adresses.
+         * Returns true if the parameter <code>address</code> is in the range of usable endpoint
+         * addresses for this subnet. This excludes the network and broadcast adresses.
+         *
          * @param address A dot-delimited IPv4 address, e.g. "192.168.0.1"
          * @return True if in range, false otherwise
          */
@@ -145,9 +159,7 @@ public class SubnetV4Utils {
             return format(toArray(netmask()));
         }
 
-        /**
-         * @return the address in dotted form
-         */
+        /** @return the address in dotted form */
         public String getAddress() {
             return format(toArray(address()));
         }
@@ -157,8 +169,8 @@ public class SubnetV4Utils {
         }
 
         /**
-         * Return the low address as a dotted IP address.
-         * Will be zero for CIDR/31 and CIDR/32 if the inclusive flag is false.
+         * Return the low address as a dotted IP address. Will be zero for CIDR/31 and CIDR/32 if
+         * the inclusive flag is false.
          *
          * @return the IP address in dotted format, may be "0.0.0.0" if there is no valid address
          */
@@ -167,8 +179,8 @@ public class SubnetV4Utils {
         }
 
         /**
-         * Return the high address as a dotted IP address.
-         * Will be zero for CIDR/31 and CIDR/32 if the inclusive flag is false.
+         * Return the high address as a dotted IP address. Will be zero for CIDR/31 and CIDR/32 if
+         * the inclusive flag is false.
          *
          * @return the IP address in dotted format, may be "0.0.0.0" if there is no valid address
          */
@@ -177,8 +189,9 @@ public class SubnetV4Utils {
         }
 
         /**
-         * Get the count of available addresses.
-         * Will be zero for CIDR/31 and CIDR/32 if the inclusive flag is false.
+         * Get the count of available addresses. Will be zero for CIDR/31 and CIDR/32 if the
+         * inclusive flag is false.
+         *
          * @return the count of addresses, may be zero.
          * @throws RuntimeException if the correct count is greater than {@code Integer.MAX_VALUE}
          * @deprecated use {@link #getAddressCountLong()} instead
@@ -190,12 +203,13 @@ public class SubnetV4Utils {
                 throw new RuntimeException("Count is larger than an integer: " + countLong);
             }
             // N.B. cannot be negative
-            return (int)countLong;
+            return (int) countLong;
         }
 
         /**
-         * Get the count of available addresses.
-         * Will be zero for CIDR/31 and CIDR/32 if the inclusive flag is false.
+         * Get the count of available addresses. Will be zero for CIDR/31 and CIDR/32 if the
+         * inclusive flag is false.
+         *
          * @return the count of addresses, may be zero.
          */
         public long getAddressCountLong() {
@@ -205,12 +219,8 @@ public class SubnetV4Utils {
             return count < 0 ? 0 : count;
         }
 
-
         public String getCidrSignature() {
-            return toCidrNotation(
-                    format(toArray(address())),
-                    format(toArray(netmask()))
-            );
+            return toCidrNotation(format(toArray(address())), format(toArray(netmask())));
         }
 
         public String[] getAllAddresses() {
@@ -219,7 +229,7 @@ public class SubnetV4Utils {
             if (ct == 0) {
                 return addresses;
             }
-            for (int add = low(), j=0; add <= high(); ++add, ++j) {
+            for (int add = low(), j = 0; add <= high(); ++add, ++j) {
                 addresses[j] = format(toArray(add));
             }
             return addresses;
@@ -227,27 +237,45 @@ public class SubnetV4Utils {
 
         /**
          * {@inheritDoc}
+         *
          * @since 2.2
          */
         @Override
         public String toString() {
             final StringBuilder buf = new StringBuilder();
-            buf.append("CIDR Signature:\t[").append(getCidrSignature()).append("]")
-                .append(" Netmask: [").append(getNetmask()).append("]\n")
-                .append("Network:\t[").append(getNetworkAddress()).append("]\n")
-                .append("Broadcast:\t[").append(getBroadcastAddress()).append("]\n")
-                 .append("First Address:\t[").append(getLowAddress()).append("]\n")
-                 .append("Last Address:\t[").append(getHighAddress()).append("]\n")
-                 .append("# Addresses:\t[").append(getAddressCount()).append("]\n");
+            buf.append("CIDR Signature:\t[")
+                    .append(getCidrSignature())
+                    .append("]")
+                    .append(" Netmask: [")
+                    .append(getNetmask())
+                    .append("]\n")
+                    .append("Network:\t[")
+                    .append(getNetworkAddress())
+                    .append("]\n")
+                    .append("Broadcast:\t[")
+                    .append(getBroadcastAddress())
+                    .append("]\n")
+                    .append("First Address:\t[")
+                    .append(getLowAddress())
+                    .append("]\n")
+                    .append("Last Address:\t[")
+                    .append(getHighAddress())
+                    .append("]\n")
+                    .append("# Addresses:\t[")
+                    .append(getAddressCount())
+                    .append("]\n");
             return buf.toString();
         }
     }
 
     /**
      * Return a {@link SubnetInfo} instance that contains subnet-specific statistics
+     *
      * @return new instance
      */
-    public final SubnetInfo getInfo() { return new SubnetInfo(); }
+    public final SubnetInfo getInfo() {
+        return new SubnetInfo();
+    }
 
     /*
      * Initialize the internal fields from the supplied CIDR mask
@@ -279,7 +307,7 @@ public class SubnetV4Utils {
      */
     private void calculate(long addr, int size) {
 
-        address = (int)(0x0ffffffff & addr);
+        address = (int) (0x0ffffffff & addr);
 
         /* Create a binary netmask from the number of bits specification /x */
         int cidrPart = size;
@@ -314,7 +342,7 @@ public class SubnetV4Utils {
         int addr = 0;
         for (int i = 1; i <= 4; ++i) {
             int n = (rangeCheck(Integer.parseInt(matcher.group(i)), 0, 255));
-            addr |= ((n & 0xff) << 8*(4-i));
+            addr |= ((n & 0xff) << 8 * (4 - i));
         }
         return addr;
     }
@@ -329,7 +357,7 @@ public class SubnetV4Utils {
     private int[] toArray(int val) {
         int ret[] = new int[4];
         for (int j = 3; j >= 0; --j) {
-            ret[j] |= ((val >>> 8*(3-j)) & (0xff));
+            ret[j] |= ((val >>> 8 * (3 - j)) & (0xff));
         }
         return ret;
     }
@@ -339,7 +367,7 @@ public class SubnetV4Utils {
      */
     private String format(int[] octets) {
         StringBuilder str = new StringBuilder();
-        for (int i =0; i < octets.length; ++i){
+        for (int i = 0; i < octets.length; ++i) {
             str.append(octets[i]);
             if (i != octets.length - 1) {
                 str.append(".");
@@ -358,7 +386,8 @@ public class SubnetV4Utils {
             return value;
         }
 
-        throw new IllegalArgumentException("Value [" + value + "] not in range ["+begin+","+end+"]");
+        throw new IllegalArgumentException(
+                "Value [" + value + "] not in range [" + begin + "," + end + "]");
     }
 
     /*
@@ -381,5 +410,4 @@ public class SubnetV4Utils {
     private String toCidrNotation(String addr, String mask) {
         return addr + "/" + pop(toInteger(mask));
     }
-
 }

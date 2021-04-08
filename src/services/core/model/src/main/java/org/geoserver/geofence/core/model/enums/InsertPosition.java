@@ -9,7 +9,7 @@ package org.geoserver.geofence.core.model.enums;
  * Used in DAOs and Services
  *
  * @author ETj (etj at geo-solutions.it)
-*/
+ */
 public enum InsertPosition {
 
     /** priority is a fixed value */

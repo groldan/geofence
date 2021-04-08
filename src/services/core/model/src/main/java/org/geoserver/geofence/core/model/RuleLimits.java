@@ -6,7 +6,6 @@
 package org.geoserver.geofence.core.model;
 
 import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -18,7 +17,6 @@ import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 import org.geoserver.geofence.core.model.adapter.MultiPolygonAdapter;
 import org.geoserver.geofence.core.model.enums.CatalogMode;
 import org.geoserver.geofence.core.model.enums.GrantType;
@@ -27,11 +25,10 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Check;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.Type;
-
 import org.locationtech.jts.geom.MultiPolygon;
 
 /**
- * Defines general limits (such as an Area ) for a {@link Rule}. <BR>
+ * Defines general limits (such as an Area ) for a {@link Rule}. <br>
  * RuleLimits may be set only for rules with a {@link GrantType#LIMIT} access type.
  *
  * @author ETj (etj at geo-solutions.it)
@@ -100,10 +97,13 @@ public class RuleLimits implements Serializable {
     @Override
     public String toString() {
         return "RuleLimits["
-                + "id=" + id
-                + " rule=" + rule
-                + " allowedArea=" + allowedArea
-                + (catalogMode == null ? "" : (" mode="+catalogMode))
+                + "id="
+                + id
+                + " rule="
+                + rule
+                + " allowedArea="
+                + allowedArea
+                + (catalogMode == null ? "" : (" mode=" + catalogMode))
                 + ']';
     }
 }

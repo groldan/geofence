@@ -5,7 +5,6 @@
 
 package org.geoserver.geofence.core.model.adapter;
 
-
 import org.geoserver.geofence.core.model.UserGroup;
 
 /**
@@ -13,11 +12,10 @@ import org.geoserver.geofence.core.model.UserGroup;
  *
  * @author ETj (etj at geo-solutions.it)
  */
-public class FKUserGroupAdapter extends IdentifiableAdapter<UserGroup>  {
+public class FKUserGroupAdapter extends IdentifiableAdapter<UserGroup> {
 
     @Override
     protected UserGroup createInstance() {
         return new UserGroup();
     }
-
 }

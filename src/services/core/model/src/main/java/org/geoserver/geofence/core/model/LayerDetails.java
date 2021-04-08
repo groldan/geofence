@@ -5,10 +5,6 @@
 
 package org.geoserver.geofence.core.model;
 
-import org.locationtech.jts.geom.MultiPolygon;
-import org.geoserver.geofence.core.model.adapter.MultiPolygonAdapter;
-import org.geoserver.geofence.core.model.enums.CatalogMode;
-import org.geoserver.geofence.core.model.enums.LayerType;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -27,19 +23,24 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import org.geoserver.geofence.core.model.adapter.MultiPolygonAdapter;
+import org.geoserver.geofence.core.model.enums.CatalogMode;
+import org.geoserver.geofence.core.model.enums.LayerType;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.Type;
+import org.locationtech.jts.geom.MultiPolygon;
 
 /**
  * Details may be set only for ules with non-wildcarded profile, instance, workspace,layer.
  *
- * <P>
- * <B>TODO</B> <UL>
- * <LI>What about externally defined styles?</LI>
+ * <p><B>TODO</B>
+ *
+ * <UL>
+ *   <LI>What about externally defined styles?
  * </UL>
  *
  * @author ETj (etj at geo-solutions.it)
@@ -54,52 +55,57 @@ public class LayerDetails implements Serializable {
 
     /** The id. */
     @Id
-//    @GeneratedValue
+    //    @GeneratedValue
     @Column
     private Long id;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = true /*false*/)
     private LayerType type;
-    
-    @Column
-    private String defaultStyle;
 
-    @Column(length=4000)
+    @Column private String defaultStyle;
+
+    @Column(length = 4000)
     private String cqlFilterRead;
 
-    @Column(length=4000)
+    @Column(length = 4000)
     private String cqlFilterWrite;
 
-	@Type(type = "org.hibernatespatial.GeometryUserType")
-	@Column(name = "area")
-	private MultiPolygon area;
+    @Type(type = "org.hibernatespatial.GeometryUserType")
+    @Column(name = "area")
+    private MultiPolygon area;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "catalog_mode", nullable = true)
     private CatalogMode catalogMode;
 
-    @OneToOne(optional=false)
-//    @Check(constraints="rule.access='LIMIT'") // ??? check this
-    @ForeignKey(name="fk_details_rule")
+    @OneToOne(optional = false)
+    //    @Check(constraints="rule.access='LIMIT'") // ??? check this
+    @ForeignKey(name = "fk_details_rule")
     private Rule rule;
 
     /** Styles allowed for this layer */
-    @org.hibernate.annotations.CollectionOfElements(fetch=FetchType.EAGER)
-    @JoinTable( name = "gf_layer_styles", joinColumns = @JoinColumn(name = "details_id"))
-    @ForeignKey(name="fk_styles_layer")
-    @Column(name="styleName")
+    @org.hibernate.annotations.CollectionOfElements(fetch = FetchType.EAGER)
+    @JoinTable(name = "gf_layer_styles", joinColumns = @JoinColumn(name = "details_id"))
+    @ForeignKey(name = "fk_styles_layer")
+    @Column(name = "styleName")
     private Set<String> allowedStyles = new HashSet<String>();
 
-    /** Feature Attributes associated to the Layer
-     * <P>We'll use the pair <TT>(details_id, name)</TT> as PK for the associated table.
-     * To do so, we have to perform some trick on the <TT>{@link LayerAttribute#access}</TT> field.
+    /**
+     * Feature Attributes associated to the Layer
+     *
+     * <p>We'll use the pair <TT>(details_id, name)</TT> as PK for the associated table. To do so,
+     * we have to perform some trick on the <TT>{@link LayerAttribute#access}</TT> field.
      */
-    @org.hibernate.annotations.CollectionOfElements(fetch=FetchType.EAGER)
-    @JoinTable( name = "gf_layer_attributes",  joinColumns = @JoinColumn(name = "details_id"),  uniqueConstraints = @UniqueConstraint(columnNames={"details_id", "name"}))
+    @org.hibernate.annotations.CollectionOfElements(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "gf_layer_attributes",
+        joinColumns = @JoinColumn(name = "details_id"),
+        uniqueConstraints = @UniqueConstraint(columnNames = {"details_id", "name"})
+    )
     // override is used to set the pk as {"details_id", "name"}
-//    @AttributeOverride( name="access", column=@Column(name="access", nullable=false) )
-    @ForeignKey(name="fk_attribute_layer")
+    //    @AttributeOverride( name="access", column=@Column(name="access", nullable=false) )
+    @ForeignKey(name = "fk_attribute_layer")
     @Fetch(FetchMode.SELECT) // without this, hibernate will duplicate results(!)
     private Set<LayerAttribute> attributes = new HashSet<LayerAttribute>();
 
@@ -119,7 +125,7 @@ public class LayerDetails implements Serializable {
     public void setCatalogMode(CatalogMode catalogMode) {
         this.catalogMode = catalogMode;
     }
-    
+
     public String getCqlFilterRead() {
         return cqlFilterRead;
     }
@@ -152,7 +158,6 @@ public class LayerDetails implements Serializable {
         this.allowedStyles = allowedStyles;
     }
 
-
     public Long getId() {
         return id;
     }
@@ -170,7 +175,7 @@ public class LayerDetails implements Serializable {
         this.rule = rule;
     }
 
-    @XmlElement(name="attribute")
+    @XmlElement(name = "attribute")
     public Set<LayerAttribute> getAttributes() {
         return attributes;
     }
@@ -185,22 +190,31 @@ public class LayerDetails implements Serializable {
 
     public void setType(LayerType type) {
         this.type = type;
-    }    
+    }
 
     @Override
     public String toString() {
-        return "LayerDetails{" 
-                + "id=" + id
-                + " type=" + type
-                + " defStyle=" + defaultStyle
-                + " cqlr=" + cqlFilterRead
-                + " cqlw=" + cqlFilterWrite
-                + " catmode" + catalogMode
-                + " area=" + area
-                + " rule=" + rule
-                + " attrs=" + attributes
-                + " styles=" + allowedStyles
+        return "LayerDetails{"
+                + "id="
+                + id
+                + " type="
+                + type
+                + " defStyle="
+                + defaultStyle
+                + " cqlr="
+                + cqlFilterRead
+                + " cqlw="
+                + cqlFilterWrite
+                + " catmode"
+                + catalogMode
+                + " area="
+                + area
+                + " rule="
+                + rule
+                + " attrs="
+                + attributes
+                + " styles="
+                + allowedStyles
                 + '}';
     }
-
 }

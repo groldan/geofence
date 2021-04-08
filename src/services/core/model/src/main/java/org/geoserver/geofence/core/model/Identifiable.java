@@ -5,15 +5,13 @@
 
 package org.geoserver.geofence.core.model;
 
-/**
- *
- * @author ETj (etj at geo-solutions.it)
- */
+/** @author ETj (etj at geo-solutions.it) */
 public interface Identifiable {
 
     Long getId();
+
     void setId(Long id);
 
-//    String getName();
-//    void setName(String name);
+    //    String getName();
+    //    void setName(String name);
 }

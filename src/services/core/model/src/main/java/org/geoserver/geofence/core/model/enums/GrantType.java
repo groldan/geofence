@@ -5,9 +5,7 @@
 
 package org.geoserver.geofence.core.model.enums;
 
-/**
- * The Enum GrantType.
- */
+/** The Enum GrantType. */
 public enum GrantType {
     ALLOW,
     DENY,

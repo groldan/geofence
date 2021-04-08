@@ -5,23 +5,18 @@
 
 package org.geoserver.geofence.core.model;
 
-import org.geoserver.geofence.core.model.enums.AccessType;
 import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.geoserver.geofence.core.model.enums.AccessType;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-/**
- *
- * @author ETj (etj at geo-solutions.it)
- */
+/** @author ETj (etj at geo-solutions.it) */
 @Embeddable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "LayerAttribute")
 @XmlRootElement(name = "LayerAttribute")
@@ -29,27 +24,24 @@ public class LayerAttribute implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -4739817113509675752L;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String name;
 
-    @Column(name="data_type")
+    @Column(name = "data_type")
     private String datatype; // should be an enum?
 
-    /** 
+    /**
      * Tells if the attribute can be read, written, or not accessed at all.
-     * <P>
-     * This field should be notnull, but making it so, hibernate will insist to
-     * put it into the PK.
-     * We'll making it notnull in the {@link LayerDetails#attributes parent class},
-     * but this seems not to work. We're enforncing the notnull at the DAO level.
      *
+     * <p>This field should be notnull, but making it so, hibernate will insist to put it into the
+     * PK. We'll making it notnull in the {@link LayerDetails#attributes parent class}, but this
+     * seems not to work. We're enforncing the notnull at the DAO level.
      */
     @Enumerated(EnumType.STRING)
-    @Column(name="access_type", nullable = true /*false*/)
+    @Column(name = "access_type", nullable = true /*false*/)
     private AccessType access;
 
-    public LayerAttribute() {
-    }
+    public LayerAttribute() {}
 
     public LayerAttribute(String name, AccessType access) {
         this.name = name;
@@ -99,7 +91,9 @@ public class LayerAttribute implements Serializable, Cloneable {
         if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
             return false;
         }
-        if ((this.datatype == null) ? (other.datatype != null) : !this.datatype.equals(other.datatype)) {
+        if ((this.datatype == null)
+                ? (other.datatype != null)
+                : !this.datatype.equals(other.datatype)) {
             return false;
         }
         if (this.access != other.access) {
@@ -117,13 +111,14 @@ public class LayerAttribute implements Serializable, Cloneable {
         return hash;
     }
 
-
-
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(getClass().getSimpleName())
-                .append("[name:").append(name)
-                .append(" access:").append(access);
+        StringBuilder sb =
+                new StringBuilder(getClass().getSimpleName())
+                        .append("[name:")
+                        .append(name)
+                        .append(" access:")
+                        .append(access);
 
         if (datatype != null) {
             sb.append(" type:").append(datatype);
@@ -131,7 +126,6 @@ public class LayerAttribute implements Serializable, Cloneable {
         sb.append("]");
 
         return sb.toString();
-
     }
 
     @Override
@@ -142,6 +136,4 @@ public class LayerAttribute implements Serializable, Cloneable {
             throw new IllegalStateException("Unexpected exception", ex);
         }
     }
-
-
 }

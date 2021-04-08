@@ -5,20 +5,16 @@
 
 package org.geoserver.geofence.core.model;
 
-import org.geoserver.geofence.core.model.GSUser;
-import org.geoserver.geofence.core.model.UserGroup;
+import static org.junit.Assert.*;
+
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Date;
 import java.util.HashSet;
 import javax.xml.bind.JAXB;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
-/**
- *
- * @author ETj (etj at geo-solutions.it)
- */
+/** @author ETj (etj at geo-solutions.it) */
 public class GSUserTest {
 
     @Test
@@ -87,8 +83,8 @@ public class GSUserTest {
                     found = true;
                     break;
                 }
-            }            
-            assertTrue("Group " + ug1 + " not found in unmarshalled GSUser" , found);
+            }
+            assertTrue("Group " + ug1 + " not found in unmarshalled GSUser", found);
         }
         for (UserGroup ug2 : user2.getGroups()) {
             boolean found = false;
@@ -98,8 +94,7 @@ public class GSUserTest {
                     break;
                 }
             }
-            assertTrue("Group " + ug2 + " not found in unmarshalled GSUser" , found);
+            assertTrue("Group " + ug2 + " not found in unmarshalled GSUser", found);
         }
-
     }
 }

@@ -7,7 +7,6 @@ package org.geoserver.geofence.core.model.util;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -15,16 +14,13 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
-/**
- * 
- * @author ETj <etj at geo-solutions.it>
- */
+/** @author ETj <etj at geo-solutions.it> */
 public class PwEncoder {
 
     private static byte[] getKey() {
         String strKey = System.getProperty("GEOFENCE_PWENCODER_KEY");
         if (strKey == null || strKey.length() < 16) {
-          strKey = "installation dependant key needed";
+            strKey = "installation dependant key needed";
         }
         return strKey.substring(0, 16).getBytes();
     }

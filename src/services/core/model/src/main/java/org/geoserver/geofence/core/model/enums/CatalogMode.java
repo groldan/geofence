@@ -11,6 +11,7 @@ package org.geoserver.geofence.core.model.enums;
  * @author ETj (etj at geo-solutions.it)
  */
 public enum CatalogMode {
-    HIDE, CHALLENGE, MIXED;
-
+    HIDE,
+    CHALLENGE,
+    MIXED;
 }

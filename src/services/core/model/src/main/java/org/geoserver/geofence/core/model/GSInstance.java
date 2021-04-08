@@ -7,7 +7,6 @@ package org.geoserver.geofence.core.model;
 
 import java.io.Serializable;
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -16,7 +15,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
-
 import javax.xml.bind.annotation.XmlType;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -24,24 +22,22 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 /**
  * A GeoServer instance.
  *
- * <P><B>TODO</B>: how does a GeoServer instance identify itself?
+ * <p><B>TODO</B>: how does a GeoServer instance identify itself?
  */
 @Entity(name = "GSInstance")
 @Table(name = "gf_gsinstance")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "gsinstance")
 @XmlRootElement(name = "GSInstance")
-@XmlType(propOrder={"id","name","description","dateCreation","baseURL","username","password"})
-
+@XmlType(
+    propOrder = {"id", "name", "description", "dateCreation", "baseURL", "username", "password"}
+)
 public class GSInstance implements Identifiable, Serializable {
 
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -2584592064221812813L;
 
     /** The id. */
-    @Id
-    @GeneratedValue
-    @Column
-    private Long id;
+    @Id @GeneratedValue @Column private Long id;
 
     /** The name. */
     @Column(nullable = false, updatable = true)
@@ -52,7 +48,7 @@ public class GSInstance implements Identifiable, Serializable {
     private String description;
 
     /** The date creation. */
-    @Column(updatable=false)
+    @Column(updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateCreation;
 
@@ -66,65 +62,45 @@ public class GSInstance implements Identifiable, Serializable {
     @Column(nullable = false, updatable = true)
     private String password;
 
-    /**
-     * Instantiates a new instance.
-     */
-    public GSInstance() {
+    /** Instantiates a new instance. */
+    public GSInstance() {}
 
-    }
-
-    /**
-     * @return the id
-     */
+    /** @return the id */
     public Long getId() {
         return id;
     }
 
-    /**
-     * @param id the id to set
-     */
+    /** @param id the id to set */
     public void setId(Long id) {
         this.id = id;
     }
 
-    /**
-     * @return the name
-     */
+    /** @return the name */
     public String getName() {
         return name;
     }
 
-    /**
-     * @param name the name to set
-     */
+    /** @param name the name to set */
     public void setName(String name) {
         this.name = name;
     }
 
-    /**
-     * @return the description
-     */
+    /** @return the description */
     public String getDescription() {
         return description;
     }
 
-    /**
-     * @param description the description to set
-     */
+    /** @param description the description to set */
     public void setDescription(String description) {
         this.description = description;
     }
 
-    /**
-     * @return the dateCreation
-     */
+    /** @return the dateCreation */
     public Date getDateCreation() {
         return dateCreation;
     }
 
-    /**
-     * @param dateCreation the dateCreation to set
-     */
+    /** @param dateCreation the dateCreation to set */
     public void setDateCreation(Date dateCreation) {
         this.dateCreation = dateCreation;
     }
@@ -136,7 +112,6 @@ public class GSInstance implements Identifiable, Serializable {
     public void setBaseURL(String baseURL) {
         this.baseURL = baseURL;
     }
-
 
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
@@ -218,7 +193,6 @@ public class GSInstance implements Identifiable, Serializable {
         this.username = username;
     }
 
-
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
@@ -226,17 +200,12 @@ public class GSInstance implements Identifiable, Serializable {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("Instance [");
-        if (dateCreation != null)
-            builder.append("dateCreation=").append(dateCreation).append(", ");
-        if (description != null)
-            builder.append("description=").append(description).append(", ");
-        if (baseURL != null)
-            builder.append("baseURL=").append(baseURL).append(", ");
+        if (dateCreation != null) builder.append("dateCreation=").append(dateCreation).append(", ");
+        if (description != null) builder.append("description=").append(description).append(", ");
+        if (baseURL != null) builder.append("baseURL=").append(baseURL).append(", ");
         builder.append("id=").append(id).append(", ");
-        if (name != null)
-            builder.append("name=").append(name);
+        if (name != null) builder.append("name=").append(name);
         builder.append("]");
         return builder.toString();
     }
-
 }

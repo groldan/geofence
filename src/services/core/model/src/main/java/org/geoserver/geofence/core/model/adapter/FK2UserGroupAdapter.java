@@ -5,25 +5,21 @@
 
 package org.geoserver.geofence.core.model.adapter;
 
-import org.geoserver.geofence.core.model.adapter.dual.IdNameBundle;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-
-import org.locationtech.jts.io.ParseException;
 import org.geoserver.geofence.core.model.UserGroup;
+import org.geoserver.geofence.core.model.adapter.dual.IdNameBundle;
+import org.locationtech.jts.io.ParseException;
 
-/**
- * Transform a UserGroup into its id.
- *
- */
+/** Transform a UserGroup into its id. */
 public class FK2UserGroupAdapter extends XmlAdapter<IdNameBundle, UserGroup> {
 
     @Override
     public UserGroup unmarshal(IdNameBundle in) throws ParseException {
 
-            UserGroup ret = new UserGroup();
-            ret.setId(in.getId());
-            ret.setName(in.getName());
-            return ret;
+        UserGroup ret = new UserGroup();
+        ret.setId(in.getId());
+        ret.setName(in.getName());
+        return ret;
     }
 
     @Override

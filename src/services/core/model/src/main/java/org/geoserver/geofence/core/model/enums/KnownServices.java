@@ -5,9 +5,10 @@
 
 package org.geoserver.geofence.core.model.enums;
 
-/**
- * The Enum AccessType.
- */
+/** The Enum AccessType. */
 public enum KnownServices {
-    WMS, WCS, WFS, WPS
+    WMS,
+    WCS,
+    WFS,
+    WPS
 }

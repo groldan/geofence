@@ -6,7 +6,6 @@
 package org.geoserver.geofence.core.model.adapter;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
@@ -14,9 +13,7 @@ import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
 
 // TODO: Auto-generated Javadoc
-/**
- * The Class PolygonAdapter.
- */
+/** The Class PolygonAdapter. */
 public class PolygonAdapter extends XmlAdapter<String, Polygon> {
 
     /* (non-Javadoc)
@@ -28,8 +25,7 @@ public class PolygonAdapter extends XmlAdapter<String, Polygon> {
 
         Geometry the_geom = wktReader.read(val);
         if (the_geom instanceof Polygon) {
-            if (the_geom.getSRID() == 0)
-                the_geom.setSRID(4326);
+            if (the_geom.getSRID() == 0) the_geom.setSRID(4326);
 
             return (Polygon) the_geom;
         }
@@ -44,8 +40,7 @@ public class PolygonAdapter extends XmlAdapter<String, Polygon> {
     public String marshal(Polygon the_geom) throws ParseException {
         if (the_geom != null) {
             WKTWriter wktWriter = new WKTWriter();
-            if (the_geom.getSRID() == 0)
-                the_geom.setSRID(4326);
+            if (the_geom.getSRID() == 0) the_geom.setSRID(4326);
 
             return wktWriter.write(the_geom);
         } else {

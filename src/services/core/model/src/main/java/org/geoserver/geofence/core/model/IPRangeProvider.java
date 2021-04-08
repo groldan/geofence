@@ -5,10 +5,7 @@
 
 package org.geoserver.geofence.core.model;
 
-/**
- *
- * @author ETj (etj at geo-solutions.it)
- */
+/** @author ETj (etj at geo-solutions.it) */
 public interface IPRangeProvider {
     IPAddressRange getAddressRange();
 }

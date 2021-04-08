@@ -5,14 +5,11 @@
 
 package org.geoserver.geofence.core.model.adapter.dual;
 
-/**
- *
- * @author ETj (etj at geo-solutions.it)
- */
+/** @author ETj (etj at geo-solutions.it) */
 public class IdNameBundle {
     private Long id;
     private String name;
-    
+
     public Long getId() {
         return id;
     }
@@ -31,7 +28,6 @@ public class IdNameBundle {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName()+"[id:" + id + " name=" + name + ']';
+        return getClass().getSimpleName() + "[id:" + id + " name=" + name + ']';
     }
-
 }

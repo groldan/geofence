@@ -5,17 +5,18 @@
 
 package org.geoserver.geofence.core.model;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Arrays;
 import javax.xml.bind.DatatypeConverter;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Assert;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**
- * Moving base64 de-coding from commons codec to DatatypeConverter.
- * Making sure the results are the same, or we may lose some passwords in the db...
- * 
+ * Moving base64 de-coding from commons codec to DatatypeConverter. Making sure the results are the
+ * same, or we may lose some passwords in the db...
+ *
  * @author ETj (etj at geo-solutions.it)
  */
 public class Base64EncodersTest {
@@ -35,11 +36,7 @@ public class Base64EncodersTest {
         byte[] back_codec = Base64.decodeBase64(output_dconv);
         byte[] back_dconv = DatatypeConverter.parseBase64Binary(output_dconv);
 
-
-
-        Assert.assertTrue( Arrays.equals(msg1.getBytes(), back_codec));
-        Assert.assertTrue( Arrays.equals(msg1.getBytes(), back_dconv));
-
+        Assert.assertTrue(Arrays.equals(msg1.getBytes(), back_codec));
+        Assert.assertTrue(Arrays.equals(msg1.getBytes(), back_dconv));
     }
-
 }

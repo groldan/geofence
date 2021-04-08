@@ -7,8 +7,5 @@ package org.geoserver.geofence.core.model.adapter;
 
 import org.locationtech.jts.geom.MultiPolygon;
 
-/**
- * The Class MultiPolygonAdapter.
- */
-public class MultiPolygonAdapter extends GeometryAdapter<MultiPolygon> {
-}
+/** The Class MultiPolygonAdapter. */
+public class MultiPolygonAdapter extends GeometryAdapter<MultiPolygon> {}

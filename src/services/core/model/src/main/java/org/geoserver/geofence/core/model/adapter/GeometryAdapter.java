@@ -6,7 +6,6 @@
 package org.geoserver.geofence.core.model.adapter;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
@@ -15,14 +14,14 @@ import org.locationtech.jts.io.WKTWriter;
 // TODO: Auto-generated Javadoc
 /**
  * The Class GeometryAdapter.
- * 
+ *
  * @param <G> the generic type
  */
 public class GeometryAdapter<G extends Geometry> extends XmlAdapter<String, G> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
      */
     @SuppressWarnings("unchecked")
@@ -31,8 +30,7 @@ public class GeometryAdapter<G extends Geometry> extends XmlAdapter<String, G> {
         WKTReader wktReader = new WKTReader();
 
         Geometry the_geom = wktReader.read(val);
-        if (the_geom.getSRID() == 0)
-            the_geom.setSRID(4326);
+        if (the_geom.getSRID() == 0) the_geom.setSRID(4326);
 
         try {
             return (G) the_geom;
@@ -43,15 +41,14 @@ public class GeometryAdapter<G extends Geometry> extends XmlAdapter<String, G> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
      */
     @Override
     public String marshal(G the_geom) throws ParseException {
         if (the_geom != null) {
             WKTWriter wktWriter = new WKTWriter();
-            if (the_geom.getSRID() == 0)
-                the_geom.setSRID(4326);
+            if (the_geom.getSRID() == 0) the_geom.setSRID(4326);
 
             return wktWriter.write(the_geom);
         } else {

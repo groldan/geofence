@@ -5,8 +5,6 @@
 
 package org.geoserver.geofence.core.model;
 
-import org.geoserver.geofence.core.model.adapter.FKGSInstanceAdapter;
-import org.geoserver.geofence.core.model.enums.GrantType;
 import java.io.Serializable;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -26,6 +24,8 @@ import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import org.geoserver.geofence.core.model.adapter.FKGSInstanceAdapter;
+import org.geoserver.geofence.core.model.enums.GrantType;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.ForeignKey;
@@ -33,48 +33,77 @@ import org.hibernate.annotations.Index;
 
 /**
  * A Rule expresses if a given combination of request access is allowed or not.
- * <P>
- * In a given Rule, you may specify a precise combination of filters or a general
- * behavior. <BR>
- * Filtering can be done on <UL>
- * <LI> the requesting user </LI>
- * <LI> the profile associated to the requesting user</LI>
- * <LI> the instance of the accessed geoserver</LI>
- * <LI> the accessed service (e.g.: WMS)</LI>
- * <LI> the requested operation inside the accessed service (e.g.: getMap)</LI>
- * <LI> the workspace in geoserver</LI>
- * <LI> the requested layer </LI>
+ *
+ * <p>In a given Rule, you may specify a precise combination of filters or a general behavior. <br>
+ * Filtering can be done on
+ *
+ * <UL>
+ *   <LI>the requesting user
+ *   <LI>the profile associated to the requesting user
+ *   <LI>the instance of the accessed geoserver
+ *   <LI>the accessed service (e.g.: WMS)
+ *   <LI>the requested operation inside the accessed service (e.g.: getMap)
+ *   <LI>the workspace in geoserver
+ *   <LI>the requested layer
  * </UL>
- * <P><B>Example</B>: In order to allow access to every request to the WMS service in the instance GS1,
- * you will need to create a Rule, by only setting Service=WMS and Instance=GS1,
- * leaving the other fields to <TT>null</TT>.
- * <P>
- * When an access has to be checked for filtering, all the matching rules are read;
- * they are then evaluated according to their priority: the first rule found having
- * accessType <TT><B>{@link GrantType#ALLOW}</B></TT> or <TT><B>{@link GrantType#DENY}</B></TT> wins,
- * and the access is granted or denied accordingly.
- * <BR>Matching rules with accessType=<TT><B>{@link GrantType#LIMIT}</B></TT> are collected and evaluated at the end,
- * only if the request is Allowed by some other rule with lower priority.
- * <BR>These rules will have an associated {@link RuleLimits RuleLimits} that
- * defines some restrictions for using the data (such as area limitation).
+ *
+ * <p><B>Example</B>: In order to allow access to every request to the WMS service in the instance
+ * GS1, you will need to create a Rule, by only setting Service=WMS and Instance=GS1, leaving the
+ * other fields to <TT>null</TT>.
+ *
+ * <p>When an access has to be checked for filtering, all the matching rules are read; they are then
+ * evaluated according to their priority: the first rule found having accessType <TT><B>{@link
+ * GrantType#ALLOW}</B></TT> or <TT><B>{@link GrantType#DENY}</B></TT> wins, and the access is
+ * granted or denied accordingly. <br>
+ * Matching rules with accessType=<TT><B>{@link GrantType#LIMIT}</B></TT> are collected and
+ * evaluated at the end, only if the request is Allowed by some other rule with lower priority. <br>
+ * These rules will have an associated {@link RuleLimits RuleLimits} that defines some restrictions
+ * for using the data (such as area limitation).
  *
  * @author ETj (etj at geo-solutions.it)
  */
 @Entity(name = "Rule")
-@Table(name = "gf_rule", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"username", "rolename", "instance_id", "service", "request", "workspace", "layer"})})
+@Table(
+    name = "gf_rule",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            columnNames = {
+                "username",
+                "rolename",
+                "instance_id",
+                "service",
+                "request",
+                "workspace",
+                "layer"
+            }
+        )
+    }
+)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "Rule")
 @XmlRootElement(name = "Rule")
-@XmlType(propOrder={"id","priority","username","rolename","instance","addressRange","service","request","workspace","layer","access","layerDetails","ruleLimits"})
+@XmlType(
+    propOrder = {
+        "id",
+        "priority",
+        "username",
+        "rolename",
+        "instance",
+        "addressRange",
+        "service",
+        "request",
+        "workspace",
+        "layer",
+        "access",
+        "layerDetails",
+        "ruleLimits"
+    }
+)
 public class Rule implements Identifiable, Serializable, Prioritizable, IPRangeProvider {
 
     private static final long serialVersionUID = -5127129225384707164L;
 
     /** The id. */
-    @Id
-    @GeneratedValue
-    @Column
-    private Long id;
+    @Id @GeneratedValue @Column private Long id;
 
     /** Lower numbers have higher priority */
     @Column(nullable = false)
@@ -97,9 +126,10 @@ public class Rule implements Identifiable, Serializable, Prioritizable, IPRangeP
 
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name="low", column=@Column(name="ip_low")),
-        @AttributeOverride(name="high", column=@Column(name="ip_high")),
-        @AttributeOverride(name="size", column=@Column(name="ip_size"))   })
+        @AttributeOverride(name = "low", column = @Column(name = "ip_low")),
+        @AttributeOverride(name = "high", column = @Column(name = "ip_high")),
+        @AttributeOverride(name = "size", column = @Column(name = "ip_size"))
+    })
     private IPAddressRange addressRange;
 
     @Column
@@ -118,19 +148,35 @@ public class Rule implements Identifiable, Serializable, Prioritizable, IPRangeP
     @Column(name = "grant_type", nullable = false)
     private GrantType access;
 
-    @OneToOne(optional = true, cascade = CascadeType.REMOVE, mappedBy = "rule") // main ref is in LayerDetails
+    @OneToOne(
+        optional = true,
+        cascade = CascadeType.REMOVE,
+        mappedBy = "rule"
+    ) // main ref is in LayerDetails
     @ForeignKey(name = "fk_rule_details")
     private LayerDetails layerDetails;
 
-    @OneToOne(optional = true, cascade = CascadeType.REMOVE, mappedBy = "rule") // main ref is in ruleLimits
+    @OneToOne(
+        optional = true,
+        cascade = CascadeType.REMOVE,
+        mappedBy = "rule"
+    ) // main ref is in ruleLimits
     @ForeignKey(name = "fk_rule_limits")
     private RuleLimits ruleLimits;
 
-    public Rule() {
-    }
+    public Rule() {}
 
-    public Rule(long priority, String username, String rolename, GSInstance instance, IPAddressRange addressRange,
-                               String service, String request, String workspace, String layer, GrantType access) {
+    public Rule(
+            long priority,
+            String username,
+            String rolename,
+            GSInstance instance,
+            IPAddressRange addressRange,
+            String service,
+            String request,
+            String workspace,
+            String layer,
+            GrantType access) {
         this.priority = priority;
         this.username = username;
         this.rolename = rolename;
@@ -182,7 +228,6 @@ public class Rule implements Identifiable, Serializable, Prioritizable, IPRangeP
     public void setRolename(String rolename) {
         this.rolename = rolename;
     }
-
 
     @XmlJavaTypeAdapter(FKGSInstanceAdapter.class)
     public GSInstance getInstance() {
@@ -238,7 +283,7 @@ public class Rule implements Identifiable, Serializable, Prioritizable, IPRangeP
     }
 
     /**
-     * @deprecated  This setter is only used by hibernate, should not be called by the user.
+     * @deprecated This setter is only used by hibernate, should not be called by the user.
      * @param ruleLimits
      */
     public void setRuleLimits(RuleLimits ruleLimits) {
@@ -249,18 +294,19 @@ public class Rule implements Identifiable, Serializable, Prioritizable, IPRangeP
         return layerDetails;
     }
 
-    /**
-     * @deprecated This setter is only used by hibernate, should not be called by the user.
-     */
+    /** @deprecated This setter is only used by hibernate, should not be called by the user. */
     public void setLayerDetails(LayerDetails layerDetails) {
         this.layerDetails = layerDetails;
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(getClass().getSimpleName())
-                .append("[id:").append(id)
-                .append(" pri:").append(priority);
+        StringBuilder sb =
+                new StringBuilder(getClass().getSimpleName())
+                        .append("[id:")
+                        .append(id)
+                        .append(" pri:")
+                        .append(priority);
 
         if (username != null) {
             sb.append(" user:").append(prepare(username));
@@ -297,15 +343,11 @@ public class Rule implements Identifiable, Serializable, Prioritizable, IPRangeP
         sb.append(']');
 
         return sb.toString();
-
     }
-    
+
     private static String prepare(String s) {
-        if(s==null)
-            return "(null)";
-        else if (s.isEmpty())
-            return "(empty)";
-        else
-            return s;
+        if (s == null) return "(null)";
+        else if (s.isEmpty()) return "(empty)";
+        else return s;
     }
 }

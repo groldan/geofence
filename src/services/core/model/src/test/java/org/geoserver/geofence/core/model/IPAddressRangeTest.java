@@ -5,19 +5,14 @@
 
 package org.geoserver.geofence.core.model;
 
-import org.geoserver.geofence.core.model.IPAddressRange;
-import org.junit.Test;
 import static org.junit.Assert.*;
 
-/**
- *
- * @author ETj (etj at geo-solutions.it)
- */
+import org.junit.Test;
+
+/** @author ETj (etj at geo-solutions.it) */
 public class IPAddressRangeTest {
 
-    public IPAddressRangeTest() {
-    }
-
+    public IPAddressRangeTest() {}
 
     @Test
     public void testCIDRConstructorV4() {
@@ -26,7 +21,7 @@ public class IPAddressRangeTest {
 
         assertEquals(16, r.getSize());
 
-        assertEquals((long)(1<<24 | 2 << 16), (long)r.getLow());
+        assertEquals((long) (1 << 24 | 2 << 16), (long) r.getLow());
         assertNull(r.getHigh());
     }
 
@@ -59,8 +54,7 @@ public class IPAddressRangeTest {
 
         assertEquals(20, r.getSize());
 
-        assertEquals((255<<24 | 2 << 16 | 127 << 8)&0x0ffffffff, (long)r.getLow());
+        assertEquals((255 << 24 | 2 << 16 | 127 << 8) & 0x0ffffffff, (long) r.getLow());
         assertNull(r.getHigh());
     }
-
 }

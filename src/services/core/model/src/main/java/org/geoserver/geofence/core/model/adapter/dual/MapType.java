@@ -12,13 +12,9 @@ import java.util.Map;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-/**
- *
- * @author ETj (etj at geo-solutions.it)
- */
+/** @author ETj (etj at geo-solutions.it) */
 @XmlRootElement(name = "Map")
 public class MapType implements Iterable<MapEntryType> {
-
 
     List<MapEntryType> entries = new LinkedList<MapEntryType>();
 

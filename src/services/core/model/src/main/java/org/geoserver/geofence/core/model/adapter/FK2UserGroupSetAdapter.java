@@ -5,28 +5,24 @@
 
 package org.geoserver.geofence.core.model.adapter;
 
-import org.geoserver.geofence.core.model.adapter.dual.IdNameBundle;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-
-import org.locationtech.jts.io.ParseException;
-import org.geoserver.geofence.core.model.UserGroup;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import org.geoserver.geofence.core.model.UserGroup;
+import org.geoserver.geofence.core.model.adapter.dual.IdNameBundle;
+import org.locationtech.jts.io.ParseException;
 
-/**
- * Transform a UserGroup into its id.
- *
- */
-public class FK2UserGroupSetAdapter extends XmlAdapter<FK2UserGroupSetAdapter.GroupList, Set<UserGroup>> {
+/** Transform a UserGroup into its id. */
+public class FK2UserGroupSetAdapter
+        extends XmlAdapter<FK2UserGroupSetAdapter.GroupList, Set<UserGroup>> {
 
     @Override
     public Set<UserGroup> unmarshal(GroupList inSet) throws ParseException {
-        if(inSet == null)
-            return null;
+        if (inSet == null) return null;
 
         Set<UserGroup> ret = new HashSet<UserGroup>();
         for (IdNameBundle in : inSet) {
@@ -44,8 +40,7 @@ public class FK2UserGroupSetAdapter extends XmlAdapter<FK2UserGroupSetAdapter.Gr
 
     @Override
     public GroupList marshal(Set<UserGroup> inSet) throws ParseException {
-        if(inSet == null)
-            return null;
+        if (inSet == null) return null;
 
         System.out.println("Marshalling " + inSet.size() + " groups");
 
@@ -66,14 +61,13 @@ public class FK2UserGroupSetAdapter extends XmlAdapter<FK2UserGroupSetAdapter.Gr
     static class GroupList implements Iterable<IdNameBundle> {
         List<IdNameBundle> list;
 
-        public GroupList() {
-        }
+        public GroupList() {}
 
         public GroupList(int size) {
             list = new ArrayList<IdNameBundle>(size);
         }
 
-        @XmlElement(name="group")
+        @XmlElement(name = "group")
         public List<IdNameBundle> getList() {
             return list;
         }
@@ -90,6 +84,5 @@ public class FK2UserGroupSetAdapter extends XmlAdapter<FK2UserGroupSetAdapter.Gr
         public Iterator<IdNameBundle> iterator() {
             return list.iterator();
         }
-
     }
 }

@@ -5,9 +5,7 @@
 
 package org.geoserver.geofence.core.model.enums;
 
-/**
- * The type of a Layer (Vector or Raster)
- */
+/** The type of a Layer (Vector or Raster) */
 public enum LayerType {
     VECTOR,
     RASTER,

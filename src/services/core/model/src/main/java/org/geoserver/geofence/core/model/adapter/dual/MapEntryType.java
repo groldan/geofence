@@ -9,11 +9,8 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 
-/**
- *
- * @author ETj (etj at geo-solutions.it)
- */
-@XmlRootElement(name="entry")
+/** @author ETj (etj at geo-solutions.it) */
+@XmlRootElement(name = "entry")
 public class MapEntryType {
 
     private String key;
@@ -24,8 +21,7 @@ public class MapEntryType {
         this.value = value;
     }
 
-    public MapEntryType() {
-    }
+    public MapEntryType() {}
 
     @XmlAttribute
     public String getKey() {

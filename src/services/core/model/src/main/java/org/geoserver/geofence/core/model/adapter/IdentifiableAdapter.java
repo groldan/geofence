@@ -6,16 +6,11 @@
 package org.geoserver.geofence.core.model.adapter;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-
-import org.locationtech.jts.io.ParseException;
 import org.geoserver.geofence.core.model.Identifiable;
+import org.locationtech.jts.io.ParseException;
 
-/**
- * Transform a Profile into its id.
- *
- */
+/** Transform a Profile into its id. */
 public abstract class IdentifiableAdapter<I extends Identifiable> extends XmlAdapter<String, I> {
-
 
     protected abstract I createInstance();
     /* (non-Javadoc)
@@ -30,7 +25,7 @@ public abstract class IdentifiableAdapter<I extends Identifiable> extends XmlAda
             ret.setId(Long.valueOf(val));
             return ret;
         } catch (NumberFormatException e) {
-            throw new ParseException("Bad "+ ret.getClass().getSimpleName()+" id " + val);
+            throw new ParseException("Bad " + ret.getClass().getSimpleName() + " id " + val);
         }
     }
 

@@ -5,41 +5,30 @@
 
 package org.geoserver.geofence.core.model;
 
-import org.geoserver.geofence.core.model.util.SubnetV4Utils;
 import java.io.Serializable;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import javax.persistence.Embeddable;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.geoserver.geofence.core.model.util.SubnetV4Utils;
 
-/**
- *
- * @author ETj (etj at geo-solutions.it)
- */
+/** @author ETj (etj at geo-solutions.it) */
 @XmlRootElement(name = "IPAddressRange")
 @Embeddable
 public class IPAddressRange implements Serializable {
 
-    /**
-     * The lower 64 bits.
-     * For IPv4, only the lower 32 are used.
-     */
+    /** The lower 64 bits. For IPv4, only the lower 32 are used. */
     private Long low;
-    /**
-     * The higher 64 bits.
-     * For IPv4, this is null
-     */
+    /** The higher 64 bits. For IPv4, this is null */
     private Long high;
 
     /**
-     * CIDR based prefix size.
-     * It's equivalent to the number of leading 1 bits in the routing prefix mask.
-     * http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing
+     * CIDR based prefix size. It's equivalent to the number of leading 1 bits in the routing prefix
+     * mask. http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing
      */
     private Integer size;
 
-    protected IPAddressRange() {
-    }
+    protected IPAddressRange() {}
 
     public IPAddressRange(String cidrNotation) {
         SubnetV4Utils su = new SubnetV4Utils(cidrNotation);
@@ -48,19 +37,16 @@ public class IPAddressRange implements Serializable {
         size = su.getInfo().getMaskSize();
     }
 
-
     public boolean match(String address) {
-        if( ! SubnetV4Utils.isAddress(address))
-            return false;
+        if (!SubnetV4Utils.isAddress(address)) return false;
 
         SubnetV4Utils su = new SubnetV4Utils(low, size);
         return su.getInfo().isInRange(address);
     }
 
-
     public boolean match(InetAddress address) {
-        if(address instanceof Inet4Address ) {
-            return match((Inet4Address)address);        
+        if (address instanceof Inet4Address) {
+            return match((Inet4Address) address);
         } else {
             throw new UnsupportedOperationException("IPv6 non implemented yet");
         }
@@ -72,24 +58,18 @@ public class IPAddressRange implements Serializable {
     }
 
     public String getAddress() {
-        return high == null?
-                encodeIPv4():
-                encodeIPv6();
+        return high == null ? encodeIPv4() : encodeIPv6();
     }
 
-    /**
-     * @return the range in CIDR format: x.y.z.w/sz
-     */
+    /** @return the range in CIDR format: x.y.z.w/sz */
     public String getCidrSignature() {
-        if(high == null) {
+        if (high == null) {
             SubnetV4Utils su = new SubnetV4Utils(low, size);
             return su.getInfo().getCidrSignature();
         } else {
             throw new UnsupportedOperationException("IPv6 non implemented yet");
         }
     }
-
-
 
     protected String encodeIPv4() {
         SubnetV4Utils su = new SubnetV4Utils(low, size);
@@ -100,10 +80,7 @@ public class IPAddressRange implements Serializable {
         throw new UnsupportedOperationException("IPv6 non implemented yet");
     }
 
-    /**
-     * The lower 64 bits.
-     * For IPv4, only the lower 32 are used.
-     */
+    /** The lower 64 bits. For IPv4, only the lower 32 are used. */
     public Long getLow() {
         return low;
     }
@@ -112,10 +89,7 @@ public class IPAddressRange implements Serializable {
         this.low = low;
     }
 
-    /**
-     * The higher 64 bits.
-     * For IPv4, this is null
-     */
+    /** The higher 64 bits. For IPv4, this is null */
     public Long getHigh() {
         return high;
     }
@@ -125,9 +99,8 @@ public class IPAddressRange implements Serializable {
     }
 
     /**
-     * CIDR based prefix size.
-     * It's equivalent to the number of leading 1 bits in the routing prefix mask.
-     * http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing
+     * CIDR based prefix size. It's equivalent to the number of leading 1 bits in the routing prefix
+     * mask. http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing
      */
     public int getSize() {
         return size;
@@ -171,6 +144,4 @@ public class IPAddressRange implements Serializable {
     public String toString() {
         return getCidrSignature();
     }
-
-
 }

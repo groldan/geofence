@@ -6,7 +6,6 @@
 package org.geoserver.geofence.core.model.adapter;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.io.ParseException;
@@ -14,9 +13,7 @@ import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
 
 // TODO: Auto-generated Javadoc
-/**
- * The Class XMultiPolygonAdapter.
- */
+/** The Class XMultiPolygonAdapter. */
 public class XMultiPolygonAdapter extends XmlAdapter<String, MultiPolygon> {
 
     /* (non-Javadoc)
@@ -27,8 +24,7 @@ public class XMultiPolygonAdapter extends XmlAdapter<String, MultiPolygon> {
         WKTReader wktReader = new WKTReader();
 
         Geometry the_geom = wktReader.read(val);
-        if (the_geom.getSRID() == 0)
-            the_geom.setSRID(4326);
+        if (the_geom.getSRID() == 0) the_geom.setSRID(4326);
 
         try {
             return (MultiPolygon) the_geom;
@@ -44,8 +40,7 @@ public class XMultiPolygonAdapter extends XmlAdapter<String, MultiPolygon> {
     public String marshal(MultiPolygon the_geom) throws ParseException {
         if (the_geom != null) {
             WKTWriter wktWriter = new WKTWriter();
-            if (the_geom.getSRID() == 0)
-                the_geom.setSRID(4326);
+            if (the_geom.getSRID() == 0) the_geom.setSRID(4326);
 
             return wktWriter.write(the_geom);
         } else {

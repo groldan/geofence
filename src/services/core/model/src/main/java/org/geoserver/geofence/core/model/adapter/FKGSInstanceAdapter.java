@@ -5,18 +5,13 @@
 
 package org.geoserver.geofence.core.model.adapter;
 
-
 import org.geoserver.geofence.core.model.GSInstance;
 
-/**
- * Transform a Profile into its id.
- *
- */
-public class FKGSInstanceAdapter extends IdentifiableAdapter<GSInstance>  {
+/** Transform a Profile into its id. */
+public class FKGSInstanceAdapter extends IdentifiableAdapter<GSInstance> {
 
     @Override
     protected GSInstance createInstance() {
         return new GSInstance();
     }
-
 }
