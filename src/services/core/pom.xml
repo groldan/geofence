@@ -22,7 +22,7 @@
   <name>GeoFence - Core</name>
 
   <modules>
-    <module>model-external</module>
+    <module>model</module>
     <module>persistence-model</module>
     <module>persistence</module>
     <module>services-api</module>
