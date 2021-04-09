@@ -50,6 +50,7 @@
   <modules>
     <module>services</module>
     <module>web</module>
+    <module>webapp</module>
   </modules>
 
   <scm>
