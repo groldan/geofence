@@ -31,7 +31,7 @@ public class ShortGroup implements Serializable {
     public ShortGroup(UserGroup group) {
         this.id = group.getId();
         this.name = group.getName();
-        this.enabled = group.getEnabled();
+        this.enabled = group.isEnabled();
         this.extId = group.getExtId();
     }
 

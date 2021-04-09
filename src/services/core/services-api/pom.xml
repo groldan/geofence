@@ -22,46 +22,16 @@
   <name>GeoFence - Core - Services API</name>
 
   <dependencies>
-
-    <!-- APACHE COMMONS -->
     <!-- GeoFence -->
     <dependency>
       <groupId>org.geoserver.geofence</groupId>
       <artifactId>geofence-model</artifactId>
-      <!-- we don't want to export this dep transitively 
-                 because we may want to use the model-internal somewhere.
-                 Let's make this lib's users import the model on their own.
-            -->
-      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.locationtech.jts</groupId>
       <artifactId>jts-core</artifactId>
     </dependency>
-
-    <!-- SPRING -->
-    <!--        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jmx</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-    -->
 
     <!-- JUnit -->
     <dependency>
