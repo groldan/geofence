@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+/* (c) 2021 Open Source Geospatial Foundation - all rights reserved
+ * This code is licensed under the GPL 2.0 license, available at the root
+ * application directory.
+ */
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
@@ -9,6 +15,9 @@
   <artifactId>geofence-service</artifactId>
   <name>geofence-service</name>
   <description>Geofence spring-boot cloud native application</description>
+  <properties>
+    <spring-boot.build-image.imageName>geoserver/geofence:${project.version}</spring-boot.build-image.imageName>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -47,12 +56,6 @@
       <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.springframework.experimental</groupId>
-      <artifactId>spring-native</artifactId>
-      <version>${spring-native.version}</version>
-    </dependency>
-
-    <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <scope>runtime</scope>
@@ -88,7 +91,6 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
   <build>
     <plugins>
       <plugin>
@@ -101,54 +103,86 @@
               <artifactId>lombok</artifactId>
             </exclude>
           </excludes>
-          <image>
-            <builder>paketobuildpacks/builder:tiny</builder>
-            <env>
-              <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
-            </env>
-          </image>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.springframework.experimental</groupId>
-        <artifactId>spring-aot-maven-plugin</artifactId>
-        <version>${spring-native.version}</version>
-        <executions>
-          <execution>
-            <id>test-generate</id>
-            <goals>
-              <goal>test-generate</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>generate</id>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.hibernate.orm.tooling</groupId>
-        <artifactId>hibernate-enhance-maven-plugin</artifactId>
-        <version>${hibernate.version}</version>
-        <executions>
-          <execution>
-            <id>enhance</id>
-            <goals>
-              <goal>enhance</goal>
-            </goals>
-            <configuration>
-              <failOnError>true</failOnError>
-              <enableLazyInitialization>true</enableLazyInitialization>
-              <enableDirtyTracking>true</enableDirtyTracking>
-              <enableAssociationManagement>true</enableAssociationManagement>
-              <enableExtendedEnhancement>false</enableExtendedEnhancement>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
 
+  <profiles>
+    <profile>
+      <!-- Enable this profile generate a docker image with a native application: mvn -Pnative-image spring-boot:build-image -->
+      <id>native-image</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+              <excludes>
+                <exclude>
+                  <groupId>org.projectlombok</groupId>
+                  <artifactId>lombok</artifactId>
+                </exclude>
+              </excludes>
+              <image>
+                <builder>paketobuildpacks/builder:tiny</builder>
+                <env>
+                  <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
+                </env>
+              </image>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.springframework.experimental</groupId>
+            <artifactId>spring-aot-maven-plugin</artifactId>
+            <version>${spring-native.version}</version>
+            <executions>
+              <execution>
+                <id>test-generate</id>
+                <goals>
+                  <goal>test-generate</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>generate</id>
+                <goals>
+                  <goal>generate</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.hibernate.orm.tooling</groupId>
+            <artifactId>hibernate-enhance-maven-plugin</artifactId>
+            <version>${hibernate.version}</version>
+            <executions>
+              <execution>
+                <id>enhance</id>
+                <goals>
+                  <goal>enhance</goal>
+                </goals>
+                <configuration>
+                  <failOnError>true</failOnError>
+                  <enableLazyInitialization>true</enableLazyInitialization>
+                  <enableDirtyTracking>true</enableDirtyTracking>
+                  <enableAssociationManagement>true</enableAssociationManagement>
+                  <enableExtendedEnhancement>false</enableExtendedEnhancement>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+      <properties>
+        <spring-boot.build-image.imageName>geoserver/geofence:${project.version}-native</spring-boot.build-image.imageName>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.springframework.experimental</groupId>
+          <artifactId>spring-native</artifactId>
+          <version>${spring-native.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 </project>
