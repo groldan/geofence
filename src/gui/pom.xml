@@ -23,7 +23,6 @@
 
     <properties>
         <module.name>geofence-gui</module.name>
-        <geofence-version>3.5-SNAPSHOT</geofence-version>
         <gt-version>25-SNAPSHOT</gt-version>
         <geogwt-version>0.4-SNAPSHOT</geogwt-version>
 
@@ -77,89 +76,32 @@
             <dependency>
                 <groupId>org.geoserver.geofence</groupId>
                 <artifactId>geofence-gui-core</artifactId>
-                <version>${geofence-version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.geoserver.geofence</groupId>
                 <artifactId>geofence-gui-resources</artifactId>
-                <version>${geofence-version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.geoserver.geofence</groupId>
                 <artifactId>geofence-gui-plugin</artifactId>
-                <version>${geofence-version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.geoserver.geofence</groupId>
                 <artifactId>geofence-gui-userui</artifactId>
-                <version>${geofence-version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.geoserver.geofence</groupId>
                 <artifactId>geofence-gui-mapsui</artifactId>
-                <version>${geofence-version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.geoserver.geofence</groupId>
                 <artifactId>geofence-gui-fullweb</artifactId>
-                <version>${geofence-version}</version>
-            </dependency>
-
-            <!-- =========================================================== -->
-            <!--     GeoFence MODULES                                        -->
-            <!-- =========================================================== -->
-            <dependency>
-                <groupId>org.geoserver.geofence</groupId>
-                <artifactId>geofence-persistence-model</artifactId>
-                <version>${geofence-version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.geoserver.geofence</groupId>
-                <artifactId>geofence-persistence</artifactId>
-                <version>${geofence-version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.geoserver.geofence</groupId>
-                <artifactId>geofence-services-api</artifactId>
-                <version>${geofence-version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.geoserver.geofence</groupId>
-                <artifactId>geofence-services-impl</artifactId>
-                <version>${geofence-version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.geoserver.geofence</groupId>
-                <artifactId>geofence-login-api</artifactId>
-                <version>${geofence-version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.geoserver.geofence</groupId>
-                <artifactId>geofence-login-impl</artifactId>
-                <version>${geofence-version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.geoserver.geofence</groupId>
-                <artifactId>geofence-generic-api</artifactId>
-                <version>${geofence-version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.geoserver.geofence</groupId>
-                <artifactId>geofence-rest-impl</artifactId>
-                <version>${geofence-version}</version>
-            </dependency>
-			
-            <dependency>
-                <groupId>org.geoserver.geofence</groupId>
-                <artifactId>geofence-ldap</artifactId>
-                <version>${geofence-version}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <!-- =========================================================== -->

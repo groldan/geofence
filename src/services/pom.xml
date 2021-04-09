@@ -24,7 +24,6 @@
   </modules>
 
   <properties>
-    <geofence-version>3.5-SNAPSHOT</geofence-version>
     <main-prefix>geofence</main-prefix>
 
     <gt-version>25-SNAPSHOT</gt-version>
@@ -89,109 +88,6 @@
   <!-- =========================================================== -->
   <dependencyManagement>
     <dependencies>
-
-      <!-- =========================================================== -->
-      <!--     GeoFence Core Modules                                    -->
-      <!-- =========================================================== -->
-      <dependency>
-        <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-persistence-model</artifactId>
-        <version>${geofence-version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-model</artifactId>
-        <version>${geofence-version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-persistence</artifactId>
-        <version>${geofence-version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-services-api</artifactId>
-        <version>${geofence-version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-services-impl</artifactId>
-        <version>${geofence-version}</version>
-      </dependency>
-
-      <!-- =========================================================== -->
-      <!--     GeoFence modules                                         -->
-      <!-- =========================================================== -->
-      <dependency>
-        <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-modules</artifactId>
-        <version>${geofence-version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-generic-api</artifactId>
-        <version>${geofence-version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-login-parent</artifactId>
-        <version>${geofence-version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-login-api</artifactId>
-        <version>${geofence-version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-login-impl</artifactId>
-        <version>${geofence-version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-rest-root</artifactId>
-        <version>${geofence-version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-rest</artifactId>
-        <version>${geofence-version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-rest-api</artifactId>
-        <version>${geofence-version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-rest-impl</artifactId>
-        <version>${geofence-version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-rest-test</artifactId>
-        <version>${geofence-version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-ldap</artifactId>
-        <version>${geofence-version}</version>
-      </dependency>
-
       <!-- =========================================================== -->
       <!--     GeoServer Manager                                       -->
       <!-- =========================================================== -->
