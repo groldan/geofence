@@ -10,8 +10,7 @@ import org.springframework.cloud.bus.BusRefreshAutoConfiguration;
 @EnableAutoConfiguration(exclude = {BusAutoConfiguration.class, BusRefreshAutoConfiguration.class})
 public class GeofenceServiceApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(GeofenceServiceApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(GeofenceServiceApplication.class, args);
+    }
 }
