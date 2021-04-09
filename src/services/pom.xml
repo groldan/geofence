@@ -95,7 +95,7 @@
       <!-- =========================================================== -->
       <dependency>
         <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-model-internal</artifactId>
+        <artifactId>geofence-persistence-model</artifactId>
         <version>${geofence-version}</version>
       </dependency>
 

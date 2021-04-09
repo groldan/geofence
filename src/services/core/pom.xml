@@ -22,10 +22,8 @@
   <name>GeoFence - Core</name>
 
   <modules>
-    <module>model</module>
-    <!-- artifactid: model-internal -->
     <module>model-external</module>
-    <!-- artifactid: model -->
+    <module>persistence-model</module>
     <module>persistence</module>
     <module>services-api</module>
     <module>services-impl</module>

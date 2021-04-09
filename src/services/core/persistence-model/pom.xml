@@ -17,7 +17,7 @@
     <version>4.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>geofence-model-internal</artifactId>
+  <artifactId>geofence-persistence-model</artifactId>
   <packaging>jar</packaging>
   <name>GeoFence - Core - Model internal</name>
   <description>Model with JPA annotation used internally</description>
