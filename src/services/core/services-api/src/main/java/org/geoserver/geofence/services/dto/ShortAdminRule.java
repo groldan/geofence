@@ -6,8 +6,8 @@
 package org.geoserver.geofence.services.dto;
 
 import java.io.Serializable;
+import org.geoserver.geofence.core.model.AdminGrantType;
 import org.geoserver.geofence.core.model.AdminRule;
-import org.geoserver.geofence.core.model.enums.AdminGrantType;
 
 /** @author ETj (etj at geo-solutions.it) */
 public class ShortAdminRule implements Serializable {

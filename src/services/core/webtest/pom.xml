@@ -38,12 +38,12 @@
     <!-- =============================================================== -->
     <dependency>
       <groupId>org.geoserver.geofence</groupId>
-      <artifactId>geofence-persistence-model</artifactId>
+      <artifactId>geofence-persistence-api</artifactId>
     </dependency>
 
     <dependency>
       <groupId>org.geoserver.geofence</groupId>
-      <artifactId>geofence-persistence</artifactId>
+      <artifactId>geofence-persistence-impl</artifactId>
     </dependency>
 
     <dependency>

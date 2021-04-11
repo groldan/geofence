@@ -6,9 +6,9 @@
 package org.geoserver.geofence.services;
 
 import java.util.List;
+import org.geoserver.geofence.core.model.GrantType;
 import org.geoserver.geofence.core.model.Rule;
 import org.geoserver.geofence.core.model.UserGroup;
-import org.geoserver.geofence.core.model.enums.GrantType;
 import org.geoserver.geofence.services.dto.ShortGroup;
 import org.geoserver.geofence.services.exception.NotFoundServiceEx;
 import org.junit.AfterClass;
@@ -75,7 +75,7 @@ public class UserGroupAdminServiceImplTest extends ServiceTestBase {
             assertNotNull(loaded);
 
             assertEquals("u1", loaded.getName());
-            oldEnabled = loaded.getEnabled();
+            oldEnabled = loaded.isEnabled();
 
             loaded.setEnabled(!oldEnabled);
 
@@ -86,7 +86,7 @@ public class UserGroupAdminServiceImplTest extends ServiceTestBase {
             UserGroup loaded = userGroupAdminService.get(group.getId());
             assertNotNull(loaded);
 
-            assertEquals((boolean) !oldEnabled, (boolean) loaded.getEnabled());
+            assertEquals(!oldEnabled, loaded.isEnabled());
         }
     }
 

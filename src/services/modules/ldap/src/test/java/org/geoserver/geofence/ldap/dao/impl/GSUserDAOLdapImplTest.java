@@ -11,8 +11,8 @@ import com.googlecode.genericdao.search.Search;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.geoserver.geofence.core.model.GSUser;
-import org.geoserver.geofence.core.model.UserGroup;
+import org.geoserver.geofence.jpa.model.JPAGSUser;
+import org.geoserver.geofence.jpa.model.JPAUserGroup;
 import org.junit.Test;
 
 /**
@@ -23,22 +23,22 @@ public class GSUserDAOLdapImplTest extends BaseDAOTest {
 
     @Test
     public void testFindAll() {
-        List<GSUser> users = userDAO.findAll();
+        List<JPAGSUser> users = userDAO.findAll();
         assertTrue(users.size() > 0);
-        GSUser user = users.get(0);
+        JPAGSUser user = users.get(0);
         assertTrue(user.getName().length() > 0);
     }
 
     @Test
     public void testFind() {
-        GSUser user = userDAO.find(1l);
+        JPAGSUser user = userDAO.find(1l);
         assertNull(user);
     }
 
     @Test
     public void testGetFullByName() {
         final String USERNAME = "admin";
-        GSUser user = userDAO.getFull(USERNAME);
+        JPAGSUser user = userDAO.getFull(USERNAME);
         assertNotNull(user);
         LOGGER.info("Searching for '" + USERNAME + "', found " + user);
         assertEquals(USERNAME, user.getName());
@@ -53,16 +53,16 @@ public class GSUserDAOLdapImplTest extends BaseDAOTest {
     public void testSearch_admin() {
         Search search = new Search();
         search.addFilter(new Filter("username", "admin"));
-        List<GSUser> users = userDAO.search(search);
+        List<JPAGSUser> users = userDAO.search(search);
         assertTrue(users.size() > 0);
-        GSUser user = users.get(0);
+        JPAGSUser user = users.get(0);
         assertTrue(user.getName().length() > 0);
     }
 
     @Test
     public void testSearchPagination() {
         Search search = new Search();
-        List<GSUser> users = userDAO.search(search);
+        List<JPAGSUser> users = userDAO.search(search);
         assertEquals(4, users.size());
 
         search.setPage(0);
@@ -80,21 +80,21 @@ public class GSUserDAOLdapImplTest extends BaseDAOTest {
     public void testSearch_groups() {
         Search search = new Search();
         search.addFilter(new Filter("username", "destination1"));
-        List<GSUser> users = userDAO.search(search);
+        List<JPAGSUser> users = userDAO.search(search);
         assertTrue(users.size() == 1);
-        GSUser user = users.get(0);
+        JPAGSUser user = users.get(0);
         assertTrue(user.getName().equals("destination1"));
     }
 
     @Test
     public void test_getFullByName_groups() {
-        GSUser user = userDAO.getFull("destination2");
+        JPAGSUser user = userDAO.getFull("destination2");
         assertNotNull(user);
         assertEquals("destination2", user.getName());
         assertEquals(2, user.getGroups().size());
 
         Set<String> gnames = new HashSet<>();
-        for (UserGroup g : user.getGroups()) {
+        for (JPAUserGroup g : user.getGroups()) {
             LOGGER.debug("group : " + g.getName());
             gnames.add(g.getName());
         }
@@ -109,14 +109,14 @@ public class GSUserDAOLdapImplTest extends BaseDAOTest {
         ((GSUserDAOLdapImpl) userDAO).setMemberFilter("member={0}");
         ((GSUserDAOLdapImpl) userDAO).setNestedMemberFilter("member={0}");
         try {
-            GSUser user = userDAO.getFull("destination2");
+            JPAGSUser user = userDAO.getFull("destination2");
 
             assertNotNull(user);
             assertEquals("destination2", user.getName());
             assertEquals(3, user.getGroups().size());
 
             Set<String> gnames = new HashSet<>();
-            for (UserGroup g : user.getGroups()) {
+            for (JPAUserGroup g : user.getGroups()) {
                 LOGGER.debug("group : " + g.getName());
                 gnames.add(g.getName());
             }

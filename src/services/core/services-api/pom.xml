@@ -27,10 +27,9 @@
       <groupId>org.geoserver.geofence</groupId>
       <artifactId>geofence-model</artifactId>
     </dependency>
-
     <dependency>
-      <groupId>org.locationtech.jts</groupId>
-      <artifactId>jts-core</artifactId>
+      <groupId>org.geoserver.geofence</groupId>
+      <artifactId>geofence-persistence-api</artifactId>
     </dependency>
 
     <!-- JUnit -->

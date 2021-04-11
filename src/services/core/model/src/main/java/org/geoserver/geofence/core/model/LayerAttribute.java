@@ -8,7 +8,6 @@ package org.geoserver.geofence.core.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.geoserver.geofence.core.model.enums.AccessType;
 
 /** @author ETj (etj at geo-solutions.it) */
 @Data

@@ -89,7 +89,7 @@ public abstract class BaseRESTServiceImpl {
         shu.setId(user.getId());
         shu.setExtId(user.getExtId());
         shu.setUserName(user.getName());
-        shu.setEnabled(user.getEnabled());
+        shu.setEnabled(user.isEnabled());
 
         return shu;
     }
@@ -99,7 +99,7 @@ public abstract class BaseRESTServiceImpl {
         ret.setId(user.getId());
         ret.setExtId(user.getExtId());
         ret.setName(user.getName());
-        ret.setEnabled(user.getEnabled());
+        ret.setEnabled(user.isEnabled());
         ret.setAdmin(user.isAdmin());
         ret.setFullName(user.getFullName());
         ret.setEmailAddress(user.getEmailAddress());

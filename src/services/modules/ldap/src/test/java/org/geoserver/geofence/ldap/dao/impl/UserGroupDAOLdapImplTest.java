@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.geoserver.geofence.core.model.UserGroup;
+import org.geoserver.geofence.jpa.model.JPAUserGroup;
 import org.junit.Test;
 
 /**
@@ -23,9 +23,9 @@ public class UserGroupDAOLdapImplTest extends BaseDAOTest {
 
     @Test
     public void testFindAll() {
-        List<UserGroup> groups = userGroupDAO.findAll();
+        List<JPAUserGroup> groups = userGroupDAO.findAll();
         assertTrue("No groups", groups.size() > 0);
-        UserGroup group = groups.get(0);
+        JPAUserGroup group = groups.get(0);
         assertTrue("Empty group name", group.getName().length() > 0);
 
         Set<String> expected =
@@ -35,7 +35,7 @@ public class UserGroupDAOLdapImplTest extends BaseDAOTest {
                                     "adminGroup", "parent", "other", "otherGroup", "destination"
                                 }));
         Set<String> found = new HashSet<>();
-        for (UserGroup g : groups) {
+        for (JPAUserGroup g : groups) {
             LOGGER.debug("Found group " + g);
             found.add(g.getName());
         }
@@ -44,7 +44,7 @@ public class UserGroupDAOLdapImplTest extends BaseDAOTest {
 
     @Test
     public void testFind() {
-        UserGroup group = userGroupDAO.find(1l);
+        JPAUserGroup group = userGroupDAO.find(1l);
         assertNull("Find by id should be disabled in LDAP", group);
     }
 
@@ -53,9 +53,9 @@ public class UserGroupDAOLdapImplTest extends BaseDAOTest {
         Search search = new Search();
         search.addFilter(new Filter("groupname", "adminGroup"));
 
-        List<UserGroup> groups = userGroupDAO.search(search);
+        List<JPAUserGroup> groups = userGroupDAO.search(search);
         assertTrue(groups.size() == 1);
-        UserGroup group = groups.get(0);
+        JPAUserGroup group = groups.get(0);
         assertEquals("adminGroup", group.getName());
     }
 
@@ -67,7 +67,7 @@ public class UserGroupDAOLdapImplTest extends BaseDAOTest {
     @Test
     public void testSearchPagination() {
         Search search = new Search();
-        List<UserGroup> groups = userGroupDAO.search(search);
+        List<JPAUserGroup> groups = userGroupDAO.search(search);
         assertEquals(5, groups.size());
 
         search.setPage(0);

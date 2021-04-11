@@ -23,8 +23,8 @@
 
   <modules>
     <module>model</module>
-    <module>persistence-model</module>
-    <module>persistence</module>
+    <module>persistence-api</module>
+    <module>persistence-impl</module>
     <module>services-api</module>
     <module>services-impl</module>
     <module>webtest</module>

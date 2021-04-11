@@ -8,23 +8,23 @@ package org.geoserver.geofence.servicetest;
 import java.util.List;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.geoserver.geofence.core.model.GSInstance;
-import org.geoserver.geofence.core.model.GSUser;
-import org.geoserver.geofence.core.model.LayerAttribute;
-import org.geoserver.geofence.core.model.LayerDetails;
-import org.geoserver.geofence.core.model.Rule;
-import org.geoserver.geofence.core.model.RuleLimits;
-import org.geoserver.geofence.core.model.UserGroup;
-import org.geoserver.geofence.core.model.enums.AccessType;
-import org.geoserver.geofence.core.model.enums.GrantType;
+import org.geoserver.geofence.core.dao.RuleFilter;
+import org.geoserver.geofence.core.dao.RuleFilter.SpecialFilterType;
+import org.geoserver.geofence.jpa.model.JPAAccessType;
+import org.geoserver.geofence.jpa.model.JPAGSInstance;
+import org.geoserver.geofence.jpa.model.JPAGSUser;
+import org.geoserver.geofence.jpa.model.JPAGrantType;
+import org.geoserver.geofence.jpa.model.JPALayerAttribute;
+import org.geoserver.geofence.jpa.model.JPALayerDetails;
+import org.geoserver.geofence.jpa.model.JPARule;
+import org.geoserver.geofence.jpa.model.JPARuleLimits;
+import org.geoserver.geofence.jpa.model.JPAUserGroup;
 import org.geoserver.geofence.services.InstanceAdminService;
 import org.geoserver.geofence.services.RuleAdminService;
 import org.geoserver.geofence.services.RuleReaderService;
 import org.geoserver.geofence.services.UserAdminService;
 import org.geoserver.geofence.services.UserGroupAdminService;
 import org.geoserver.geofence.services.dto.AccessInfo;
-import org.geoserver.geofence.services.dto.RuleFilter;
-import org.geoserver.geofence.services.dto.RuleFilter.SpecialFilterType;
 import org.geoserver.geofence.services.dto.ShortGroup;
 import org.geoserver.geofence.services.dto.ShortRule;
 import org.geoserver.geofence.services.dto.ShortUser;
@@ -77,49 +77,49 @@ public class MainTest implements InitializingBean, ApplicationContextAware {
         ShortGroup shortProfile = new ShortGroup();
         shortProfile.setName("basic");
         long pid1 = userGroupAdminService.insert(shortProfile);
-        UserGroup p1 = userGroupAdminService.get(pid1);
+        JPAUserGroup p1 = userGroupAdminService.get(pid1);
 
         ShortGroup shortProfile2 = new ShortGroup();
         shortProfile2.setName("advanced");
         long pid2 = userGroupAdminService.insert(shortProfile2);
-        UserGroup p2 = userGroupAdminService.get(pid2);
+        JPAUserGroup p2 = userGroupAdminService.get(pid2);
 
         LOGGER.info("===== Creating Users =====");
         String citeUsername = "cite";
-        GSUser citeUser = createUser(citeUsername);
+        JPAGSUser citeUser = createUser(citeUsername);
         citeUser.getGroups().add(p1);
         userAdminService.insert(citeUser);
 
         String wmsUsername = "wmsuser";
-        GSUser wmsUser = createUser(wmsUsername);
+        JPAGSUser wmsUser = createUser(wmsUsername);
         wmsUser.getGroups().add(p1);
         userAdminService.insert(wmsUser);
 
         String areaUsername = "area";
-        GSUser areaUser = createUser(areaUsername);
+        JPAGSUser areaUser = createUser(areaUsername);
         areaUser.getGroups().add(p1);
         userAdminService.insert(areaUser);
 
         String statesUsername = "u-states";
-        GSUser uStates = createUser(statesUsername);
+        JPAGSUser uStates = createUser(statesUsername);
         uStates.getGroups().add(p1);
         userAdminService.insert(uStates);
 
         LOGGER.info("===== Creating Rules =====");
 
-        LayerDetails ld1 = new LayerDetails();
+        JPALayerDetails ld1 = new JPALayerDetails();
         ld1.getAllowedStyles().add("style1");
         ld1.getAllowedStyles().add("style2");
-        ld1.getAttributes().add(new LayerAttribute("attr1", AccessType.NONE));
-        ld1.getAttributes().add(new LayerAttribute("attr2", AccessType.READONLY));
-        ld1.getAttributes().add(new LayerAttribute("attr3", AccessType.READWRITE));
+        ld1.getAttributes().add(new JPALayerAttribute("attr1", JPAAccessType.NONE));
+        ld1.getAttributes().add(new JPALayerAttribute("attr2", JPAAccessType.READONLY));
+        ld1.getAttributes().add(new JPALayerAttribute("attr3", JPAAccessType.READWRITE));
 
         int priority = 0;
 
         /* Cite user rules */
         // allow user cite full control over the cite workspace
         ruleAdminService.insert(
-                new Rule(
+                new JPARule(
                         priority++,
                         citeUsername,
                         null,
@@ -129,10 +129,10 @@ public class MainTest implements InitializingBean, ApplicationContextAware {
                         null,
                         "cite",
                         null,
-                        GrantType.ALLOW));
+                        JPAGrantType.ALLOW));
         // allow only getmap, getcapatbilities and reflector usage on workspace sf
         ruleAdminService.insert(
-                (new Rule(
+                (new JPARule(
                         priority++,
                         citeUsername,
                         null,
@@ -142,9 +142,9 @@ public class MainTest implements InitializingBean, ApplicationContextAware {
                         "GetMap",
                         "sf",
                         null,
-                        GrantType.ALLOW)));
+                        JPAGrantType.ALLOW)));
         ruleAdminService.insert(
-                (new Rule(
+                (new JPARule(
                         priority++,
                         citeUsername,
                         null,
@@ -154,9 +154,9 @@ public class MainTest implements InitializingBean, ApplicationContextAware {
                         "GetCapabilities",
                         "sf",
                         null,
-                        GrantType.ALLOW)));
+                        JPAGrantType.ALLOW)));
         ruleAdminService.insert(
-                (new Rule(
+                (new JPARule(
                         priority++,
                         citeUsername,
                         null,
@@ -166,12 +166,12 @@ public class MainTest implements InitializingBean, ApplicationContextAware {
                         "reflect",
                         "sf",
                         null,
-                        GrantType.ALLOW)));
+                        JPAGrantType.ALLOW)));
         // allow only GetMap and GetFeature the topp workspace
 
         /* wms user rules */
         ruleAdminService.insert(
-                (new Rule(
+                (new JPARule(
                         priority++,
                         wmsUsername,
                         null,
@@ -181,11 +181,11 @@ public class MainTest implements InitializingBean, ApplicationContextAware {
                         null,
                         null,
                         null,
-                        GrantType.ALLOW)));
+                        JPAGrantType.ALLOW)));
 
         /* all powerful but only in a restricted area */
-        Rule areaRestriction =
-                new Rule(
+        JPARule areaRestriction =
+                new JPARule(
                         priority++,
                         areaUsername,
                         null,
@@ -195,13 +195,13 @@ public class MainTest implements InitializingBean, ApplicationContextAware {
                         null,
                         null,
                         null,
-                        GrantType.LIMIT);
-        RuleLimits limits = new RuleLimits();
+                        JPAGrantType.LIMIT);
+        JPARuleLimits limits = new JPARuleLimits();
         limits.setAllowedArea((MultiPolygon) new WKTReader().read(MULTIPOLYGONWKT));
         long ruleId = ruleAdminService.insert(areaRestriction);
         ruleAdminService.setLimits(ruleId, limits);
         ruleAdminService.insert(
-                (new Rule(
+                (new JPARule(
                         priority++,
                         areaUsername,
                         null,
@@ -211,12 +211,12 @@ public class MainTest implements InitializingBean, ApplicationContextAware {
                         null,
                         null,
                         null,
-                        GrantType.ALLOW)));
+                        JPAGrantType.ALLOW)));
 
         /* some users for interactive testing with the default data directory */
         // uStates can do whatever, but only on topp:states
         ruleAdminService.insert(
-                new Rule(
+                new JPARule(
                         priority++,
                         statesUsername,
                         null,
@@ -226,11 +226,11 @@ public class MainTest implements InitializingBean, ApplicationContextAware {
                         null,
                         "topp",
                         "states",
-                        GrantType.ALLOW));
+                        JPAGrantType.ALLOW));
 
         // deny everything else
         ruleAdminService.insert(
-                new Rule(
+                new JPARule(
                         priority++,
                         null,
                         null,
@@ -240,7 +240,7 @@ public class MainTest implements InitializingBean, ApplicationContextAware {
                         null,
                         null,
                         null,
-                        GrantType.DENY));
+                        JPAGrantType.DENY));
         new Thread(
                         new Runnable() {
 
@@ -316,8 +316,8 @@ public class MainTest implements InitializingBean, ApplicationContextAware {
 
     // ==========================================================================
 
-    protected GSUser createUser(String baseName) {
-        GSUser user = new GSUser();
+    protected JPAGSUser createUser(String baseName) {
+        JPAGSUser user = new JPAGSUser();
         user.setName(baseName);
         return user;
     }
@@ -369,8 +369,8 @@ public class MainTest implements InitializingBean, ApplicationContextAware {
     }
 
     protected void removeAllInstances() throws NotFoundServiceEx {
-        List<GSInstance> list = instanceAdminService.getAll();
-        for (GSInstance item : list) {
+        List<JPAGSInstance> list = instanceAdminService.getAll();
+        for (JPAGSInstance item : list) {
             LOGGER.info("Removing " + item);
             boolean ret = instanceAdminService.delete(item.getId());
             if (!ret) throw new IllegalStateException("GSInstance not removed");

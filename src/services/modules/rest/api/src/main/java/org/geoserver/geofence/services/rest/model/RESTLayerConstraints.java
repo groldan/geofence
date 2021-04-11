@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import org.geoserver.geofence.core.model.LayerAttribute;
-import org.geoserver.geofence.core.model.enums.LayerType;
+import org.geoserver.geofence.core.model.LayerType;
 
 /** @author Etj (etj at geo-solutions.it) */
 @XmlRootElement(name = "LayerConstraints")

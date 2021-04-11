@@ -8,7 +8,7 @@ package org.geoserver.geofence.services.rest.model;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import org.geoserver.geofence.core.model.enums.AdminGrantType;
+import org.geoserver.geofence.core.model.AdminGrantType;
 import org.geoserver.geofence.services.rest.model.util.IdName;
 
 /**

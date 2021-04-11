@@ -10,7 +10,6 @@ import java.net.InetAddress;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.geoserver.geofence.core.model.util.SubnetV4Utils;
 
 /** @author ETj (etj at geo-solutions.it) */
 @Data

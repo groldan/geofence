@@ -7,11 +7,11 @@ package org.geoserver.geofence.services;
 
 import java.util.List;
 import java.util.Set;
+import org.geoserver.geofence.core.dao.RuleFilter;
+import org.geoserver.geofence.core.model.InsertPosition;
 import org.geoserver.geofence.core.model.LayerDetails;
 import org.geoserver.geofence.core.model.Rule;
 import org.geoserver.geofence.core.model.RuleLimits;
-import org.geoserver.geofence.core.model.enums.InsertPosition;
-import org.geoserver.geofence.services.dto.RuleFilter;
 import org.geoserver.geofence.services.dto.ShortRule;
 import org.geoserver.geofence.services.exception.BadRequestServiceEx;
 import org.geoserver.geofence.services.exception.NotFoundServiceEx;

@@ -11,7 +11,7 @@ import javax.naming.directory.Attributes;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.geoserver.geofence.core.model.UserGroup;
+import org.geoserver.geofence.jpa.model.JPAUserGroup;
 
 /**
  * AttributeMapper for UserGroup objects.
@@ -24,7 +24,7 @@ public class UserGroupAttributesMapper extends BaseAttributesMapper {
 
     @Override
     public Object mapFromAttributes(Attributes attrs) throws NamingException {
-        UserGroup group = new UserGroup();
+        JPAUserGroup group = new JPAUserGroup();
 
         String id = getAttribute(attrs, "id");
         if (StringUtils.isBlank(id)) {

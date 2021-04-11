@@ -12,8 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.geoserver.geofence.core.dao.GSUserDAO;
-import org.geoserver.geofence.core.model.GSUser;
-import org.geoserver.geofence.core.model.UserGroup;
+import org.geoserver.geofence.jpa.model.JPAGSUser;
+import org.geoserver.geofence.jpa.model.JPAUserGroup;
 
 /**
  * GSUserDAO implementation, using an LDAP server as a primary source.
@@ -21,7 +21,7 @@ import org.geoserver.geofence.core.model.UserGroup;
  * @author "Mauro Bartolomeoli - mauro.bartolomeoli@geo-solutions.it"
  * @author Emanuele Tajariol (etj at geo-solutions.it)
  */
-public class GSUserDAOLdapImpl extends LDAPBaseDAO<GSUserDAO, GSUser> implements GSUserDAO {
+public class GSUserDAOLdapImpl extends LDAPBaseDAO<GSUserDAO, JPAGSUser> implements GSUserDAO {
 
     private UserGroupDAOLdapImpl userGroupDAOLdapImpl;
 
@@ -47,10 +47,10 @@ public class GSUserDAOLdapImpl extends LDAPBaseDAO<GSUserDAO, GSUser> implements
      * @param user
      * @return
      */
-    private List<UserGroup> getGroups(GSUser user) {
+    private List<JPAUserGroup> getGroups(JPAGSUser user) {
         Filter filter = new Filter();
         String member;
-        List<UserGroup> groups;
+        List<JPAUserGroup> groups;
         String filterStr = null;
 
         String dn = user.getExtId();
@@ -82,21 +82,23 @@ public class GSUserDAOLdapImpl extends LDAPBaseDAO<GSUserDAO, GSUser> implements
             groups = userGroupDAOLdapImpl.search(filterStr);
         }
         if (enableHierarchicalGroups && nestedMemberFilter != null) {
-            for (UserGroup group : groups) {
+            for (JPAUserGroup group : groups) {
                 groups = addParentGroups(groups, group, 0);
             }
         }
         return groups;
     }
 
-    private List<UserGroup> addParentGroups(List<UserGroup> groups, UserGroup group, int level) {
+    private List<JPAUserGroup> addParentGroups(
+            List<JPAUserGroup> groups, JPAUserGroup group, int level) {
         if (level < maxLevelGroupsSearch) {
-            List<UserGroup> newGroups = new ArrayList<UserGroup>();
+            List<JPAUserGroup> newGroups = new ArrayList<JPAUserGroup>();
             newGroups.addAll(groups);
             String filter =
                     MessageFormat.format(
                             nestedMemberFilter, new String[] {group.getExtId(), group.getName()});
-            for (UserGroup parentGroup : (List<UserGroup>) userGroupDAOLdapImpl.search(filter)) {
+            for (JPAUserGroup parentGroup :
+                    (List<JPAUserGroup>) userGroupDAOLdapImpl.search(filter)) {
                 if (!newGroups.contains(parentGroup)) {
                     newGroups.add(parentGroup);
                     newGroups = addParentGroups(newGroups, parentGroup, level + 1);
@@ -108,8 +110,8 @@ public class GSUserDAOLdapImpl extends LDAPBaseDAO<GSUserDAO, GSUser> implements
     }
 
     @Override
-    public GSUser getFull(String name) {
-        GSUser user = searchByName(name);
+    public JPAGSUser getFull(String name) {
+        JPAGSUser user = searchByName(name);
         if (user == null) return null;
 
         return fillWithGroups(user);
@@ -121,22 +123,22 @@ public class GSUserDAOLdapImpl extends LDAPBaseDAO<GSUserDAO, GSUser> implements
      * @param gsUser
      * @return
      */
-    private GSUser fillWithGroups(GSUser user) {
+    private JPAGSUser fillWithGroups(JPAGSUser user) {
         user.setGroups(new HashSet(getGroups(user)));
         return user;
     }
 
-    public GSUser searchByName(String name) {
+    public JPAGSUser searchByName(String name) {
 
         Search search = new Search();
         search.addFilter(new Filter("username", name));
-        List<GSUser> users = search(search);
+        List<JPAGSUser> users = search(search);
 
         if (users.isEmpty()) return null;
         else if (users.size() > 1)
             throw new IllegalArgumentException(
                     "Given filter (" + name + ") returns too many users (" + users.size() + ")");
-        GSUser user = users.get(0);
+        JPAGSUser user = users.get(0);
         return user;
     }
 

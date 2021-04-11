@@ -17,8 +17,8 @@
 
   <artifactId>geofence-model</artifactId>
   <packaging>jar</packaging>
-  <name>GeoFence - Core - Model external</name>
-  <description>Model used for external deps, cleaned from JPA annotations</description>
+  <name>GeoFence - Core - Object Model</name>
+  <description>GeoFence Object Model</description>
 
   <dependencies>
     <dependency>

@@ -1,0 +1,78 @@
+/* (c) 2014 - 2017 Open Source Geospatial Foundation - all rights reserved
+ * This code is licensed under the GPL 2.0 license, available at the root
+ * application directory.
+ */
+
+package org.geoserver.geofence.jpa.repository;
+
+import com.googlecode.genericdao.search.Search;
+import java.util.Date;
+import java.util.List;
+import org.geoserver.geofence.jpa.model.JPAGSUser;
+import org.springframework.stereotype.Repository;
+
+/**
+ * Public implementation of the GSUserDAO interface
+ *
+ * @author Emanuele Tajariol (etj at geo-solutions.it)
+ */
+@Repository
+public class GSUserRepository extends BaseRepository<JPAGSUser, Long> {
+
+    @Override
+    public void persist(JPAGSUser... entities) {
+        Date now = new Date();
+        for (JPAGSUser user : entities) {
+            user.setDateCreation(now);
+        }
+        super.persist(entities);
+    }
+
+    /** Fetch a GSUser with all of its related groups */
+    public JPAGSUser getFull(String name) {
+        Search search = new Search(JPAGSUser.class);
+        search.addFilterEqual("name", name);
+        search.addFetch("groups");
+        search.setDistinct(true);
+        List<JPAGSUser> users = super.search(search);
+
+        // When fetching users with multiple groups, the gsusers list id multiplied for
+        // the number
+        // of groups found.
+        // Next there is a workaround to this problem; maybe this:
+        // search.setDistinct(true);
+        // Dunno if some annotations in the GSUser definition are wrong, some deeper
+        // checks have to
+        // be performed.
+
+        switch (users.size()) {
+            case 0:
+                return null;
+            case 1:
+                return users.get(0);
+            default:
+                // if(users.size() == users.get(0).getGroups().size()) { // normal
+                // hibernate behaviour
+                // if(LOGGER.isDebugEnabled()) { // perform some more consistency
+                // tests only when debugging
+                // for (GSUser user : users) {
+                // if(user.getId() != users.get(0).getId() ||
+                // user.getGroups().size() !=
+                // users.get(0).getGroups().size()) {
+                // LOGGER.error("Inconsistent userlist " + user);
+                // }
+                // }
+                // }
+                //
+                // return users.get(0);
+                // } else {
+                // LOGGER.error("Too many users in unique search " + search);
+                // for (GSUser user : users) {
+                // LOGGER.error(" " + user + "
+                // grp:"+user.getGroups().size());
+                // }
+                throw new IllegalStateException("Found more than one user (search:" + search + ")");
+                // }
+        }
+    }
+}

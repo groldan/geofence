@@ -7,11 +7,17 @@ package org.geoserver.geofence.services.exception;
 
 /** @author ETj (etj at geo-solutions.it) */
 public class BadRequestServiceEx extends WebApplicationException {
+    private static final long serialVersionUID = 1L;
 
     private String message;
 
     public BadRequestServiceEx(String message) {
         super(Response.Status.BAD_REQUEST);
+        this.message = message;
+    }
+
+    public BadRequestServiceEx(String message, Throwable cause) {
+        super(Response.Status.BAD_REQUEST, cause);
         this.message = message;
     }
 

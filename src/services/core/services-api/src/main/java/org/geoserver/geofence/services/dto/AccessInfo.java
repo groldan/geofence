@@ -7,8 +7,8 @@ package org.geoserver.geofence.services.dto;
 
 import java.io.Serializable;
 import java.util.Set;
+import org.geoserver.geofence.core.model.GrantType;
 import org.geoserver.geofence.core.model.LayerAttribute;
-import org.geoserver.geofence.core.model.enums.GrantType;
 
 /** @author ETj (etj at geo-solutions.it) */
 public class AccessInfo implements Serializable {

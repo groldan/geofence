@@ -5,33 +5,43 @@
 
 package org.geoserver.geofence.services;
 
-import static org.geoserver.geofence.services.util.FilterUtils.filterByAddress;
-
-import com.googlecode.genericdao.search.Filter;
-import com.googlecode.genericdao.search.Search;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.geoserver.geofence.core.dao.AdminRuleDAO;
 import org.geoserver.geofence.core.dao.LayerDetailsDAO;
 import org.geoserver.geofence.core.dao.RuleDAO;
-import org.geoserver.geofence.core.model.*;
-import org.geoserver.geofence.core.model.enums.AccessType;
-import org.geoserver.geofence.core.model.enums.AdminGrantType;
-import org.geoserver.geofence.core.model.enums.CatalogMode;
-import org.geoserver.geofence.core.model.enums.GrantType;
+import org.geoserver.geofence.core.dao.RuleFilter;
+import org.geoserver.geofence.core.dao.RuleFilter.FilterType;
+import org.geoserver.geofence.core.dao.RuleFilter.IdNameFilter;
+import org.geoserver.geofence.core.dao.RuleFilter.SpecialFilterType;
+import org.geoserver.geofence.core.dao.RuleFilter.TextFilter;
+import org.geoserver.geofence.core.model.AccessType;
+import org.geoserver.geofence.core.model.AdminGrantType;
+import org.geoserver.geofence.core.model.AdminRule;
+import org.geoserver.geofence.core.model.CatalogMode;
+import org.geoserver.geofence.core.model.GrantType;
+import org.geoserver.geofence.core.model.IPRangeProvider;
+import org.geoserver.geofence.core.model.LayerAttribute;
+import org.geoserver.geofence.core.model.LayerDetails;
+import org.geoserver.geofence.core.model.Rule;
+import org.geoserver.geofence.core.model.RuleLimits;
 import org.geoserver.geofence.services.dto.AccessInfo;
 import org.geoserver.geofence.services.dto.AuthUser;
-import org.geoserver.geofence.services.dto.RuleFilter;
-import org.geoserver.geofence.services.dto.RuleFilter.FilterType;
-import org.geoserver.geofence.services.dto.RuleFilter.IdNameFilter;
-import org.geoserver.geofence.services.dto.RuleFilter.SpecialFilterType;
-import org.geoserver.geofence.services.dto.RuleFilter.TextFilter;
 import org.geoserver.geofence.services.dto.ShortRule;
 import org.geoserver.geofence.services.exception.BadRequestServiceEx;
 import org.geoserver.geofence.services.util.AccessInfoInternal;
+import org.geoserver.geofence.services.util.IPUtils;
 import org.geoserver.geofence.spi.UserResolver;
 import org.locationtech.jts.geom.Geometry;
 import org.springframework.security.core.Authentication;
@@ -230,9 +240,9 @@ public class RuleReaderServiceImpl implements RuleReaderService {
         // TODO: check how geoserver deals with empty set
 
         if (a0 == null || a0.isEmpty()) return Collections.EMPTY_SET;
-        //            return a1;
+        // return a1;
         if (a1 == null || a1.isEmpty()) return Collections.EMPTY_SET;
-        //            return a0;
+        // return a0;
 
         Set<LayerAttribute> ret = new HashSet<LayerAttribute>();
         // add both attributes only in a0, and enlarge common attributes
@@ -293,6 +303,9 @@ public class RuleReaderServiceImpl implements RuleReaderService {
 
             switch (rule.getAccess()) {
                 case LIMIT:
+                    // TODO: (groldan) model's Rule.ruleLimits was deprecated, I've re-added them
+                    // for the sake of this call. Revisit if we should be getting the limits some
+                    // other way and remove the model's Rule.ruleLimits property
                     RuleLimits rl = rule.getRuleLimits();
                     if (rl != null) {
                         LOGGER.info("Collecting limits: " + rl);
@@ -313,13 +326,13 @@ public class RuleReaderServiceImpl implements RuleReaderService {
             }
         }
 
-        //        if(ret == null) {
-        //            LOGGER.warn("No rule matching filter " + filter);
-        //            // Denying by default
-        //            ret = new AccessInfo(GrantType.DENY);
-        //        }
+        // if(ret == null) {
+        // LOGGER.warn("No rule matching filter " + filter);
+        // // Denying by default
+        // ret = new AccessInfo(GrantType.DENY);
+        // }
 
-        //        LOGGER.info("Returning " + ret + " for " + filter);
+        // LOGGER.info("Returning " + ret + " for " + filter);
         return ret;
     }
 
@@ -382,7 +395,7 @@ public class RuleReaderServiceImpl implements RuleReaderService {
                                 + " "
                                 + area.toString());
             }
-            //            accessInfo.setAreaWkt(area.toText());
+            // accessInfo.setAreaWkt(area.toText());
             accessInfo.setArea(area);
         }
 
@@ -537,8 +550,8 @@ public class RuleReaderServiceImpl implements RuleReaderService {
         }
         Set<String> finalRoleFilter = new HashSet<>();
         // If both user and group are defined in filter
-        //   if user doensn't belong to group, no rule is returned
-        //   otherwise assigned or default rules are searched for
+        // if user doensn't belong to group, no rule is returned
+        // otherwise assigned or default rules are searched for
         if (username != null) {
             Set<String> assignedRoles = userResolver.getRoles(username);
             if (authorities != null) {
@@ -578,8 +591,8 @@ public class RuleReaderServiceImpl implements RuleReaderService {
             }
         } else {
             // user is null: then either:
-            //  1) no filter on user was requested (ANY or DEFAULT)
-            //  2) user has not been found
+            // 1) no filter on user was requested (ANY or DEFAULT)
+            // 2) user has not been found
             if (rolename != null) {
                 finalRoleFilter.add(rolename);
             } else if (filter.getUser().getType() != FilterType.ANY) {
@@ -594,68 +607,14 @@ public class RuleReaderServiceImpl implements RuleReaderService {
     }
 
     protected List<Rule> getRuleAux(RuleFilter filter, TextFilter roleFilter) {
-        Search searchCriteria = new Search(Rule.class);
-        searchCriteria.addSortAsc("priority");
-        addStringCriteria(searchCriteria, "username", filter.getUser());
-        addStringCriteria(searchCriteria, "rolename", roleFilter);
-        addCriteria(searchCriteria, "instance", filter.getInstance());
-        addStringCriteria(searchCriteria, "service", filter.getService()); // see class' javadoc
-        addStringCriteria(searchCriteria, "request", filter.getRequest()); // see class' javadoc
-        addStringCriteria(searchCriteria, "workspace", filter.getWorkspace());
-        addStringCriteria(searchCriteria, "layer", filter.getLayer());
+        filter = new RuleFilter(filter);
+        filter.getRole().set(roleFilter);
 
-        List<Rule> found = ruleDAO.search(searchCriteria);
+        List<Rule> found = ruleDAO.search(filter);
         found = filterByAddress(filter, found);
 
         return found;
     }
-
-    private void addCriteria(Search searchCriteria, String fieldName, IdNameFilter filter) {
-        switch (filter.getType()) {
-            case ANY:
-                break; // no filtering
-
-            case DEFAULT:
-                searchCriteria.addFilterNull(fieldName);
-                break;
-
-            case IDVALUE:
-                searchCriteria.addFilterOr(
-                        Filter.isNull(fieldName), Filter.equal(fieldName + ".id", filter.getId()));
-                break;
-
-            case NAMEVALUE:
-                searchCriteria.addFilterOr(
-                        Filter.isNull(fieldName),
-                        Filter.equal(fieldName + ".name", filter.getName()));
-                break;
-
-            default:
-                throw new AssertionError();
-        }
-    }
-
-    private void addStringCriteria(Search searchCriteria, String fieldName, TextFilter filter) {
-        switch (filter.getType()) {
-            case ANY:
-                break; // no filtering
-
-            case DEFAULT:
-                searchCriteria.addFilterNull(fieldName);
-                break;
-
-            case NAMEVALUE:
-                searchCriteria.addFilterOr(
-                        Filter.isNull(fieldName), Filter.equal(fieldName, filter.getText()));
-                break;
-
-            case IDVALUE:
-            default:
-                throw new AssertionError();
-        }
-    }
-
-    // ==========================================================================
 
     /**
      * @deprecated Please use the method in {@link AuthorizationService#authorize(String, String)}.
@@ -727,17 +686,12 @@ public class RuleReaderServiceImpl implements RuleReaderService {
     }
 
     protected AdminRule getAdminAuthAux(RuleFilter filter, TextFilter roleFilter) {
-        Search searchCriteria = new Search(AdminRule.class);
-        searchCriteria.addSortAsc("priority");
-        addStringCriteria(searchCriteria, "username", filter.getUser());
-        addStringCriteria(searchCriteria, "rolename", roleFilter);
-        addCriteria(searchCriteria, "instance", filter.getInstance());
-        addStringCriteria(searchCriteria, "workspace", filter.getWorkspace());
-
+        filter = new RuleFilter(filter);
+        filter.getRole().set(roleFilter);
         // we only need the first match, no need to aggregate (no LIMIT rules here)
-        searchCriteria.setMaxResults(1);
+        filter.setLimit(1);
 
-        List<AdminRule> found = adminRuleDAO.search(searchCriteria);
+        List<AdminRule> found = adminRuleDAO.search(filter);
         found = filterByAddress(filter, found);
 
         switch (found.size()) {
@@ -749,5 +703,70 @@ public class RuleReaderServiceImpl implements RuleReaderService {
                 // should not happen
                 throw new IllegalStateException("Too many admin auth rules");
         }
+    }
+
+    /**
+     * Filters out rules not matching with ip address filter.
+     *
+     * <p>IP address filtering is not performed by DAO at the moment, so we'll have to filter out
+     * such results by hand.
+     */
+    public static <T extends IPRangeProvider> List<T> filterByAddress(
+            RuleFilter filter, List<T> rules) {
+        RuleFilter.FilterType type = filter.getSourceAddress().getType();
+
+        if (type == RuleFilter.FilterType.ANY) return rules;
+
+        String ipvalue = null;
+        if (type == RuleFilter.FilterType.NAMEVALUE) {
+            ipvalue = filter.getSourceAddress().getText();
+            if (!IPUtils.isAddressValid(ipvalue)) {
+                LOGGER.error("Bad address filter " + ipvalue);
+                return Collections.EMPTY_LIST;
+            }
+        }
+
+        List<T> ret = new ArrayList(rules.size());
+
+        for (T rule : rules) {
+            boolean added = false;
+
+            switch (type) {
+                case DEFAULT:
+                    if (rule.getAddressRange() == null) {
+                        ret.add(rule);
+                        added = true;
+                    }
+                    break;
+
+                case NAMEVALUE:
+                    if (filter.getSourceAddress().isIncludeDefault()) {
+                        if (rule.getAddressRange() == null
+                                || rule.getAddressRange().match(ipvalue)) {
+                            ret.add(rule);
+                            added = true;
+                        }
+                    } else {
+                        if (rule.getAddressRange() != null
+                                && rule.getAddressRange().match(ipvalue)) {
+                            ret.add(rule);
+                            added = true;
+                        }
+                    }
+                    break;
+
+                case IDVALUE:
+                default:
+                    LOGGER.error("Bad address filter type" + type);
+                    return Collections.EMPTY_LIST;
+            }
+
+            if (LOGGER.isDebugEnabled()) {
+                if (added) LOGGER.debug("ADDED " + rule);
+                else LOGGER.debug("NOT ADDED " + rule);
+            }
+        }
+
+        return ret;
     }
 }

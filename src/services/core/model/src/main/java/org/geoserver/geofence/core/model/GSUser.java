@@ -51,5 +51,5 @@ public class GSUser implements Identifiable {
     private boolean admin = false;
 
     /** Groups to which the user is associated */
-    private Set<UserGroup> userGroups = new HashSet<UserGroup>();
+    private Set<UserGroup> groups = new HashSet<UserGroup>();
 }

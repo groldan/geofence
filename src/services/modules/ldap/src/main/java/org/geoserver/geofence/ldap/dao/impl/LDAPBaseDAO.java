@@ -21,8 +21,8 @@ import javax.naming.NamingException;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.geoserver.geofence.core.dao.RestrictedGenericDAO;
-import org.geoserver.geofence.core.model.GSUser;
-import org.geoserver.geofence.core.model.UserGroup;
+import org.geoserver.geofence.jpa.model.JPAGSUser;
+import org.geoserver.geofence.jpa.model.JPAUserGroup;
 import org.geoserver.geofence.ldap.utils.LdapUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.ldap.core.AttributesMapper;
@@ -57,11 +57,11 @@ public abstract class LDAPBaseDAO<T extends RestrictedGenericDAO<R>, R>
         protected Object doMapFromContext(DirContextOperations ctx) {
             try {
                 Object result = mapper.mapFromAttributes(ctx.getAttributes());
-                if (result instanceof GSUser) {
-                    ((GSUser) result).setExtId(ctx.getNameInNamespace());
+                if (result instanceof JPAGSUser) {
+                    ((JPAGSUser) result).setExtId(ctx.getNameInNamespace());
                 }
-                if (result instanceof UserGroup) {
-                    ((UserGroup) result).setExtId(ctx.getNameInNamespace());
+                if (result instanceof JPAUserGroup) {
+                    ((JPAUserGroup) result).setExtId(ctx.getNameInNamespace());
                 }
                 return result;
             } catch (NamingException e) {
@@ -122,7 +122,6 @@ public abstract class LDAPBaseDAO<T extends RestrictedGenericDAO<R>, R>
         return null;
     }
 
-    @Override
     public List<R> search(ISearch search) {
         List<R> objects = new ArrayList<>();
         if (search.getFilters().isEmpty()) {
@@ -152,9 +151,13 @@ public abstract class LDAPBaseDAO<T extends RestrictedGenericDAO<R>, R>
         return list;
     }
 
-    @Override
     public int count(ISearch search) {
         return search(search).size();
+    }
+
+    @Override
+    public int countAll() {
+        return count(null);
     }
 
     @Override

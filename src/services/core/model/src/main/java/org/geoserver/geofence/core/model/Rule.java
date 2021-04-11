@@ -7,7 +7,6 @@ package org.geoserver.geofence.core.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.geoserver.geofence.core.model.enums.GrantType;
 
 /**
  * A Rule expresses if a given combination of request access is allowed or not.
@@ -70,7 +69,7 @@ public class Rule implements Identifiable, Prioritizable, IPRangeProvider {
 
     private LayerDetails layerDetails;
 
-    // private RuleLimits ruleLimits;
+    private RuleLimits ruleLimits;
 
     public Rule(
             long priority,

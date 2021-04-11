@@ -5,15 +5,15 @@
 
 package org.geoserver.geofence.services;
 
+import org.geoserver.geofence.core.dao.RuleFilter;
+import org.geoserver.geofence.core.model.CatalogMode;
 import org.geoserver.geofence.core.model.GSUser;
+import org.geoserver.geofence.core.model.GrantType;
 import org.geoserver.geofence.core.model.LayerDetails;
 import org.geoserver.geofence.core.model.Rule;
 import org.geoserver.geofence.core.model.RuleLimits;
 import org.geoserver.geofence.core.model.UserGroup;
-import org.geoserver.geofence.core.model.enums.CatalogMode;
-import org.geoserver.geofence.core.model.enums.GrantType;
 import org.geoserver.geofence.services.dto.CatalogModeDTO;
-import org.geoserver.geofence.services.dto.RuleFilter;
 import org.geoserver.geofence.services.exception.NotFoundServiceEx;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

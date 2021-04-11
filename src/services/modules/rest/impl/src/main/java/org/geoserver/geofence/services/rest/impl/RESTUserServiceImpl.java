@@ -13,10 +13,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.geoserver.geofence.core.dao.RuleFilter;
+import org.geoserver.geofence.core.dao.RuleFilter.SpecialFilterType;
 import org.geoserver.geofence.core.model.GSUser;
 import org.geoserver.geofence.core.model.UserGroup;
-import org.geoserver.geofence.services.dto.RuleFilter;
-import org.geoserver.geofence.services.dto.RuleFilter.SpecialFilterType;
 import org.geoserver.geofence.services.exception.BadRequestServiceEx;
 import org.geoserver.geofence.services.exception.NotFoundServiceEx;
 import org.geoserver.geofence.services.rest.RESTUserService;
@@ -257,7 +257,7 @@ public class RESTUserServiceImpl extends BaseRESTServiceImpl implements RESTUser
         shu.setId(user.getId());
         shu.setExtId(user.getExtId());
         shu.setUserName(user.getName());
-        shu.setEnabled(user.getEnabled());
+        shu.setEnabled(user.isEnabled());
 
         return shu;
     }
@@ -267,7 +267,7 @@ public class RESTUserServiceImpl extends BaseRESTServiceImpl implements RESTUser
         ret.setId(user.getId());
         ret.setExtId(user.getExtId());
         ret.setName(user.getName());
-        ret.setEnabled(user.getEnabled());
+        ret.setEnabled(user.isEnabled());
         ret.setAdmin(user.isAdmin());
         ret.setFullName(user.getFullName());
         ret.setEmailAddress(user.getEmailAddress());

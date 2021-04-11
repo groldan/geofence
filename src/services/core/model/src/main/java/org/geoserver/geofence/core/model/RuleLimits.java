@@ -6,8 +6,6 @@
 package org.geoserver.geofence.core.model;
 
 import lombok.Data;
-import org.geoserver.geofence.core.model.enums.CatalogMode;
-import org.geoserver.geofence.core.model.enums.GrantType;
 import org.locationtech.jts.geom.MultiPolygon;
 
 /**
@@ -19,10 +17,11 @@ import org.locationtech.jts.geom.MultiPolygon;
 @Data
 public class RuleLimits {
 
-    /** The id. */
-    private Long id;
+    // removed, only concerns the persistence model
+    // private Long id;
 
-    private Rule rule;
+    // removed, only concerns the persistence model
+    // private Rule rule;
 
     private MultiPolygon allowedArea;
 

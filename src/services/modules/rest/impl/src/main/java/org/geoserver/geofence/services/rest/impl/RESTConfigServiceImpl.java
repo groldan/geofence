@@ -82,7 +82,7 @@ public class RESTConfigServiceImpl implements RESTConfigService {
 
             input.setAdmin(user.isAdmin());
             input.setEmailAddress(user.getEmailAddress());
-            input.setEnabled(user.getEnabled());
+            input.setEnabled(user.isEnabled());
             input.setExtId(user.getExtId());
             input.setFullName(user.getFullName());
             input.setName(user.getName());

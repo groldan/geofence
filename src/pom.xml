@@ -93,6 +93,7 @@
 
     <openapi-generator-maven-plugin.version>5.1.0</openapi-generator-maven-plugin.version>
     <mapstruct.version>1.4.2.Final</mapstruct.version>
+    <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 
     <hibernate-version>3.6.9.Final</hibernate-version>
     <hibernate-generic-dao-version>1.1.0</hibernate-generic-dao-version>
@@ -138,12 +139,12 @@
       </dependency>
       <dependency>
         <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-persistence-model</artifactId>
+        <artifactId>geofence-persistence-api</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.geoserver.geofence</groupId>
-        <artifactId>geofence-persistence</artifactId>
+        <artifactId>geofence-persistence-impl</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

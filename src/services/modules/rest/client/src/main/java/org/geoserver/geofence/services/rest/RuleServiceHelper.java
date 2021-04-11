@@ -5,7 +5,7 @@
 
 package org.geoserver.geofence.services.rest;
 
-import org.geoserver.geofence.services.dto.RuleFilter;
+import org.geoserver.geofence.core.dao.RuleFilter;
 import org.geoserver.geofence.services.rest.model.RESTOutputRuleList;
 
 /** @author ETj (etj at geo-solutions.it) */

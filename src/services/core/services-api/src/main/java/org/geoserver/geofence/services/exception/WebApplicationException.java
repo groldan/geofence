@@ -5,6 +5,8 @@
 
 package org.geoserver.geofence.services.exception;
 
+import org.geoserver.geofence.services.exception.WebApplicationException.Response.Status;
+
 /**
  * Replaces javax.ws.rs.WebApplicationException for service-api exception inheritance.
  *
@@ -19,6 +21,11 @@ public abstract class WebApplicationException extends RuntimeException {
     private final Response.Status status;
 
     protected WebApplicationException(Response.Status status) {
+        this.status = status;
+    }
+
+    public WebApplicationException(Status status, Throwable cause) {
+        super(cause);
         this.status = status;
     }
 

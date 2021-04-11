@@ -9,15 +9,15 @@ import java.util.HashSet;
 import java.util.Set;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.geoserver.geofence.core.model.GFUser;
-import org.geoserver.geofence.core.model.GSInstance;
-import org.geoserver.geofence.core.model.GSUser;
-import org.geoserver.geofence.core.model.LayerAttribute;
-import org.geoserver.geofence.core.model.LayerDetails;
-import org.geoserver.geofence.core.model.Rule;
-import org.geoserver.geofence.core.model.UserGroup;
-import org.geoserver.geofence.core.model.enums.AccessType;
-import org.geoserver.geofence.core.model.enums.GrantType;
+import org.geoserver.geofence.jpa.model.JPAAccessType;
+import org.geoserver.geofence.jpa.model.JPAGFUser;
+import org.geoserver.geofence.jpa.model.JPAGSInstance;
+import org.geoserver.geofence.jpa.model.JPAGSUser;
+import org.geoserver.geofence.jpa.model.JPAGrantType;
+import org.geoserver.geofence.jpa.model.JPALayerAttribute;
+import org.geoserver.geofence.jpa.model.JPALayerDetails;
+import org.geoserver.geofence.jpa.model.JPARule;
+import org.geoserver.geofence.jpa.model.JPAUserGroup;
 import org.geoserver.geofence.services.GFUserAdminService;
 import org.geoserver.geofence.services.InstanceAdminService;
 import org.geoserver.geofence.services.RuleAdminService;
@@ -58,9 +58,9 @@ public class MainTest implements InitializingBean {
         sp2.setName("test_profile2");
 
         long p2id = userGroupAdminService.insert(sp2);
-        UserGroup p2 = userGroupAdminService.get(p2id);
+        JPAUserGroup p2 = userGroupAdminService.get(p2id);
 
-        GFUser u0 = new GFUser();
+        JPAGFUser u0 = new JPAGFUser();
         u0.setName("admin");
         u0.setPassword("password");
         u0.setEnabled(true);
@@ -69,7 +69,7 @@ public class MainTest implements InitializingBean {
         u0.setExtId("sample_geoserver_user");
         gfUserAdminService.insert(u0);
 
-        GSUser u1 = new GSUser();
+        JPAGSUser u1 = new JPAGSUser();
         u1.setAdmin(true);
         u1.setName("admin");
         u1.setPassword("password");
@@ -80,7 +80,7 @@ public class MainTest implements InitializingBean {
         u1.setExtId("sample_geoserver_user");
         userAdminService.insert(u1);
 
-        GSInstance gs1 = new GSInstance();
+        JPAGSInstance gs1 = new JPAGSInstance();
         gs1.setName("geoserver01");
         gs1.setUsername("admin");
         gs1.setPassword("geoserver");
@@ -88,8 +88,8 @@ public class MainTest implements InitializingBean {
         gs1.setDescription("A sample instance");
         instanceAdminService.insert(gs1);
 
-        Rule r0 =
-                new Rule(
+        JPARule r0 =
+                new JPARule(
                         5,
                         u1.getName(),
                         p2.getName(),
@@ -99,13 +99,15 @@ public class MainTest implements InitializingBean {
                         "r0",
                         null,
                         null,
-                        GrantType.ALLOW);
+                        JPAGrantType.ALLOW);
         ruleAdminService.insert(r0);
 
         final Long r1id;
 
         {
-            Rule r1 = new Rule(10, null, null, null, null, "s1", "r1", "w1", "l1", GrantType.ALLOW);
+            JPARule r1 =
+                    new JPARule(
+                            10, null, null, null, null, "s1", "r1", "w1", "l1", JPAGrantType.ALLOW);
             ruleAdminService.insert(r1);
             r1id = r1.getId();
         }
@@ -113,9 +115,9 @@ public class MainTest implements InitializingBean {
         // save details and check it has been saved
         final Long lid1;
         {
-            LayerDetails details = new LayerDetails();
+            JPALayerDetails details = new JPALayerDetails();
             details.getAllowedStyles().add("FIRST_style1");
-            details.getAttributes().add(new LayerAttribute("FIRST_attr1", AccessType.NONE));
+            details.getAttributes().add(new JPALayerAttribute("FIRST_attr1", JPAAccessType.NONE));
             ruleAdminService.setDetails(r1id, details);
             lid1 = details.getId();
             assert lid1 != null;
@@ -123,8 +125,8 @@ public class MainTest implements InitializingBean {
 
         // check details have been set in Rule
         {
-            Rule loaded = ruleAdminService.get(r1id);
-            LayerDetails details = loaded.getLayerDetails();
+            JPARule loaded = ruleAdminService.get(r1id);
+            JPALayerDetails details = loaded.getLayerDetails();
             assert details != null;
             assert lid1.equals(details.getId());
             assert 1 == details.getAttributes().size();
@@ -135,10 +137,10 @@ public class MainTest implements InitializingBean {
         // set new details
         final Long lid2;
         {
-            LayerDetails details = new LayerDetails();
-            details.getAttributes().add(new LayerAttribute("attr1", AccessType.NONE));
-            details.getAttributes().add(new LayerAttribute("attr2", AccessType.READONLY));
-            details.getAttributes().add(new LayerAttribute("attr3", AccessType.READWRITE));
+            JPALayerDetails details = new JPALayerDetails();
+            details.getAttributes().add(new JPALayerAttribute("attr1", JPAAccessType.NONE));
+            details.getAttributes().add(new JPALayerAttribute("attr2", JPAAccessType.READONLY));
+            details.getAttributes().add(new JPALayerAttribute("attr3", JPAAccessType.READWRITE));
 
             assert 3 == details.getAttributes().size();
 
@@ -154,10 +156,10 @@ public class MainTest implements InitializingBean {
 
         // check details
         {
-            Rule loaded = ruleAdminService.get(r1id);
-            LayerDetails details = loaded.getLayerDetails();
+            JPARule loaded = ruleAdminService.get(r1id);
+            JPALayerDetails details = loaded.getLayerDetails();
             assert details != null;
-            for (LayerAttribute layerAttribute : details.getAttributes()) {
+            for (JPALayerAttribute layerAttribute : details.getAttributes()) {
                 LOGGER.error(layerAttribute);
             }
 

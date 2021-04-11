@@ -6,8 +6,8 @@
 package org.geoserver.geofence.services.dto;
 
 import java.io.Serializable;
+import org.geoserver.geofence.core.model.GrantType;
 import org.geoserver.geofence.core.model.Rule;
-import org.geoserver.geofence.core.model.enums.GrantType;
 
 /** @author ETj (etj at geo-solutions.it) */
 public class ShortRule implements Serializable {

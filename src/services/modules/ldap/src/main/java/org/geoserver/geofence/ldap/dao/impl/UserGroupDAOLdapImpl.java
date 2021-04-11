@@ -5,7 +5,7 @@
 package org.geoserver.geofence.ldap.dao.impl;
 
 import org.geoserver.geofence.core.dao.UserGroupDAO;
-import org.geoserver.geofence.core.model.UserGroup;
+import org.geoserver.geofence.jpa.model.JPAUserGroup;
 
 /**
  * UserGroupDAO implementation, using an LDAP server as a primary source.
@@ -13,7 +13,7 @@ import org.geoserver.geofence.core.model.UserGroup;
  * @author "Mauro Bartolomeoli - mauro.bartolomeoli@geo-solutions.it"
  * @author Emanuele Tajariol (etj at geo-solutions.it)
  */
-public class UserGroupDAOLdapImpl extends LDAPBaseDAO<UserGroupDAO, UserGroup>
+public class UserGroupDAOLdapImpl extends LDAPBaseDAO<UserGroupDAO, JPAUserGroup>
         implements UserGroupDAO {
 
     public UserGroupDAOLdapImpl() {

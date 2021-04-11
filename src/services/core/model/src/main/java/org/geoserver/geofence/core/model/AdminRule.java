@@ -7,7 +7,6 @@ package org.geoserver.geofence.core.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.geoserver.geofence.core.model.enums.AdminGrantType;
 
 /**
  * An AdminRule expresses if a given combination of request access is allowed or not.

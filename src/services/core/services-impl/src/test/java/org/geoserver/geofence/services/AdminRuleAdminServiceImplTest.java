@@ -6,11 +6,11 @@
 package org.geoserver.geofence.services;
 
 import java.util.List;
+import org.geoserver.geofence.core.dao.RuleFilter;
+import org.geoserver.geofence.core.dao.RuleFilter.SpecialFilterType;
+import org.geoserver.geofence.core.model.AdminGrantType;
 import org.geoserver.geofence.core.model.AdminRule;
 import org.geoserver.geofence.core.model.UserGroup;
-import org.geoserver.geofence.core.model.enums.AdminGrantType;
-import org.geoserver.geofence.services.dto.RuleFilter;
-import org.geoserver.geofence.services.dto.RuleFilter.SpecialFilterType;
 import org.geoserver.geofence.services.dto.ShortAdminRule;
 import org.geoserver.geofence.services.exception.NotFoundServiceEx;
 import org.junit.Test;

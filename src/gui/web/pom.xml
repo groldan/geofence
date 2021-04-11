@@ -55,7 +55,7 @@
         <!-- =============================================================== -->
         <dependency>
             <groupId>org.geoserver.geofence</groupId>
-            <artifactId>geofence-persistence-model</artifactId>
+            <artifactId>geofence-persistence-api</artifactId>
         </dependency>
 
         <dependency>

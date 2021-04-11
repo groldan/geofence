@@ -11,7 +11,7 @@ import javax.naming.directory.Attributes;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.geoserver.geofence.core.model.GSUser;
+import org.geoserver.geofence.jpa.model.JPAGSUser;
 
 /**
  * AttributeMapper for GSUser objects.
@@ -24,7 +24,7 @@ public class GSUserAttributesMapper extends BaseAttributesMapper {
 
     @Override
     public Object mapFromAttributes(Attributes attrs) throws NamingException {
-        GSUser user = new GSUser();
+        JPAGSUser user = new JPAGSUser();
         String id = getAttribute(attrs, "id");
         if (StringUtils.isBlank(id)) {
             LOGGER.warn("Empty id for GSUser");

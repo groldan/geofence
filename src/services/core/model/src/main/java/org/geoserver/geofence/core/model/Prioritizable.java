@@ -6,7 +6,7 @@
 package org.geoserver.geofence.core.model;
 
 /** @author ETj (etj at geo-solutions.it) */
-public interface Prioritizable {
+public interface Prioritizable extends Identifiable {
 
     long getPriority();
 

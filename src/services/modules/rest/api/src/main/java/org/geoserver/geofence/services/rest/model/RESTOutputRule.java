@@ -9,7 +9,7 @@ import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import org.geoserver.geofence.core.model.enums.GrantType;
+import org.geoserver.geofence.core.model.GrantType;
 import org.geoserver.geofence.services.rest.model.util.IdName;
 
 /**

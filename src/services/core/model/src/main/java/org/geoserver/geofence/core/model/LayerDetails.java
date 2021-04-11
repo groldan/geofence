@@ -8,8 +8,6 @@ package org.geoserver.geofence.core.model;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.Data;
-import org.geoserver.geofence.core.model.enums.CatalogMode;
-import org.geoserver.geofence.core.model.enums.LayerType;
 import org.locationtech.jts.geom.MultiPolygon;
 
 /**
@@ -26,8 +24,8 @@ import org.locationtech.jts.geom.MultiPolygon;
 @Data
 public class LayerDetails {
 
-    /** The id. */
-    private Long id;
+    // removed, only concerns the persistence model
+    // private Long id;
 
     private LayerType type;
 
@@ -41,7 +39,8 @@ public class LayerDetails {
 
     private CatalogMode catalogMode;
 
-    private Rule rule;
+    // removed, only concerns the persistence model
+    // private Rule rule;
 
     private Set<String> allowedStyles = new HashSet<String>();
 
