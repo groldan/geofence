@@ -10,13 +10,13 @@
   <parent>
     <groupId>org.geoserver.geofence</groupId>
     <artifactId>geofence-bom</artifactId>
-    <version>4.0-SNAPSHOT</version>
+    <version>${revision}</version>
   </parent>
 
-  <artifactId>geofence-legacy</artifactId>
+  <artifactId>geofence</artifactId>
   <packaging>pom</packaging>
 
-  <name>Master GeoFence POM</name>
+  <name>GeoFence</name>
   <description>GeoFence is a java web application that handles authorization rules, integrating with GeoServer using the interface described in GSIP 57.</description>
 
   <modules></modules>
@@ -26,8 +26,22 @@
     <fmt.skip>false</fmt.skip>
     <pom.fmt.action>sort</pom.fmt.action>
     <pom.fmt.skip>${fmt.skip}</pom.fmt.skip>
+    <spring-boot.version>2.7.8</spring-boot.version>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+    </dependencies>
+
+  </dependencyManagement>
   <build>
     <pluginManagement>
       <plugins>
