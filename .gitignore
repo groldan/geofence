@@ -18,3 +18,4 @@ legacy/gui/web/war/geofence/
 **/nbproject/
 **/nb-configuration.xml
 .dbeaver
+.flattened-pom.xml

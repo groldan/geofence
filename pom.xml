@@ -10,12 +10,16 @@
 
    <groupId>org.geoserver.geofence</groupId>
    <artifactId>geofence-bom</artifactId>
-   <version>4.0-SNAPSHOT</version>
+   <version>${revision}</version>
    <packaging>pom</packaging>
 
    <name>GeoFence BOM</name>
    <description>GeoFence is a java web application that handles authorization rules, integrating with GeoServer using the interface described in GSIP 57.</description>
-   
+
+   <properties>
+     <revision>4.0-SNAPSHOT</revision>
+   </properties>
+      
    <url>https://github.com/geoserver/geofence</url>
    <inceptionYear>2011</inceptionYear>
    
@@ -117,6 +121,7 @@
 
    <modules>
       <module>legacy</module>
+      <module>src</module>
    </modules>
    
    <build>

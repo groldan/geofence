@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/* (c) 2014-2020 Open Source Geospatial Foundation - all rights reserved
+ * This code is licensed under the GPL 2.0 license, available at the root
+ * application directory.
+ */
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.geoserver.geofence</groupId>
+    <artifactId>geofence-bom</artifactId>
+    <version>4.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>geofence-legacy</artifactId>
+  <packaging>pom</packaging>
+
+  <name>Master GeoFence POM</name>
+  <description>GeoFence is a java web application that handles authorization rules, integrating with GeoServer using the interface described in GSIP 57.</description>
+
+  <modules></modules>
+
+  <properties>
+    <fmt.action>format</fmt.action>
+    <fmt.skip>false</fmt.skip>
+    <pom.fmt.action>sort</pom.fmt.action>
+    <pom.fmt.skip>${fmt.skip}</pom.fmt.skip>
+  </properties>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>flatten-maven-plugin</artifactId>
+          <version>1.2.7</version>
+        </plugin>
+        <plugin>
+          <groupId>com.coveo</groupId>
+          <artifactId>fmt-maven-plugin</artifactId>
+          <version>2.13</version>
+        </plugin>
+        <plugin>
+          <groupId>com.github.ekryd.sortpom</groupId>
+          <artifactId>sortpom-maven-plugin</artifactId>
+          <version>3.2.1</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <configuration>
+          <updatePomFile>true</updatePomFile>
+          <!--flattenMode>resolveCiFriendliesOnly</flattenMode -->
+          <flattenMode>oss</flattenMode>
+        </configuration>
+        <executions>
+          <execution>
+            <id>flatten</id>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+            <phase>process-resources</phase>
+          </execution>
+          <execution>
+            <id>flatten.clean</id>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+            <phase>clean</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.coveo</groupId>
+        <artifactId>fmt-maven-plugin</artifactId>
+        <configuration>
+          <verbose>false</verbose>
+          <filesNamePattern>.*\.java</filesNamePattern>
+          <skip>${fmt.skip}</skip>
+          <style>aosp</style>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>${fmt.action}</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.github.ekryd.sortpom</groupId>
+        <artifactId>sortpom-maven-plugin</artifactId>
+        <configuration>
+          <skip>${pom.fmt.skip}</skip>
+          <keepBlankLines>true</keepBlankLines>
+          <spaceBeforeCloseEmptyElement>false</spaceBeforeCloseEmptyElement>
+          <createBackupFile>false</createBackupFile>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>${pom.fmt.action}</goal>
+            </goals>
+            <phase>verify</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
