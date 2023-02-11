@@ -17,3 +17,4 @@ legacy/gui/web/war/geofence/
 **/geofence_db/
 **/nbproject/
 **/nb-configuration.xml
+.dbeaver
