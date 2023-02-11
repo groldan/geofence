@@ -124,7 +124,7 @@
        <url>https://repo.osgeo.org/repository/geoserver-snapshots/</url>
      </snapshotRepository>
    </distributionManagement>
-      
+
    <modules>
       <module>services</module>
       <module>gui</module>

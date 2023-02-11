@@ -24,7 +24,11 @@
     <description>Model with JPA annotation used internally</description>
   
     <dependencies>
-
+       <dependency>
+         <groupId>com.sun.xml.ws</groupId>
+         <artifactId>jaxws-ri</artifactId>
+         <type>pom</type>
+       </dependency>       
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>

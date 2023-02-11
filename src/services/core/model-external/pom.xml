@@ -24,6 +24,11 @@
     <description>Model used for external deps, cleaned from JPA annotations</description>
   
     <dependencies>
+       <dependency>
+         <groupId>com.sun.xml.ws</groupId>
+         <artifactId>jaxws-ri</artifactId>
+         <type>pom</type>
+       </dependency>       
   
         <dependency>
             <groupId>org.locationtech.jts</groupId>
