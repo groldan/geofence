@@ -12,16 +12,12 @@
     <artifactId>geofence-bom</artifactId>
     <version>${revision}</version>
   </parent>
-
   <artifactId>geofence</artifactId>
   <packaging>pom</packaging>
-
   <name>GeoFence</name>
   <description>GeoFence is a java web application that handles authorization rules, integrating with GeoServer using the interface described in GSIP 57.</description>
-
   <modules>
   </modules>
-
   <properties>
     <fmt.action>format</fmt.action>
     <fmt.skip>false</fmt.skip>
@@ -29,7 +25,6 @@
     <pom.fmt.skip>${fmt.skip}</pom.fmt.skip>
     <spring-boot.version>2.7.8</spring-boot.version>
   </properties>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -41,7 +36,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-  
   <build>
     <pluginManagement>
       <plugins>
@@ -113,6 +107,10 @@
           <keepBlankLines>true</keepBlankLines>
           <spaceBeforeCloseEmptyElement>false</spaceBeforeCloseEmptyElement>
           <createBackupFile>false</createBackupFile>
+          <!-- explicitly indicate to use the pom.xml file, or it'll resolve to .flattened-pom.xml -->
+          <pomFile>pom.xml</pomFile>
+          <verifyFail>Stop</verifyFail>
+          <verifyFailOn>Strict</verifyFailOn>
         </configuration>
         <executions>
           <execution>
@@ -125,5 +123,13 @@
       </plugin>
     </plugins>
   </build>
-
+  <profiles>
+    <profile>
+      <id>lint</id>
+      <properties>
+        <fmt.action>check</fmt.action>
+        <pom.fmt.action>verify</pom.fmt.action>
+      </properties>
+    </profile>
+  </profiles>
 </project>
