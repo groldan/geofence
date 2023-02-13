@@ -18,5 +18,9 @@
   <packaging>pom</packaging>
   <modules>
     <module>persistence-jpa</module>
+    <module>integration-jpa</module>
+    <module>integration-api-client</module>
+    <module>openapi</module>
+    <!--module>geoserver</module-->
   </modules>
 </project>

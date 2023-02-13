@@ -1,0 +1,28 @@
+/*
+ * (c) 2015 Open Source Geospatial Foundation - all rights reserved This code is licensed under the
+ * GPL 2.0 license, available at the root application directory.
+ */
+
+package org.geoserver.geofence.adminrules.model;
+
+import lombok.Builder;
+import lombok.Value;
+import lombok.With;
+
+import org.geoserver.geofence.rules.model.IPAddressRange;
+
+@Value
+@With
+@Builder(toBuilder = true)
+public class AdminRuleIdentifier {
+
+    private String instanceName;
+
+    private String username;
+
+    private String rolename;
+
+    private IPAddressRange addressRange;
+
+    private String workspace;
+}

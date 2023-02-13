@@ -19,3 +19,4 @@ legacy/gui/web/war/geofence/
 **/nb-configuration.xml
 .dbeaver
 .flattened-pom.xml
+.factorypath

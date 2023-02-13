@@ -17,23 +17,38 @@
   <name>GeoFence</name>
   <description>GeoFence is a java web application that handles authorization rules, integrating with GeoServer using the interface described in GSIP 57.</description>
   <modules>
-    <module>data-access-rules</module>
-    <module>admin-rules</module>
-    <module>user-management</module>
+    <module>domain</module>
+    <module>openapi</module>
     <module>integration</module>
     <module>app</module>
   </modules>
   <properties>
     <java.version>11</java.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <fmt.action>format</fmt.action>
     <fmt.skip>false</fmt.skip>
     <pom.fmt.action>sort</pom.fmt.action>
     <pom.fmt.skip>${fmt.skip}</pom.fmt.skip>
     <spring-boot.version>2.7.8</spring-boot.version>
     <lombok.version>1.18.26</lombok.version>
+    <gt.version>29-SNAPSHOT</gt.version>
+    <jts.version>1.19.0</jts.version>
+    <mapstruct.version>1.5.3.Final</mapstruct.version>
+    <querydsl.version>5.0.0</querydsl.version>
+    <testcontainers.version>1.17.4</testcontainers.version>
   </properties>
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.geotools</groupId>
+        <artifactId>gt-main</artifactId>
+        <version>${gt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.geotools</groupId>
+        <artifactId>gt-epsg-hsql</artifactId>
+        <version>${gt.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
@@ -42,10 +57,38 @@
         <scope>import</scope>
       </dependency>
       <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers-bom</artifactId>
+        <version>${testcontainers.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
         <version>${lombok.version}</version>
         <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.locationtech.jts</groupId>
+        <artifactId>jts-core</artifactId>
+        <version>${jts.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.mapstruct</groupId>
+        <artifactId>mapstruct</artifactId>
+        <version>${mapstruct.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.querydsl</groupId>
+        <artifactId>querydsl-jpa</artifactId>
+        <version>${querydsl.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -56,6 +99,16 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.8.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.22.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>2.22.2</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
@@ -104,6 +157,39 @@
         <configuration>
           <release>${java.version}</release>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <excludes>
+                <excludes>logback-test.xml</excludes>
+              </excludes>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

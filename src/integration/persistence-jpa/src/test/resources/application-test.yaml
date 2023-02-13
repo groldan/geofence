@@ -1,0 +1,13 @@
+spring:
+  main:
+    banner-mode: off
+    
+
+
+logging:
+  level:
+    root: warn
+    '[org.geoserver.geofence]': info
+    '[org.springframework.boot.autoconfigure]': info
+    '[org.springframework.boot.test.context]': info
+    '[org.testcontainers]': info

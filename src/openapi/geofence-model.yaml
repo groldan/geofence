@@ -1,0 +1,311 @@
+openapi: 3.0.0
+info:
+  title: GeoFence
+  description: GeoFence API Object Model
+  version: 1.0.0
+servers:
+- url: http://localhost:8080/geofence/rest/v2
+- url: http://localhost:8080/geoserver/rest/geofence/v2
+paths:
+  /fakeapi:
+    get:
+      operationId: fake
+      description: OAS 3.0 does not allow to define a document without at least one path. 3.1 does
+      responses:
+        '200':
+          description: OK
+components:
+  parameters:
+    pageable:
+      name: pageable
+      in: query 
+      description: 'In a paginated list, the page number, 0-based. If not null, entries must be defined as well.'
+      required: false
+      schema:
+        $ref: '#/components/schemas/Pageable'
+    insertPosition:
+      name: position
+      in: query 
+      description: "Displacement option related to how to interpret the Rule's priority"
+      required: false
+      schema:
+        $ref: '#/components/schemas/InsertPosition'
+    priorityOffset:
+      name: priorityOffset
+      in: query
+      required: false
+      description: Rule id offset
+      schema:
+        type: integer
+        format: int64
+  schemas:
+    Pageable: 
+      description: minimal Pageable query parameters
+      type: object
+      nullable: true
+      properties:
+        page:
+          type: integer
+          default: 0
+          minimum: 0
+        size:
+          type: integer
+          default: 100
+          minimum: 1
+          maximum: 1000
+    CatalogMode:
+      type: string
+      nullable: true
+      enum:
+        - HIDE
+        - CHALLENGE
+        - MIXED
+    SpatialFilterType:
+      type: string
+      nullable: true
+      enum:
+        - INTERSECT
+        - CLIP
+    Rule:
+      type: object
+      description: >-
+         A Rule expresses if a given combination of request access is allowed or not.
+      required:
+        - priority
+        - access
+      properties:
+        id:
+          type: integer
+          format: int64
+          nullable: true
+        priority:
+          type: integer
+          format: int64
+        instancename:
+          type: string
+          nullable: true
+        access:
+          $ref: '#/components/schemas/GrantType'
+        limits:
+          $ref: '#/components/schemas/RuleLimits'
+        roleName:
+          type: string
+          nullable: true
+        userName:
+          type: string
+          nullable: true
+        addressRange:
+          type: string
+          nullable: true
+          pattern: '^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$'
+          description: IPv4 address with optional /nn on the end with values from 0 - 32
+        service:
+          type: string
+          nullable: true
+        request:
+          type: string
+          nullable: true
+        subfield:
+          type: string
+          nullable: true
+        workspace:
+          type: string
+          nullable: true
+        layer:
+          type: string
+          nullable: true
+        layerDetails:
+          $ref: '#/components/schemas/LayerDetails'
+    RuleLimits:
+      type: object
+      description: Defines general limits (such as an Area ) for a Rule, when  access type is LIMIT
+      nullable: true
+      properties:
+        allowedArea:
+          type: string
+          example: 'SRID=4326;MULTIPOLYGON (((0 0, 1 1, 2 2, 3 3, 0 0)))'
+          nullable: true
+        spatialFilterType:
+          $ref: '#/components/schemas/SpatialFilterType'
+        catalogMode:
+          $ref: '#/components/schemas/CatalogMode'
+
+    LayerDetails:
+      type: object
+      description: Details may be set only for ules with non-wildcarded profile, instance, workspace, layer
+      nullable: true
+      properties:
+        type:
+          type: string
+          nullable: true
+          enum:
+            - VECTOR
+            - RASTER
+            - LAYERGROUP
+        defaultStyle:
+          type: string
+          nullable: true
+        cqlFilterRead:
+          type: string
+          nullable: true
+        cqlFilterWrite:
+          type: string
+          nullable: true
+        allowedArea:
+          type: string
+          nullable: true
+          example: "CRS=EPSG:4326;MULTIPOLYGON(....)"
+        spatialFilterType:
+          $ref: '#/components/schemas/SpatialFilterType'
+        catalogMode:
+          $ref: '#/components/schemas/CatalogMode'
+        allowedStyles:
+          type: array
+          nullable: true
+          uniqueItems: true
+          items:
+            type: string
+        layerAttributes:
+          type: array
+          nullable: true
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/LayerAttribute'
+    LayerAttribute:
+      type: object
+      description: Access restrictions to a FeatureType attribute
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        dataType:
+          type: string
+          nullable: true
+        access:
+          type: string
+          nullable: true
+          enum:
+            - NONE
+            - READONLY
+            - READWRITE
+    InsertPosition:
+      type: string
+      enum:
+        - FIXED
+        - FROM_START
+        - FROM_END
+
+    GrantType:
+      type: string
+      description: The type of access restriction this rule represents.
+      nullable: true
+      enum:
+        - ALLOW
+        - DENY
+        - LIMIT
+
+    AdminGrantType:
+      type: string
+      description: The type of access restriction to the workspace administration
+      nullable: true
+      enum:
+        - ADMIN
+        - USER
+
+    RuleFilter:
+      type: object
+      description: A filter definition to query Rules
+      nullable: true
+      properties:
+        role:
+          type: string
+          nullable: true
+        user:
+          type: string
+          nullable: true
+        service:
+          type: string
+          nullable: true
+        request:
+          type: string
+          nullable: true
+        subfield:
+          type: string
+          nullable: true
+        workspace:
+          type: string
+          nullable: true
+        layer:
+          type: string
+          nullable: true
+        sourceAddress:
+          type: string
+          nullable: true
+    AdminRule:
+      type: object
+      description: >-
+         An AdminRule expresses if a given combination of request access is allowed or not.
+         It's used for setting admin privileges on workspaces.
+      required:
+        - priority
+        - access
+      properties:
+        id:
+          type: integer
+          format: int64
+          nullable: true
+        priority:
+          type: integer
+          format: int64
+        access:
+          $ref: '#/components/schemas/AdminGrantType'
+        instancename:
+          type: string
+          nullable: true
+        roleName:
+          type: string
+          nullable: true
+        userName:
+          type: string
+          nullable: true
+        workspace:
+          type: string
+          nullable: true
+        addressRange:
+          type: string
+          nullable: true
+          pattern: '^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$'
+          description: IPv4 address with optional /nn on the end with values from 0 - 32
+    AdminRuleFilter:
+      type: object
+      description: A filter definition to query Rules
+      nullable: true
+      properties:
+        grantType:
+          $ref: '#/components/schemas/AdminGrantType'
+        role:
+          type: string
+          nullable: true
+        user:
+          type: string
+          nullable: true
+        service:
+          type: string
+          nullable: true
+        request:
+          type: string
+          nullable: true
+        subfield:
+          type: string
+          nullable: true
+        workspace:
+          type: string
+          nullable: true
+        layer:
+          type: string
+          nullable: true
+        sourceAddress:
+          type: string
+          nullable: true
+          

@@ -1,0 +1,44 @@
+server:
+  port: 8080
+  # one of never, always, on_trace_param (deprecated), on_param
+  error.include-stacktrace: on-param
+
+
+spring:
+  config:
+    name: geofence
+  main:
+    banner-mode: off
+    web-application-type: servlet
+  application:
+    name: geofence
+  jackson:
+    default-property-inclusion: non-empty
+    serialization:
+      indent-output: true
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
+
+  data:
+    web:
+      pageable:
+        default-page-size: 100
+  jpa:
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        '[format_sql]': true
+        '[dialect]': org.hibernate.spatial.dialect.h2geodb.GeoDBDialect
+        '[hbm2ddl.auto]': update
+
+geofence:
+  datasource:
+    url: jdbc:h2:mem:geofence
+    username: sa
+    password: sa
+
+
+
