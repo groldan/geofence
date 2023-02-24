@@ -2,8 +2,8 @@ server:
   port: 8080
   # one of never, always, on_trace_param (deprecated), on_param
   error.include-stacktrace: on-param
-
-
+  servlet:
+    context-path: /geofence
 spring:
   config:
     name: geofence
@@ -34,11 +34,18 @@ spring:
         '[dialect]': org.hibernate.spatial.dialect.h2geodb.GeoDBDialect
         '[hbm2ddl.auto]': update
 
+openapi.geoFence.base-path: /api/v2
+
 geofence:
   datasource:
     url: jdbc:h2:mem:geofence
     username: sa
     password: sa
 
-
-
+springdoc:
+  api-docs:
+    enabled: true
+    path: ${openapi.geoFence.base-path}/api-docs
+  swagger-ui:
+    enabled: true
+    path: ${openapi.geoFence.base-path}/swagger-ui.html
