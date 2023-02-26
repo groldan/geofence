@@ -9,6 +9,9 @@ import org.geoserver.geofence.jpa.model.GrantType;
 import org.geoserver.geofence.jpa.model.LayerDetails;
 import org.geoserver.geofence.jpa.model.RuleIdentifier;
 import org.geoserver.geofence.jpa.repository.JpaRuleRepository;
+import org.geoserver.geofence.jpa.repository.TransactionReadOnly;
+import org.geoserver.geofence.jpa.repository.TransactionRequired;
+import org.geoserver.geofence.jpa.repository.TransactionSupported;
 import org.geoserver.geofence.rules.model.InsertPosition;
 import org.geoserver.geofence.rules.model.Rule;
 import org.geoserver.geofence.rules.model.RuleFilter;
@@ -17,11 +20,8 @@ import org.geoserver.geofence.rules.model.RuleQuery;
 import org.geoserver.geofence.rules.presistence.RuleRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -29,9 +29,7 @@ import java.util.stream.Stream;
 
 import javax.persistence.EntityNotFoundException;
 
-@Transactional(
-        transactionManager = "geofenceTransactionManager",
-        propagation = Propagation.SUPPORTS)
+@TransactionSupported
 public class RuleRepositoryJPAAdaptor implements RuleRepository {
 
     private final JpaRuleRepository jparepo;
@@ -85,20 +83,17 @@ public class RuleRepositoryJPAAdaptor implements RuleRepository {
     }
 
     @Override
-    @Transactional(
-            transactionManager = "geofenceTransactionManager",
-            propagation = Propagation.REQUIRED)
+    @TransactionRequired
     public Rule save(Rule rule) {
         Objects.requireNonNull(rule.getId());
-        org.geoserver.geofence.jpa.model.Rule entity = modelMapper.toEntity(rule);
+        org.geoserver.geofence.jpa.model.Rule entity = getOrThrow(rule.getId());
+        modelMapper.updateEntity(entity, rule);
         org.geoserver.geofence.jpa.model.Rule saved = jparepo.save(entity);
         return modelMapper.toModel(saved);
     }
 
     @Override
-    @Transactional(
-            transactionManager = "geofenceTransactionManager",
-            propagation = Propagation.REQUIRED)
+    @TransactionRequired
     public Rule create(Rule rule, InsertPosition position) {
         if (null != rule.getId()) throw new IllegalArgumentException("Rule must have no id");
         if (null == position) position = InsertPosition.FIXED;
@@ -112,9 +107,7 @@ public class RuleRepositoryJPAAdaptor implements RuleRepository {
     }
 
     @Override
-    @Transactional(
-            transactionManager = "geofenceTransactionManager",
-            propagation = Propagation.REQUIRED)
+    @TransactionRequired
     public boolean delete(long id) {
         return jparepo.deleteById(id);
     }
@@ -125,17 +118,13 @@ public class RuleRepositoryJPAAdaptor implements RuleRepository {
     }
 
     @Override
-    @Transactional(
-            transactionManager = "geofenceTransactionManager",
-            propagation = Propagation.REQUIRED)
+    @TransactionRequired
     public int shift(long priorityStart, long offset) {
         return jparepo.shiftPriority(priorityStart, offset);
     }
 
     @Override
-    @Transactional(
-            transactionManager = "geofenceTransactionManager",
-            propagation = Propagation.REQUIRED)
+    @TransactionRequired
     public void swap(long id1, long id2) {
 
         org.geoserver.geofence.jpa.model.Rule rule1 = getOrThrow(id1);
@@ -151,9 +140,7 @@ public class RuleRepositoryJPAAdaptor implements RuleRepository {
     }
 
     @Override
-    @Transactional(
-            transactionManager = "geofenceTransactionManager",
-            propagation = Propagation.REQUIRED)
+    @TransactionRequired
     public void setAllowedStyles(@NonNull Long ruleId, Set<String> styles) {
 
         org.geoserver.geofence.jpa.model.Rule rule = getOrThrow(ruleId);
@@ -171,9 +158,7 @@ public class RuleRepositoryJPAAdaptor implements RuleRepository {
     }
 
     @Override
-    @Transactional(
-            transactionManager = "geofenceTransactionManager",
-            propagation = Propagation.REQUIRED)
+    @TransactionRequired
     public void setLimits(Long ruleId, RuleLimits limits) {
         org.geoserver.geofence.jpa.model.Rule rule = getOrThrow(ruleId);
         if (rule.getIdentifier().getAccess() != GrantType.LIMIT) {
@@ -186,10 +171,8 @@ public class RuleRepositoryJPAAdaptor implements RuleRepository {
     }
 
     @Override
-    @Transactional(
-            transactionManager = "geofenceTransactionManager",
-            propagation = Propagation.REQUIRED)
-    public void setDetails(
+    @TransactionRequired
+    public void setLayerDetails(
             Long ruleId, org.geoserver.geofence.rules.model.LayerDetails detailsNew) {
 
         org.geoserver.geofence.jpa.model.Rule rule = getOrThrow(ruleId);
@@ -205,12 +188,30 @@ public class RuleRepositoryJPAAdaptor implements RuleRepository {
         jparepo.save(rule);
     }
 
+    @Override
+    @TransactionReadOnly
+    public Optional<org.geoserver.geofence.rules.model.LayerDetails> findLayerDetailsByRuleId(
+            long ruleId) {
+
+        org.geoserver.geofence.jpa.model.Rule jparule = getOrThrow(ruleId);
+
+        if (RuleIdentifier.ANY.equals(jparule.getIdentifier().getLayer())) {
+            throw new IllegalArgumentException("Rule " + ruleId + " has not layer set");
+        }
+
+        LayerDetails jpadetails = jparule.getLayerDetails();
+        if (jpadetails.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(modelMapper.toModel(jpadetails));
+    }
+
     private org.geoserver.geofence.jpa.model.Rule getOrThrow(Long ruleId) {
         org.geoserver.geofence.jpa.model.Rule rule;
         try {
             rule = jparepo.getReferenceById(ruleId);
         } catch (EntityNotFoundException e) {
-            throw new NoSuchElementException("Rule " + ruleId + " does not exist");
+            throw new IllegalArgumentException("Rule " + ruleId + " does not exist");
         }
         return rule;
     }

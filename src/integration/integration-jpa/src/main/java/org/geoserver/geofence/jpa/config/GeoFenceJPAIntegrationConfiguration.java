@@ -11,11 +11,11 @@ import org.geoserver.geofence.rules.presistence.RuleRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.context.annotation.Import;
 
 @Configuration(proxyBeanMethods = false)
+@Import({GeoFenceDataSourceConfiguration.class, GeoFenceJPAConfiguration.class})
 @ComponentScan(basePackageClasses = {RuleMapper.class, AdminRuleMapper.class})
-@EnableTransactionManagement
 public class GeoFenceJPAIntegrationConfiguration {
 
     @Bean

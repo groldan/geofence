@@ -15,7 +15,7 @@ import org.mapstruct.ReportingPolicy;
         // mapper stays in sync
         unmappedTargetPolicy = ReportingPolicy.ERROR,
         uses = {GeoServerInstanceMapper.class, IPAddressRangeMapper.class})
-public abstract class RuleIdentifierMapper {
+abstract class RuleIdentifierMapper {
 
     static final String ANY = org.geoserver.geofence.jpa.model.RuleIdentifier.ANY;
 

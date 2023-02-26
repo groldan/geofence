@@ -16,10 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
-
-@Transactional(value = TxType.SUPPORTS)
+@TransactionSupported
 public interface JpaRuleRepository
         extends JpaRepository<Rule, Long>, QuerydslPredicateExecutor<Rule> {
 
@@ -59,6 +56,7 @@ public interface JpaRuleRepository
         return new PageImpl<>(contents);
     }
 
+    @TransactionRequired
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Rule SET priority = priority + :offset WHERE priority >= :priorityStart")
     int shiftPriority(@Param("priorityStart") long priorityStart, @Param("offset") long offset);

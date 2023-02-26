@@ -6,9 +6,8 @@
 package org.geoserver.geofence.jpa.model;
 
 import lombok.Data;
+import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
-
-import org.locationtech.jts.geom.MultiPolygon;
 
 import java.io.Serializable;
 
@@ -28,7 +27,7 @@ public class RuleLimits implements Serializable, Cloneable {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "limits_area")
-    private MultiPolygon allowedArea;
+    private org.geolatte.geom.MultiPolygon<?> allowedArea;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "limits_spatial_filter_type", nullable = true)
@@ -42,16 +41,8 @@ public class RuleLimits implements Serializable, Cloneable {
         return allowedArea == null && spatialFilterType == null && catalogMode == null;
     }
 
+    @SneakyThrows(CloneNotSupportedException.class)
     public @Override RuleLimits clone() {
-        RuleLimits clone;
-        try {
-            clone = (RuleLimits) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
-        if (null != allowedArea) {
-            clone.allowedArea = (MultiPolygon) allowedArea.copy();
-        }
-        return clone;
+        return (RuleLimits) super.clone();
     }
 }

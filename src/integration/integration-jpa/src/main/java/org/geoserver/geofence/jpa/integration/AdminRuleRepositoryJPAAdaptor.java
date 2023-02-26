@@ -10,14 +10,14 @@ import org.geoserver.geofence.adminrules.persistence.AdminRuleRepository;
 import org.geoserver.geofence.jpa.integration.mapper.AdminRuleMapper;
 import org.geoserver.geofence.jpa.model.QAdminRule;
 import org.geoserver.geofence.jpa.repository.JpaAdminRuleRepository;
+import org.geoserver.geofence.jpa.repository.TransactionRequired;
+import org.geoserver.geofence.jpa.repository.TransactionSupported;
 import org.geoserver.geofence.rules.model.InsertPosition;
 import org.geoserver.geofence.rules.model.RuleQuery;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -27,9 +27,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
 
-@Transactional(
-        transactionManager = "geofenceTransactionManager",
-        propagation = Propagation.SUPPORTS)
+@TransactionSupported
 public class AdminRuleRepositoryJPAAdaptor implements AdminRuleRepository {
 
     private final JpaAdminRuleRepository jparepo;
@@ -45,9 +43,7 @@ public class AdminRuleRepositoryJPAAdaptor implements AdminRuleRepository {
     }
 
     @Override
-    @Transactional(
-            transactionManager = "geofenceTransactionManager",
-            propagation = Propagation.REQUIRED)
+    @TransactionRequired
     public AdminRule create(AdminRule rule, InsertPosition position) {
         if (null != rule.getId()) throw new IllegalArgumentException("Rule must have no id");
         if (null == position) position = InsertPosition.FIXED;
@@ -134,9 +130,7 @@ public class AdminRuleRepositoryJPAAdaptor implements AdminRuleRepository {
     }
 
     @Override
-    @Transactional(
-            transactionManager = "geofenceTransactionManager",
-            propagation = Propagation.REQUIRED)
+    @TransactionRequired
     public AdminRule save(AdminRule rule) {
         Objects.requireNonNull(rule.getId());
         org.geoserver.geofence.jpa.model.AdminRule entity = modelMapper.toEntity(rule);
@@ -168,17 +162,13 @@ public class AdminRuleRepositoryJPAAdaptor implements AdminRuleRepository {
     }
 
     @Override
-    @Transactional(
-            transactionManager = "geofenceTransactionManager",
-            propagation = Propagation.REQUIRED)
+    @TransactionRequired
     public int shiftPriority(long priorityStart, long offset) {
         return jparepo.shiftPriority(priorityStart, offset);
     }
 
     @Override
-    @Transactional(
-            transactionManager = "geofenceTransactionManager",
-            propagation = Propagation.REQUIRED)
+    @TransactionRequired
     public void swap(long id1, long id2) {
         org.geoserver.geofence.jpa.model.AdminRule rule1 = getOrThrow(id1);
         org.geoserver.geofence.jpa.model.AdminRule rule2 = getOrThrow(id2);
@@ -193,17 +183,13 @@ public class AdminRuleRepositoryJPAAdaptor implements AdminRuleRepository {
     }
 
     @Override
-    @Transactional(
-            transactionManager = "geofenceTransactionManager",
-            propagation = Propagation.REQUIRED)
+    @TransactionRequired
     public boolean deleteById(long id) {
         return jparepo.deleteById(id);
     }
 
     @Override
-    @Transactional(
-            transactionManager = "geofenceTransactionManager",
-            propagation = Propagation.REQUIRED)
+    @TransactionRequired
     public int delete(AdminRuleFilter filter) {
         Optional<? extends Predicate> predicate = queryMapper.toPredicate(filter);
         if (predicate.isPresent()) {

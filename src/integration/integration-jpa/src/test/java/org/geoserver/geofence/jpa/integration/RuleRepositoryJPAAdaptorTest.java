@@ -3,8 +3,6 @@ package org.geoserver.geofence.jpa.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.geoserver.geofence.jpa.config.GeoFenceDataSourceConfiguration;
-import org.geoserver.geofence.jpa.config.GeoFenceJPAConfiguration;
 import org.geoserver.geofence.jpa.config.GeoFenceJPAIntegrationConfiguration;
 import org.geoserver.geofence.jpa.model.GeoServerInstance;
 import org.geoserver.geofence.jpa.repository.JpaGeoServerInstanceRepository;
@@ -15,28 +13,14 @@ import org.geoserver.geofence.rules.presistence.RuleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@SpringBootTest(
-        classes = {
-            GeoFenceDataSourceConfiguration.class,
-            GeoFenceJPAConfiguration.class,
-            GeoFenceJPAIntegrationConfiguration.class
-        },
-        properties = {
-            "spring.jpa.show-sql=true",
-            "spring.jpa.properties.hibernate.format_sql=true",
-            "spring.jpa.properties.hibernate.dialect=org.hibernate.spatial.dialect.h2geodb.GeoDBDialect",
-            "spring.jpa.properties.hibernate.hbm2ddl.auto=update",
-            "geofence.datasource.url=jdbc:h2:mem:geofence-test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE",
-            "geofence.datasource.username=sa",
-            "geofence.datasource.password=sa"
-        })
-@EnableAutoConfiguration
+@SpringBootTest(classes = {GeoFenceJPAIntegrationConfiguration.class})
+@ActiveProfiles("test") // see config props in src/test/resource/application-test.yaml
 class RuleRepositoryJPAAdaptorTest {
 
     private static final String WORLD =

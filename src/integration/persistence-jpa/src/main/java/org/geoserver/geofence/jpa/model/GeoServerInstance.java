@@ -6,36 +6,38 @@
 package org.geoserver.geofence.jpa.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
 import org.geoserver.geofence.jpa.repository.JpaGeoServerInstanceRepository;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
-import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 /**
  * A GeoServer instance.
  *
  * <p><B>TODO</B>: how does a GeoServer instance identify itself?
  */
-@Entity(name = "GSInstance")
-@Table(name = "gf_gsinstance")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "gsinstance")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @ToString(exclude = {"password"})
-public class GeoServerInstance implements Serializable, Cloneable {
+@Entity(name = "GSInstance")
+@EntityListeners(AuditingEntityListener.class)
+@Table(name = "gf_gsinstance")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "gsinstance")
+public class GeoServerInstance extends Auditable implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -2584592064221812813L;
 
@@ -58,11 +60,6 @@ public class GeoServerInstance implements Serializable, Cloneable {
     /** The description. */
     @Column(nullable = true, updatable = true)
     private String description;
-
-    /** The date creation. */
-    @Column(updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date dateCreation;
 
     /** The host. */
     @Column(nullable = false, updatable = true)

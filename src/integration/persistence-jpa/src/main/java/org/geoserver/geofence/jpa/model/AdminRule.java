@@ -6,15 +6,18 @@
 package org.geoserver.geofence.jpa.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
@@ -33,8 +36,10 @@ import javax.persistence.UniqueConstraint;
  * @author ETj (etj at geo-solutions.it)
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @Entity(name = "AdminRule")
+@EntityListeners(AuditingEntityListener.class)
 @Table(
         name = "gf_adminrule",
         uniqueConstraints = {
@@ -57,8 +62,8 @@ import javax.persistence.UniqueConstraint;
             @Index(name = "idx_adminrule_grant_type", columnList = "grant_type")
         })
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "Rule")
-public class AdminRule implements Cloneable {
-    public static final String ANY = "*";
+public class AdminRule extends Auditable implements Cloneable {
+    private static final long serialVersionUID = 422357467611162461L;
 
     @Id @GeneratedValue @Column private Long id;
 
@@ -71,6 +76,7 @@ public class AdminRule implements Cloneable {
     @Column(name = "grant_type", nullable = false)
     private AdminGrantType access = AdminGrantType.USER;
 
+    // visible for testing
     public @Override AdminRule clone() {
         AdminRule clone;
         try {

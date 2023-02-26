@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.querydsl.core.types.Predicate;
 
+import org.geoserver.geofence.jpa.config.GeoFenceDataSourceConfiguration;
+import org.geoserver.geofence.jpa.config.GeoFenceJPAConfiguration;
 import org.geoserver.geofence.jpa.model.AdminGrantType;
 import org.geoserver.geofence.jpa.model.AdminRule;
 import org.geoserver.geofence.jpa.model.AdminRuleIdentifier;
@@ -18,15 +20,13 @@ import org.hibernate.TransientObjectException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,20 +35,18 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@DataJpaTest(
-        showSql = false,
-        properties = {
-            "spring.jpa.properties.hibernate.format_sql=true",
-            "spring.jpa.properties.hibernate.dialect=org.hibernate.spatial.dialect.h2geodb.GeoDBDialect"
-        })
-@ContextConfiguration(classes = GeoFenceJPATestConfiguration.class)
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
+
+@Transactional
+@SpringBootTest(classes = {GeoFenceDataSourceConfiguration.class, GeoFenceJPAConfiguration.class})
 @ActiveProfiles("test")
-class JpaAdminRuleRepositoryTest {
+public class JpaAdminRuleRepositoryTest {
 
     private @Autowired JpaGeoServerInstanceRepository instanceRepo;
     private @Autowired JpaAdminRuleRepository repo;
 
-    private @Autowired TestEntityManager em;
+    private @Autowired EntityManager em;
 
     private GeoServerInstance anyInstance;
 
@@ -73,7 +71,7 @@ class JpaAdminRuleRepositoryTest {
         assertEquals(AdminGrantType.USER, rule.getAccess());
         assertEquals(IPAddressRange.noData(), identifier.getAddressRange());
 
-        em.persistAndFlush(rule);
+        rule = repo.saveAndFlush(rule);
         em.detach(rule);
 
         AdminRule saved = repo.getReferenceById(rule.getId());
@@ -132,12 +130,11 @@ class JpaAdminRuleRepositoryTest {
                 new GeoServerInstance()
                         .setName("secondInstance")
                         .setBaseURL("http://localhost:9090/geoserver")
-                        .setDateCreation(new java.sql.Date(100000))
                         .setDescription("Default geoserver instance")
                         .setUsername("admin")
                         .setPassword("geoserver");
 
-        em.persistAndFlush(gsInstance2);
+        gsInstance2 = instanceRepo.saveAndFlush(gsInstance2);
 
         AdminRuleIdentifier expected =
                 entity.getIdentifier()
@@ -264,12 +261,11 @@ class JpaAdminRuleRepositoryTest {
                 new GeoServerInstance()
                         .setName("secondInstance")
                         .setBaseURL("http://localhost:9090/geoserver")
-                        .setDateCreation(new java.sql.Date(100000))
                         .setDescription("Default geoserver instance")
                         .setUsername("admin")
                         .setPassword("geoserver");
 
-        em.persistAndFlush(gsInstance2);
+        gsInstance2 = instanceRepo.saveAndFlush(gsInstance2);
 
         expected.add(rule.clone());
 

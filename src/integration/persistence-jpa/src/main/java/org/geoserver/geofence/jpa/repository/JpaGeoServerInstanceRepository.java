@@ -10,10 +10,7 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 
 import java.util.Optional;
 
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
-
-@Transactional(value = TxType.SUPPORTS)
+@TransactionSupported
 public interface JpaGeoServerInstanceRepository
         extends JpaRepository<GeoServerInstance, Long>, QuerydslPredicateExecutor<Rule> {
 
@@ -31,7 +28,7 @@ public interface JpaGeoServerInstanceRepository
      *
      * @return
      */
-    @Transactional
+    @TransactionRequired
     default @NonNull GeoServerInstance getInstanceAny() {
         return findByName(GeoServerInstance.ANY).orElseGet(() -> save(GeoServerInstance.any()));
     }

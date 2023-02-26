@@ -6,26 +6,30 @@
 package org.geoserver.geofence.jpa.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @Entity(name = "Rule")
+@EntityListeners(AuditingEntityListener.class)
 @Table(
         name = "gf_rule",
         // NOTE unique constraints don't work with null values, so all RuleIdentifier attributes
@@ -59,7 +63,7 @@ import javax.persistence.UniqueConstraint;
             @Index(name = "idx_rule_layer", columnList = "layer")
         })
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "Rule")
-public class Rule implements Serializable, Cloneable {
+public class Rule extends Auditable implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
 
@@ -73,15 +77,6 @@ public class Rule implements Serializable, Cloneable {
     @Embedded private LayerDetails layerDetails;
 
     @Embedded private RuleLimits ruleLimits;
-
-    private @PostLoad void nullify() {
-        if (layerDetails != null && layerDetails.isEmpty()) {
-            layerDetails = null;
-        }
-        if (ruleLimits != null && ruleLimits.isEmpty()) {
-            ruleLimits = null;
-        }
-    }
 
     public @Override Rule clone() {
         Rule clone;

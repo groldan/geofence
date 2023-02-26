@@ -15,7 +15,7 @@ import javax.persistence.EntityNotFoundException;
         // in case something changes in the model, make the code generation fail so we make sure the
         // mapper stays in sync
         unmappedTargetPolicy = ReportingPolicy.ERROR)
-public abstract class GeoServerInstanceMapper {
+abstract class GeoServerInstanceMapper {
 
     private @Autowired JpaGeoServerInstanceRepository geoserverInstances;
 

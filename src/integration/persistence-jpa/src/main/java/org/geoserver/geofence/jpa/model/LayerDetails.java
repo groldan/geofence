@@ -5,12 +5,14 @@
 
 package org.geoserver.geofence.jpa.model;
 
+import static java.util.Objects.isNull;
+
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import org.geolatte.geom.MultiPolygon;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import org.locationtech.jts.geom.MultiPolygon;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -58,7 +60,7 @@ public class LayerDetails implements Serializable, Cloneable {
     private String cqlFilterWrite;
 
     @Column(name = "ld_area")
-    private MultiPolygon area;
+    private MultiPolygon<?> area;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ld_spatial_filter_type", nullable = true)
@@ -69,7 +71,7 @@ public class LayerDetails implements Serializable, Cloneable {
     private CatalogMode catalogMode;
 
     /** Styles allowed for this layer */
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @JoinTable(
             name = "gf_layer_styles",
             joinColumns =
@@ -83,7 +85,7 @@ public class LayerDetails implements Serializable, Cloneable {
      * We'll use the pair <TT>(details_id, name)</TT> as PK for the associated table. To do so, we
      * have to perform some trick on the <TT>{@link LayerAttribute#access}</TT> field.
      */
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @JoinTable(
             name = "gf_layer_attributes",
             joinColumns = @JoinColumn(name = "details_id"),
@@ -92,9 +94,7 @@ public class LayerDetails implements Serializable, Cloneable {
                             name = "gf_layer_attributes_name",
                             columnNames = {"details_id", "name"}),
             foreignKey = @ForeignKey(name = "fk_attribute_layer"))
-    // Note: used to be FetchMode.SELECT, but no duplicates are returned now and this avoids N+1
-    // queries
-    @Fetch(FetchMode.JOIN)
+    @Fetch(FetchMode.SELECT)
     private Set<LayerAttribute> attributes;
 
     public @Override LayerDetails clone() {
@@ -104,9 +104,6 @@ public class LayerDetails implements Serializable, Cloneable {
             clone = (LayerDetails) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
-        }
-        if (area != null) {
-            clone.area = (MultiPolygon) area.copy();
         }
         if (allowedStyles != null) {
             clone.allowedStyles = new HashSet<>(allowedStyles);
@@ -120,15 +117,15 @@ public class LayerDetails implements Serializable, Cloneable {
         return clone;
     }
 
-    boolean isEmpty() {
-        return (allowedStyles == null || allowedStyles.isEmpty())
-                && area == null
-                && (attributes == null || attributes.isEmpty())
-                && catalogMode == null
-                && cqlFilterRead == null
-                && cqlFilterWrite == null
-                && defaultStyle == null
-                && spatialFilterType == null
-                && type == null;
+    public boolean isEmpty() {
+        return isNull(type)
+                && isNull(defaultStyle)
+                && isNull(cqlFilterRead)
+                && isNull(cqlFilterWrite)
+                && isNull(area)
+                && isNull(spatialFilterType)
+                && isNull(catalogMode)
+                && (isNull(allowedStyles) || allowedStyles.isEmpty())
+                && (isNull(attributes) || attributes.isEmpty());
     }
 }

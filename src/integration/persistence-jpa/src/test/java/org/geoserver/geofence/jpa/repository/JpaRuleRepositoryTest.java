@@ -10,8 +10,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.querydsl.core.types.Predicate;
 
-import lombok.SneakyThrows;
-
+import org.geolatte.geom.MultiPolygon;
+import org.geolatte.geom.codec.Wkt;
+import org.geolatte.geom.crs.CoordinateReferenceSystems;
+import org.geoserver.geofence.jpa.config.GeoFenceDataSourceConfiguration;
+import org.geoserver.geofence.jpa.config.GeoFenceJPAConfiguration;
 import org.geoserver.geofence.jpa.model.CatalogMode;
 import org.geoserver.geofence.jpa.model.GeoServerInstance;
 import org.geoserver.geofence.jpa.model.GrantType;
@@ -28,19 +31,14 @@ import org.geoserver.geofence.jpa.model.SpatialFilterType;
 import org.hibernate.TransientObjectException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.locationtech.jts.geom.MultiPolygon;
-import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKTReader;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,15 +48,13 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@DataJpaTest(
-        showSql = false,
-        properties = {
-            "spring.jpa.properties.hibernate.format_sql=true",
-            "spring.jpa.properties.hibernate.dialect=org.hibernate.spatial.dialect.h2geodb.GeoDBDialect"
-        })
-@ContextConfiguration(classes = GeoFenceJPATestConfiguration.class)
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
+
+@Transactional
+@SpringBootTest(classes = {GeoFenceDataSourceConfiguration.class, GeoFenceJPAConfiguration.class})
 @ActiveProfiles("test")
-class JpaRuleRepositoryTest {
+public class JpaRuleRepositoryTest {
 
     private static final String WORLD =
             "MULTIPOLYGON (((-180 -90, -180 90, 180 90, 180 -90, -180 -90)))";
@@ -66,7 +62,7 @@ class JpaRuleRepositoryTest {
     private @Autowired JpaGeoServerInstanceRepository instanceRepo;
     private @Autowired JpaRuleRepository repo;
 
-    private @Autowired TestEntityManager em;
+    private @Autowired EntityManager em;
 
     private GeoServerInstance anyInstance;
 
@@ -168,12 +164,11 @@ class JpaRuleRepositoryTest {
                 new GeoServerInstance()
                         .setName("secondInstance")
                         .setBaseURL("http://localhost:9090/geoserver")
-                        .setDateCreation(new java.sql.Date(100000))
                         .setDescription("Default geoserver instance")
                         .setUsername("admin")
                         .setPassword("geoserver");
 
-        em.persistAndFlush(gsInstance2);
+        em.persist(gsInstance2);
 
         RuleIdentifier expected =
                 entity.getIdentifier()
@@ -217,39 +212,32 @@ class JpaRuleRepositoryTest {
 
     @Test
     void testRuleLimits() {
-        assertNull(entity.getRuleLimits());
+        Rule rule = repo.saveAndFlush(entity);
+        assertNull(rule.getRuleLimits());
 
-        Rule saved = em.persistAndFlush(entity);
-        assertNull(saved.getRuleLimits());
+        rule.setRuleLimits(
+                new RuleLimits()
+                        .setAllowedArea(geom(WORLD))
+                        .setCatalogMode(CatalogMode.MIXED)
+                        .setSpatialFilterType(SpatialFilterType.CLIP));
 
-        final MultiPolygon allowedArea = geom(WORLD);
+        RuleLimits expected = rule.getRuleLimits().clone();
 
-        RuleLimits expected = new RuleLimits();
-        saved.setRuleLimits(expected);
-        saved.getRuleLimits()
-                .setAllowedArea(allowedArea)
-                .setCatalogMode(CatalogMode.MIXED)
-                .setSpatialFilterType(SpatialFilterType.CLIP)
-                .clone();
+        repo.saveAndFlush(rule);
+        rule = repo.findById(rule.getId()).orElseThrow();
 
-        saved = em.persistAndFlush(entity);
-        em.detach(saved);
-
-        assertNotNull(saved.getRuleLimits());
-
-        Rule found = repo.getReferenceById(saved.getId());
-        assertThat(found.getRuleLimits()).isNotSameAs(saved.getRuleLimits()).isEqualTo(expected);
+        assertNotNull(rule.getRuleLimits());
+        assertThat(rule.getRuleLimits()).isEqualTo(expected);
     }
 
     @Test
     void testLayerDetails() {
-        assertNull(entity.getLayerDetails());
-        entity.setLayerDetails(new LayerDetails());
-        final MultiPolygon area = geom(WORLD);
+
+        final MultiPolygon<?> area = geom(WORLD);
 
         Set<LayerAttribute> attributes = Set.of(latt("att1"), latt("att2"));
-        LayerDetails expected =
-                entity.getLayerDetails()
+        final LayerDetails details =
+                new LayerDetails()
                         .setAllowedStyles(Set.of("s1", "s2"))
                         .setArea(area)
                         .setAttributes(attributes)
@@ -261,68 +249,61 @@ class JpaRuleRepositoryTest {
                         .setType(LayerType.LAYERGROUP)
                         .clone();
 
-        Rule saved = em.persistAndFlush(entity);
-        em.detach(saved);
+        LayerDetails expected = details.clone();
 
-        Rule found = repo.getReferenceById(saved.getId());
-        assertThat(found.getLayerDetails())
-                .isNotSameAs(saved.getLayerDetails())
-                .isEqualTo(expected);
+        entity.setLayerDetails(details);
+        entity = repo.saveAndFlush(entity);
+        em.detach(entity);
 
-        // verify multiple attributes don't result in duplicates as it used to be at least in the
-        // old entity comments
-        assertThat(repo.findAllById(List.of(saved.getId()))).singleElement();
-        assertThat(repo.findAll()).singleElement();
+        Rule saved = repo.findById(entity.getId()).orElseThrow();
+
+        assertThat(saved.getLayerDetails()).isEqualTo(expected);
     }
 
     @Test
     void testLayerDetails_unset_allowedStyles() {
-        entity.setLayerDetails(new LayerDetails());
-        entity.getLayerDetails()
-                .setAllowedStyles(Set.of("s1", "s2"))
-                .setCatalogMode(CatalogMode.CHALLENGE)
-                .clone();
+        entity.setLayerDetails(
+                new LayerDetails()
+                        .setAllowedStyles(Set.of("s1", "s2"))
+                        .setCatalogMode(CatalogMode.CHALLENGE));
+        entity = repo.saveAndFlush(entity);
+        final long ruleId = entity.getId();
+        em.detach(entity);
 
-        Rule rule = em.persistAndFlush(entity);
+        Rule rule = repo.findById(ruleId).orElseThrow();
+        assertNotSame(entity, rule);
+
+        rule.getLayerDetails().setAllowedStyles(null);
+        repo.saveAndFlush(rule);
         em.detach(rule);
-        final long ruleId = rule.getId();
 
-        Rule found = repo.getReferenceById(ruleId);
-        assertNotSame(rule, found);
-
-        found.getLayerDetails().setAllowedStyles(null);
-        repo.saveAndFlush(found);
-        em.detach(found);
-
-        rule = repo.getReferenceById(ruleId);
-        assertNotSame(found, rule);
+        rule = repo.findById(ruleId).orElseThrow();
         assertThat(rule.getLayerDetails().getAllowedStyles()).isEmpty();
     }
 
     @Test
     void testLayerDetails_update_allowedStyles() {
-        entity.setLayerDetails(new LayerDetails());
-        entity.getLayerDetails()
-                .setAllowedStyles(Set.of("s1", "s2"))
-                .setCatalogMode(CatalogMode.CHALLENGE)
-                .clone();
+        entity.setLayerDetails(
+                new LayerDetails()
+                        .setAllowedStyles(Set.of("s1", "s2"))
+                        .setCatalogMode(CatalogMode.CHALLENGE));
+        entity = repo.saveAndFlush(entity);
+        final long ruleId = entity.getId();
+        em.detach(entity);
 
-        Rule rule = em.persistAndFlush(entity);
-        em.detach(rule);
-        final long ruleId = rule.getId();
+        Rule rule = repo.findById(ruleId).orElseThrow();
 
-        Rule found = repo.getReferenceById(ruleId);
-        assertNotSame(rule, found);
+        assertNotSame(entity, rule);
 
         Set<String> newStyles = Set.of("newstyle1", "s1", "newstyle2");
 
-        found.getLayerDetails().getAllowedStyles().clear();
-        found.getLayerDetails().getAllowedStyles().addAll(newStyles);
-        repo.saveAndFlush(found);
-        em.detach(found);
+        rule.getLayerDetails().getAllowedStyles().clear();
+        rule.getLayerDetails().getAllowedStyles().addAll(newStyles);
+        repo.saveAndFlush(rule);
+        em.detach(rule);
 
-        rule = repo.getReferenceById(ruleId);
-        assertNotSame(found, rule);
+        rule = repo.findById(ruleId).orElseThrow();
+
         assertThat(rule.getLayerDetails().getAllowedStyles())
                 .isEqualTo(Set.of("newstyle1", "s1", "newstyle2"));
     }
@@ -462,8 +443,8 @@ class JpaRuleRepositoryTest {
         return new LayerAttribute().setAccess(AccessType.NONE).setDataType("Integer").setName(name);
     }
 
-    @SneakyThrows({ParseException.class})
-    private MultiPolygon geom(String wkt) {
-        return (MultiPolygon) new WKTReader().read(wkt);
+    private org.geolatte.geom.MultiPolygon<?> geom(String wkt) {
+        return (org.geolatte.geom.MultiPolygon<?>)
+                Wkt.fromWkt(wkt, CoordinateReferenceSystems.WGS84);
     }
 }

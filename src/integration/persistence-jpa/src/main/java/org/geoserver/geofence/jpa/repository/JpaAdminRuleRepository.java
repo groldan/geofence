@@ -17,16 +17,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
-
 @Repository
-@Transactional(value = TxType.SUPPORTS)
+@TransactionSupported
 public interface JpaAdminRuleRepository
         extends JpaRepository<AdminRule, Long>, QuerydslPredicateExecutor<AdminRule> {
 
     Sort naturalOrder = Sort.by("identifier.instance.id", "priority");
 
+    @TransactionRequired
     boolean deleteById(long id);
 
     @Query("SELECT r FROM AdminRule r ORDER BY identifier.instance.id, priority")
@@ -61,6 +59,7 @@ public interface JpaAdminRuleRepository
         return new PageImpl<>(contents);
     }
 
+    @TransactionRequired
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE AdminRule SET priority = priority + :offset WHERE priority >= :priorityStart")
     int shiftPriority(@Param("priorityStart") long priorityStart, @Param("offset") long offset);
