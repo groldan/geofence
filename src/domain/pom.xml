@@ -20,7 +20,7 @@
   <modules>
     <module>rule-management</module>
     <module>adminrule-management</module>
-    <module>authorization</module>
     <module>user-management</module>
+    <module>authorization</module>
   </modules>
 </project>

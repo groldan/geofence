@@ -3,17 +3,17 @@
  * application directory.
  */
 
-package org.geoserver.geofence.access;
+package org.geoserver.geofence.authorization.rules;
 
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Value;
 import lombok.With;
 
+import org.geolatte.geom.Geometry;
 import org.geoserver.geofence.rules.model.CatalogMode;
 import org.geoserver.geofence.rules.model.GrantType;
 import org.geoserver.geofence.rules.model.LayerAttribute;
-import org.locationtech.jts.geom.Geometry;
 
 import java.util.Set;
 
@@ -22,7 +22,7 @@ import java.util.Set;
  */
 @Value
 @With
-@Builder
+@Builder(toBuilder = true, builderClassName = "Builder")
 public class AccessInfo {
 
     /** Default "allow everything" AccessInfo */
@@ -36,9 +36,9 @@ public class AccessInfo {
 
     @Default private boolean adminRights = false;
 
-    private Geometry area;
+    private Geometry<?> area;
 
-    private Geometry clipArea;
+    private Geometry<?> clipArea;
 
     private CatalogMode catalogMode;
 
@@ -52,10 +52,19 @@ public class AccessInfo {
 
     private Set<String> allowedStyles;
 
-    //    public void setGrant(GrantType grant) {
-    //        if(grant != GrantType.ALLOW && grant != GrantType.DENY)
-    //            throw new IllegalArgumentException("Bad grant type " + grant);
-    //        this.grant = grant;
-    //    }
+    public static class Builder {
+        // explicitly implement only mutators that need to ensure immutability
+        private Set<LayerAttribute> attributes;
+        private Set<String> allowedStyles;
 
+        public Builder attributes(Set<LayerAttribute> value) {
+            this.attributes = value == null ? null : Set.copyOf(value);
+            return this;
+        }
+
+        public Builder allowedStyles(Set<String> value) {
+            this.allowedStyles = value == null ? null : Set.copyOf(value);
+            return this;
+        }
+    }
 }

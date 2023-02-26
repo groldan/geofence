@@ -3,12 +3,11 @@
  * under the GPL 2.0 license, available at the root application directory.
  */
 
-package org.geoserver.geofence.access;
+package org.geoserver.geofence.authorization.rules;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.geoserver.geofence.access.AccessInfo.AccessInfoBuilder;
 import org.geoserver.geofence.adminrules.model.AdminGrantType;
 import org.geoserver.geofence.adminrules.model.AdminRule;
 import org.geoserver.geofence.adminrules.model.AdminRuleFilter;
@@ -60,43 +59,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RuleReaderServiceImpl implements RuleReaderService {
 
-    //    private final static Logger LOGGER = LogManager.getLogger(RuleReaderServiceImpl.class);
+    // private final static Logger LOGGER = LogManager.getLogger(RuleReaderServiceImpl.class);
 
     private final AdminRuleRepository adminRulesRepo;
     private final RuleRepository rulesRepo;
     private final Function<String, Set<String>> userResolver;
-
-    /**
-     * <B>TODO: REFACTOR</B>
-     *
-     * @param filter
-     * @return a plain List of the grouped matching Rules.
-     */
-    @Override
-    public List<Rule> getMatchingRules(RuleFilter filter) {
-        Map<String, List<Rule>> found = getRules(filter);
-
-        return found.values().stream()
-                .flatMap(List::stream)
-                .sorted((r1, r2) -> Long.compare(r1.getPriority(), r2.getPriority()))
-                .collect(Collectors.toList());
-
-        //        Map<Long, Rule> sorted = new TreeMap<>();
-        //        for (List<Rule> list : found.values()) {
-        //            for (Rule rule : list) {
-        //                sorted.put(rule.getPriority(), rule);
-        //            }
-        //        }
-        //
-        ////        LOGGER.warn(sorted.size() + " matching rules for filter " + filter);
-        //        List<Rule> plainList = new ArrayList<>();
-        //        for (Rule rule : sorted.values()) {
-        ////            LOGGER.warn(" -- " + rule);
-        //            plainList.add(rule);
-        //        }
-        //
-        //        return plainList;
-    }
 
     @Override
     public AccessInfo getAccessInfo(RuleFilter filter) {
@@ -150,7 +117,7 @@ public class RuleReaderServiceImpl implements RuleReaderService {
             else if (moreAccess.getGrant() == GrantType.DENY) return baseAccess;
             else {
                 // ok: extending grants
-                AccessInfoBuilder ret = AccessInfo.builder().grant(GrantType.ALLOW);
+                AccessInfo.Builder ret = AccessInfo.builder().grant(GrantType.ALLOW);
 
                 ret.cqlFilterRead(
                         unionCQL(baseAccess.getCqlFilterRead(), moreAccess.getCqlFilterRead()));
@@ -180,24 +147,30 @@ public class RuleReaderServiceImpl implements RuleReaderService {
     // if yes set both, to make sure user doesn't acquire visibility
     // on not allowed geometries
     private void setAllowedAreas(
-            AccessInfo baseAccess, AccessInfo moreAccess, AccessInfoBuilder ret) {
-        Geometry baseIntersects = baseAccess.getArea();
-        Geometry baseClip = baseAccess.getClipArea();
-        Geometry moreIntersects = moreAccess.getArea();
-        Geometry moreClip = moreAccess.getClipArea();
-        Geometry unionIntersects = unionGeometry(baseAccess.getArea(), moreAccess.getArea());
-        Geometry unionClip = unionGeometry(baseAccess.getClipArea(), moreAccess.getClipArea());
+            AccessInfo baseAccess, AccessInfo moreAccess, AccessInfo.Builder ret) {
+        final Geometry baseIntersects = org.geolatte.geom.jts.JTS.to(baseAccess.getArea());
+        final Geometry baseClip = org.geolatte.geom.jts.JTS.to(baseAccess.getClipArea());
+        final Geometry moreIntersects = org.geolatte.geom.jts.JTS.to(moreAccess.getArea());
+        final Geometry moreClip = org.geolatte.geom.jts.JTS.to(moreAccess.getClipArea());
+        final Geometry unionIntersects = unionGeometry(baseIntersects, moreIntersects);
+        final Geometry unionClip = unionGeometry(baseClip, moreClip);
         if (unionIntersects == null) {
-            if (baseIntersects != null && moreClip != null) ret.area(baseIntersects);
-            else if (moreIntersects != null && baseClip != null) ret.area(moreIntersects);
+            if (baseIntersects != null && moreClip != null) {
+                ret.area(baseAccess.getArea());
+            } else if (moreIntersects != null && baseClip != null) {
+                ret.area(moreAccess.getArea());
+            }
         } else {
-            ret.area(unionIntersects);
+            ret.area(org.geolatte.geom.jts.JTS.from(unionIntersects));
         }
         if (unionClip == null) {
-            if (baseClip != null && moreIntersects != null) ret.clipArea(baseClip);
-            else if (moreClip != null && baseIntersects != null) ret.clipArea(moreClip);
+            if (baseClip != null && moreIntersects != null) {
+                ret.clipArea(baseAccess.getClipArea());
+            } else if (moreClip != null && baseIntersects != null) {
+                ret.clipArea(moreAccess.getClipArea());
+            }
         } else {
-            ret.clipArea(unionClip);
+            ret.clipArea(org.geolatte.geom.jts.JTS.from(unionClip));
         }
     }
 
@@ -343,7 +316,7 @@ public class RuleReaderServiceImpl implements RuleReaderService {
 
     private AccessInfo buildAllowAccessInfo(
             Rule rule, List<RuleLimits> limits, IdNameFilter userFilter) {
-        AccessInfoBuilder accessInfo = AccessInfo.builder().grant(GrantType.ALLOW);
+        AccessInfo.Builder accessInfo = AccessInfo.builder().grant(GrantType.ALLOW);
 
         // first intersects geometry of same type
         Geometry area = intersect(limits);
@@ -351,14 +324,13 @@ public class RuleReaderServiceImpl implements RuleReaderService {
                 limits.stream()
                         .anyMatch(l -> l.getSpatialFilterType().equals(SpatialFilterType.CLIP));
         CatalogMode cmode = resolveCatalogMode(limits);
-        if (null != rule.getLayerDetails()) {
-            LayerDetails details = rule.getLayerDetails();
-
+        final LayerDetails details = getLayerDetails(rule);
+        if (null != details) {
             // intersect the allowed area of the rule to the proper type
-            SpatialFilterType spatialFilterType = getSpatialFilterType(rule);
-            if (spatialFilterType.equals(SpatialFilterType.CLIP)) atLeastOneClip = true;
+            SpatialFilterType spatialFilterType = getSpatialFilterType(rule, details);
+            atLeastOneClip = spatialFilterType.equals(SpatialFilterType.CLIP);
 
-            area = intersect(area, details.getArea());
+            area = intersect(area, org.geolatte.geom.jts.JTS.to(details.getArea()));
 
             cmode = getStricter(cmode, details.getCatalogMode());
 
@@ -375,19 +347,30 @@ public class RuleReaderServiceImpl implements RuleReaderService {
             // if we have a clip area we apply clip type
             // since is more restrictive, otherwise we keep
             // the intersect
-            if (atLeastOneClip) accessInfo.clipArea(area);
-            else accessInfo.area(area);
+            if (atLeastOneClip) {
+                accessInfo.clipArea(org.geolatte.geom.jts.JTS.from(area));
+            } else {
+                accessInfo.area(org.geolatte.geom.jts.JTS.from(area));
+            }
         }
         return accessInfo.build();
     }
 
-    private SpatialFilterType getSpatialFilterType(Rule rule) {
+    private LayerDetails getLayerDetails(Rule rule) {
+        final boolean hasLayer = null != rule.getIdentifier().getLayer();
+        if (hasLayer) {
+            return rulesRepo.findLayerDetailsByRuleId(rule.getId()).orElse(null);
+        }
+        return null;
+    }
+
+    private SpatialFilterType getSpatialFilterType(Rule rule, LayerDetails details) {
         SpatialFilterType spatialFilterType = null;
         if (GrantType.LIMIT.equals(rule.getIdentifier().getAccess())
                 && null != rule.getRuleLimits()) {
             spatialFilterType = rule.getRuleLimits().getSpatialFilterType();
-        } else if (null != rule.getLayerDetails()) {
-            spatialFilterType = rule.getLayerDetails().getSpatialFilterType();
+        } else if (null != details) {
+            spatialFilterType = details.getSpatialFilterType();
         }
         if (null == spatialFilterType) spatialFilterType = SpatialFilterType.INTERSECT;
 
@@ -395,9 +378,10 @@ public class RuleReaderServiceImpl implements RuleReaderService {
     }
 
     private Geometry intersect(List<RuleLimits> limits) {
-        Geometry g = null;
+        org.locationtech.jts.geom.Geometry g = null;
         for (RuleLimits limit : limits) {
-            Geometry area = limit.getAllowedArea();
+            org.locationtech.jts.geom.MultiPolygon area =
+                    org.geolatte.geom.jts.JTS.to(limit.getAllowedArea());
             if (area != null) {
                 if (g == null) {
                     g = area;
@@ -500,10 +484,10 @@ public class RuleReaderServiceImpl implements RuleReaderService {
         Map<String, List<Rule>> ret = new HashMap<>();
 
         if (finalRoleFilter.isEmpty()) {
-            //            TextFilter roleFilter =
-            //                    new TextFilter(filter.getRole().getType(),
+            // TextFilter roleFilter =
+            // new TextFilter(filter.getRole().getType(),
             // filter.getRole().isIncludeDefault());
-            //            List<Rule> found = getRuleAux(filter, roleFilter);
+            // List<Rule> found = getRuleAux(filter, roleFilter);
 
             List<Rule> found = rulesRepo.query(RuleQuery.of(filter)).collect(Collectors.toList());
             ret.put(null, found);
@@ -514,28 +498,28 @@ public class RuleReaderServiceImpl implements RuleReaderService {
             }
         }
 
-        //            for (String role : finalRoleFilter) {
-        //                TextFilter roleFilter = new TextFilter(role);
-        //                roleFilter.setIncludeDefault(true);
-        //                List<Rule> found = getRuleAux(filter, roleFilter);
-        //                ret.put(role, found);
-        //            }
+        // for (String role : finalRoleFilter) {
+        // TextFilter roleFilter = new TextFilter(role);
+        // roleFilter.setIncludeDefault(true);
+        // List<Rule> found = getRuleAux(filter, roleFilter);
+        // ret.put(role, found);
+        // }
 
-        //        if (LOGGER.isDebugEnabled()) {
-        //            LOGGER.debug("Filter " + filter + " is matching the following Rules:");
-        //            boolean ruleFound = false;
-        //            for (Entry<String, List<Rule>> entry : ret.entrySet()) {
-        //                String role = entry.getKey();
-        //                LOGGER.debug("    Role:" + role);
-        //                for (Rule rule : entry.getValue()) {
-        //                    LOGGER.debug("    Role:" + role + " ---> " + rule);
-        //                    ruleFound = true;
-        //                }
-        //            }
-        //            if (!ruleFound)
-        //                LOGGER.debug("No rules matching filter " + filter);
+        // if (LOGGER.isDebugEnabled()) {
+        // LOGGER.debug("Filter " + filter + " is matching the following Rules:");
+        // boolean ruleFound = false;
+        // for (Entry<String, List<Rule>> entry : ret.entrySet()) {
+        // String role = entry.getKey();
+        // LOGGER.debug(" Role:" + role);
+        // for (Rule rule : entry.getValue()) {
+        // LOGGER.debug(" Role:" + role + " ---> " + rule);
+        // ruleFound = true;
+        // }
+        // }
+        // if (!ruleFound)
+        // LOGGER.debug("No rules matching filter " + filter);
         //
-        //        }
+        // }
 
         return ret;
     }
@@ -546,6 +530,7 @@ public class RuleReaderServiceImpl implements RuleReaderService {
         filter.getRole().setIncludeDefault(true);
         return rulesRepo.query(RuleQuery.of(filter)).collect(Collectors.toList());
     }
+
     /**
      * Check requested user and group fileter. <br>
      * The input filter <b>may be altered</b> for fixing some request inconsistencies.
@@ -567,8 +552,8 @@ public class RuleReaderServiceImpl implements RuleReaderService {
         switch (filter.getRole().getType()) {
             case NAMEVALUE:
                 // rolename can be null if the group filter asks for ANY or DEFAULT
-                final Set<String> requestedRoles =
-                        validateRolenames(filter.getRole()); // CSV rolenames
+                final Set<String> requestedRoles = validateRolenames(filter.getRole()); // CSV
+                // rolenames
 
                 if (username != null) {
                     Set<String> userRoles = userResolver.apply(username);
@@ -576,11 +561,11 @@ public class RuleReaderServiceImpl implements RuleReaderService {
                         if (userRoles.contains(role)) {
                             finalRoleFilter.add(role);
                         } else {
-                            //                            LOGGER.warn("User does not belong to role
+                            // LOGGER.warn("User does not belong to role
                             // [User:" + filter.getUser()
-                            //                                    + "] [Role:" + role + "]
+                            // + "] [Role:" + role + "]
                             // [ResolvedRoles:" + resolvedRoles
-                            //                                    + "]");
+                            // + "]");
                         }
                     }
                 } else {
@@ -609,71 +594,71 @@ public class RuleReaderServiceImpl implements RuleReaderService {
         return finalRoleFilter;
     }
 
-    //    protected List<Rule> getRuleAux(RuleFilter filter, TextFilter roleFilter) {
+    // protected List<Rule> getRuleAux(RuleFilter filter, TextFilter roleFilter) {
     //
-    //        Search searchCriteria = new Search(Rule.class);
-    //        searchCriteria.addSortAsc("priority");
-    //        addStringCriteria(searchCriteria, "username", filter.getUser());
-    //        addStringCriteria(searchCriteria, "rolename", roleFilter);
-    //        addCriteria(searchCriteria, "instance", filter.getInstance());
-    //        addStringCriteria(searchCriteria, "service", filter.getService()); // see class'
+    // Search searchCriteria = new Search(Rule.class);
+    // searchCriteria.addSortAsc("priority");
+    // addStringCriteria(searchCriteria, "username", filter.getUser());
+    // addStringCriteria(searchCriteria, "rolename", roleFilter);
+    // addCriteria(searchCriteria, "instance", filter.getInstance());
+    // addStringCriteria(searchCriteria, "service", filter.getService()); // see class'
     // javadoc
-    //        addStringCriteria(searchCriteria, "request", filter.getRequest()); // see class'
+    // addStringCriteria(searchCriteria, "request", filter.getRequest()); // see class'
     // javadoc
-    //        addStringCriteria(searchCriteria, "subfield", filter.getSubfield());
-    //        addStringCriteria(searchCriteria, "workspace", filter.getWorkspace());
-    //        addStringCriteria(searchCriteria, "layer", filter.getLayer());
+    // addStringCriteria(searchCriteria, "subfield", filter.getSubfield());
+    // addStringCriteria(searchCriteria, "workspace", filter.getWorkspace());
+    // addStringCriteria(searchCriteria, "layer", filter.getLayer());
     //
-    //        List<Rule> found = ruleDAO.search(searchCriteria);
-    //        found = filterByAddress(filter, found);
+    // List<Rule> found = ruleDAO.search(searchCriteria);
+    // found = filterByAddress(filter, found);
     //
-    //        return found;
-    //    }
+    // return found;
+    // }
     //
-    //    private void addCriteria(Search searchCriteria, String fieldName, IdNameFilter filter) {
-    //        switch (filter.getType()) {
-    //            case ANY:
-    //                break; // no filtering
+    // private void addCriteria(Search searchCriteria, String fieldName, IdNameFilter filter) {
+    // switch (filter.getType()) {
+    // case ANY:
+    // break; // no filtering
     //
-    //            case DEFAULT:
-    //                searchCriteria.addFilterNull(fieldName);
-    //                break;
+    // case DEFAULT:
+    // searchCriteria.addFilterNull(fieldName);
+    // break;
     //
-    //            case IDVALUE:
-    //                searchCriteria.addFilterOr(Filter.isNull(fieldName),
-    //                        Filter.equal(fieldName + ".id", filter.getId()));
-    //                break;
+    // case IDVALUE:
+    // searchCriteria.addFilterOr(Filter.isNull(fieldName),
+    // Filter.equal(fieldName + ".id", filter.getId()));
+    // break;
     //
-    //            case NAMEVALUE:
-    //                searchCriteria.addFilterOr(Filter.isNull(fieldName),
-    //                        Filter.equal(fieldName + ".name", filter.getName()));
-    //                break;
+    // case NAMEVALUE:
+    // searchCriteria.addFilterOr(Filter.isNull(fieldName),
+    // Filter.equal(fieldName + ".name", filter.getName()));
+    // break;
     //
-    //            default:
-    //                throw new AssertionError();
-    //        }
-    //    }
+    // default:
+    // throw new AssertionError();
+    // }
+    // }
     //
-    //    private void addStringCriteria(Search searchCriteria, String fieldName, TextFilter filter)
+    // private void addStringCriteria(Search searchCriteria, String fieldName, TextFilter filter)
     // {
-    //        switch (filter.getType()) {
-    //            case ANY:
-    //                break; // no filtering
+    // switch (filter.getType()) {
+    // case ANY:
+    // break; // no filtering
     //
-    //            case DEFAULT:
-    //                searchCriteria.addFilterNull(fieldName);
-    //                break;
+    // case DEFAULT:
+    // searchCriteria.addFilterNull(fieldName);
+    // break;
     //
-    //            case NAMEVALUE:
-    //                searchCriteria.addFilterOr(Filter.isNull(fieldName),
-    //                        Filter.equal(fieldName, filter.getText()));
-    //                break;
+    // case NAMEVALUE:
+    // searchCriteria.addFilterOr(Filter.isNull(fieldName),
+    // Filter.equal(fieldName, filter.getText()));
+    // break;
     //
-    //            case IDVALUE:
-    //            default:
-    //                throw new AssertionError();
-    //        }
-    //    }
+    // case IDVALUE:
+    // default:
+    // throw new AssertionError();
+    // }
+    // }
 
     // ==========================================================================
 
@@ -689,8 +674,8 @@ public class RuleReaderServiceImpl implements RuleReaderService {
         AdminRuleFilter adminRuleFilter = AdminRuleFilter.of(filter);
 
         if (finalRoleFilter.isEmpty()) {
-            //            AdminRule rule = getAdminAuthAux(filter, filter.getRole());
-            //            isAdmin = rule == null ? false : rule.getAccess() == AdminGrantType.ADMIN;
+            // AdminRule rule = getAdminAuthAux(filter, filter.getRole());
+            // isAdmin = rule == null ? false : rule.getAccess() == AdminGrantType.ADMIN;
             isAdmin =
                     adminRulesRepo
                             .findOne(adminRuleFilter)
@@ -705,45 +690,45 @@ public class RuleReaderServiceImpl implements RuleReaderService {
             Optional<AdminRule> found = adminRulesRepo.findFirst(adminRuleFilter);
             isAdmin = found.isPresent();
 
-            //            for (String role : finalRoleFilter) {
-            //                TextFilter roleFilter = new TextFilter(role);
-            //                roleFilter.setIncludeDefault(true);
-            //                AdminRule rule = getAdminAuthAux(filter, roleFilter);
-            //                // if it's admin in at least one group, the admin auth is granted
-            //                if (rule != null && rule.getAccess() == AdminGrantType.ADMIN) {
-            //                    isAdmin = true;
-            //                }
-            //            }
+            // for (String role : finalRoleFilter) {
+            // TextFilter roleFilter = new TextFilter(role);
+            // roleFilter.setIncludeDefault(true);
+            // AdminRule rule = getAdminAuthAux(filter, roleFilter);
+            // // if it's admin in at least one group, the admin auth is granted
+            // if (rule != null && rule.getAccess() == AdminGrantType.ADMIN) {
+            // isAdmin = true;
+            // }
+            // }
         }
 
         return isAdmin;
     }
 
-    //    protected AdminRule getAdminAuthAux(RuleFilter filter, TextFilter roleFilter) {
+    // protected AdminRule getAdminAuthAux(RuleFilter filter, TextFilter roleFilter) {
     //
-    //        Search searchCriteria = new Search(AdminRule.class);
-    //        searchCriteria.addSortAsc("priority");
-    //        addStringCriteria(searchCriteria, "username", filter.getUser());
-    //        addStringCriteria(searchCriteria, "rolename", roleFilter);
-    //        addCriteria(searchCriteria, "instance", filter.getInstance());
-    //        addStringCriteria(searchCriteria, "workspace", filter.getWorkspace());
+    // Search searchCriteria = new Search(AdminRule.class);
+    // searchCriteria.addSortAsc("priority");
+    // addStringCriteria(searchCriteria, "username", filter.getUser());
+    // addStringCriteria(searchCriteria, "rolename", roleFilter);
+    // addCriteria(searchCriteria, "instance", filter.getInstance());
+    // addStringCriteria(searchCriteria, "workspace", filter.getWorkspace());
     //
-    //        // we only need the first match, no need to aggregate (no LIMIT rules here)
-    //        searchCriteria.setMaxResults(1);
+    // // we only need the first match, no need to aggregate (no LIMIT rules here)
+    // searchCriteria.setMaxResults(1);
     //
-    //        List<AdminRule> found = adminRulesRepo.search(searchCriteria);
-    //        found = filterByAddress(filter, found);
+    // List<AdminRule> found = adminRulesRepo.search(searchCriteria);
+    // found = filterByAddress(filter, found);
     //
-    //        switch (found.size()) {
-    //            case 0:
-    //                return null;
-    //            case 1:
-    //                return found.get(0);
-    //            default:
-    //                // should not happen
-    //                throw new IllegalStateException("Too many admin auth rules");
-    //        }
-    //    }
+    // switch (found.size()) {
+    // case 0:
+    // return null;
+    // case 1:
+    // return found.get(0);
+    // default:
+    // // should not happen
+    // throw new IllegalStateException("Too many admin auth rules");
+    // }
+    // }
 
     private Geometry reprojectGeometry(int targetSRID, Geometry geom) {
         if (targetSRID == geom.getSRID()) return geom;

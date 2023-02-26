@@ -11,7 +11,7 @@ import lombok.NonNull;
 import lombok.Value;
 import lombok.With;
 
-import org.locationtech.jts.geom.MultiPolygon;
+import org.geolatte.geom.MultiPolygon;
 
 import java.util.Set;
 
@@ -37,7 +37,7 @@ public class LayerDetails {
 
     private String cqlFilterWrite;
 
-    private MultiPolygon area;
+    private MultiPolygon<?> area;
 
     private SpatialFilterType spatialFilterType;
 

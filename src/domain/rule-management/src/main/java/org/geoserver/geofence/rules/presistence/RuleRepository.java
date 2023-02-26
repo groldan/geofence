@@ -66,5 +66,7 @@ public interface RuleRepository {
      * @throws NoSuchElementException if the rule does not exist
      * @throws IllegalArgumentException
      */
-    void setDetails(Long ruleId, LayerDetails detailsNew);
+    void setLayerDetails(Long ruleId, LayerDetails detailsNew);
+
+    Optional<LayerDetails> findLayerDetailsByRuleId(long ruleId);
 }

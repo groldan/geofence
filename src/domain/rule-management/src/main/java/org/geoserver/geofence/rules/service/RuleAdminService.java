@@ -19,6 +19,7 @@ import org.geoserver.geofence.rules.presistence.RuleRepository;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -286,24 +287,37 @@ public class RuleAdminService {
     // Details
     // =========================================================================
 
-    /** When setting new Details, old CustomProps will be retained. */
-    public void setDetails(Long ruleId, LayerDetails detailsNew) {
-        ruleRepository.setDetails(ruleId, detailsNew);
+    public Optional<LayerDetails> getLayerDetails(Rule rule) {
+        Objects.requireNonNull(rule.getId());
+        return getLayerDetails(rule.getId());
+    }
+
+    /**
+     * @return The {@link LayerDetails} (possibly {@link Optional#empty() empty}) for the rule as
+     *     long as the rule has {@link RuleIdentifier#getLayer() layer}
+     * @throws IllegalArgumentException if the rule does not exist or has no {@link
+     *     RuleIdentifier#getLayer() layer} set
+     */
+    public Optional<LayerDetails> getLayerDetails(long ruleId) {
+        return ruleRepository.findLayerDetailsByRuleId(ruleId);
+    }
+
+    public void setLayerDetails(Long ruleId, LayerDetails detailsNew) {
+        ruleRepository.setLayerDetails(ruleId, detailsNew);
     }
 
     public void setAllowedStyles(Long ruleId, Set<String> styles) {
         ruleRepository.setAllowedStyles(ruleId, styles);
     }
 
+    /**
+     * @return The {@link LayerDetails#getAllowedStyles() layer allowed styles} (possibly empty) for
+     *     the rule as long as the rule has {@link RuleIdentifier#getLayer() layer}
+     * @throws IllegalArgumentException if the rule does not exist or has no {@link
+     *     RuleIdentifier#getLayer() layer} set
+     */
     public Set<String> getAllowedStyles(Long ruleId) {
-        Rule rule =
-                ruleRepository
-                        .findById(ruleId)
-                        .orElseThrow(() -> new NoSuchElementException("Rule not found"));
-
-        LayerDetails details = rule.getLayerDetails();
-        if (null == details) throw new NoSuchElementException("Rule has no details associated");
-        return details.getAllowedStyles() == null ? Set.of() : details.getAllowedStyles();
+        return getLayerDetails(ruleId).map(LayerDetails::getAllowedStyles).orElse(Set.of());
     }
 
     // ==========================================================================

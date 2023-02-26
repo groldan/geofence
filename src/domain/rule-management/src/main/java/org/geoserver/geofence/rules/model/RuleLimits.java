@@ -10,7 +10,7 @@ import lombok.Builder.Default;
 import lombok.Value;
 import lombok.With;
 
-import org.locationtech.jts.geom.MultiPolygon;
+import org.geolatte.geom.MultiPolygon;
 
 /**
  * @author ETj (etj at geo-solutions.it)
@@ -20,7 +20,7 @@ import org.locationtech.jts.geom.MultiPolygon;
 @Builder(toBuilder = true)
 public class RuleLimits {
 
-    private MultiPolygon allowedArea;
+    private MultiPolygon<?> allowedArea;
 
     @Default private SpatialFilterType spatialFilterType = SpatialFilterType.INTERSECT;
 

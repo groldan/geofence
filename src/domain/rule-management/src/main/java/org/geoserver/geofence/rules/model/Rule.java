@@ -26,8 +26,6 @@ public class Rule {
 
     private RuleLimits ruleLimits;
 
-    private LayerDetails layerDetails;
-
     public Rule withAccess(@NonNull GrantType access) {
         return withIdentifier(getIdentifier().withAccess(access));
     }
