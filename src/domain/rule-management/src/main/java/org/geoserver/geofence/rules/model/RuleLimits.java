@@ -17,7 +17,7 @@ import org.geolatte.geom.MultiPolygon;
  */
 @Value
 @With
-@Builder(toBuilder = true)
+@Builder(toBuilder = true, builderClassName = "Builder")
 public class RuleLimits {
 
     private MultiPolygon<?> allowedArea;

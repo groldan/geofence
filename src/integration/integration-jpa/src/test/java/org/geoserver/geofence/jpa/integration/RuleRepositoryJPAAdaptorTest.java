@@ -47,12 +47,7 @@ class RuleRepositoryJPAAdaptorTest {
     @Test
     void count() {
         assertThat(repo.count()).isZero();
-        Rule r1 =
-                Rule.builder()
-                        .build()
-                        .withInstance(geoserverInstanceName)
-                        .withPriority(1)
-                        .withAccess(GrantType.ALLOW);
+        Rule r1 = Rule.allow().withPriority(1).withInstanceName(geoserverInstanceName);
 
         r1 = repo.create(r1, InsertPosition.FIXED);
         assertThat(repo.count()).isOne();

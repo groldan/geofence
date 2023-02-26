@@ -7,6 +7,7 @@ import lombok.NonNull;
 import org.geoserver.geofence.jpa.integration.mapper.RuleMapper;
 import org.geoserver.geofence.jpa.model.GrantType;
 import org.geoserver.geofence.jpa.model.LayerDetails;
+import org.geoserver.geofence.jpa.model.QRule;
 import org.geoserver.geofence.jpa.model.RuleIdentifier;
 import org.geoserver.geofence.jpa.repository.JpaRuleRepository;
 import org.geoserver.geofence.jpa.repository.TransactionReadOnly;
@@ -18,6 +19,7 @@ import org.geoserver.geofence.rules.model.RuleFilter;
 import org.geoserver.geofence.rules.model.RuleLimits;
 import org.geoserver.geofence.rules.model.RuleQuery;
 import org.geoserver.geofence.rules.presistence.RuleRepository;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -44,8 +46,18 @@ public class RuleRepositoryJPAAdaptor implements RuleRepository {
         this.queryMapper = new PredicateMapper();
     }
 
+    @Override
     public Optional<Rule> findById(long id) {
         return jparepo.findById(id).map(modelMapper::toModel);
+    }
+
+    @Override
+    public Optional<Rule> findByPriority(long priority) {
+        try {
+            return jparepo.findOne(QRule.rule.priority.eq(priority)).map(modelMapper::toModel);
+        } catch (IncorrectResultSizeDataAccessException e) {
+            throw new IllegalStateException("There are multiple Rules with priority " + priority);
+        }
     }
 
     @Override
@@ -141,7 +153,7 @@ public class RuleRepositoryJPAAdaptor implements RuleRepository {
 
     @Override
     @TransactionRequired
-    public void setAllowedStyles(@NonNull Long ruleId, Set<String> styles) {
+    public void setAllowedStyles(long ruleId, Set<String> styles) {
 
         org.geoserver.geofence.jpa.model.Rule rule = getOrThrow(ruleId);
 
@@ -159,7 +171,7 @@ public class RuleRepositoryJPAAdaptor implements RuleRepository {
 
     @Override
     @TransactionRequired
-    public void setLimits(Long ruleId, RuleLimits limits) {
+    public void setLimits(long ruleId, RuleLimits limits) {
         org.geoserver.geofence.jpa.model.Rule rule = getOrThrow(ruleId);
         if (rule.getIdentifier().getAccess() != GrantType.LIMIT) {
             throw new IllegalArgumentException("Rule is not of LIMIT type");
@@ -173,7 +185,7 @@ public class RuleRepositoryJPAAdaptor implements RuleRepository {
     @Override
     @TransactionRequired
     public void setLayerDetails(
-            Long ruleId, org.geoserver.geofence.rules.model.LayerDetails detailsNew) {
+            long ruleId, org.geoserver.geofence.rules.model.LayerDetails detailsNew) {
 
         org.geoserver.geofence.jpa.model.Rule rule = getOrThrow(ruleId);
 

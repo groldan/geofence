@@ -1,4 +1,4 @@
-package org.geoserver.geofence.client.integration;
+package org.geoserver.geofence.api.v2.client.integration;
 
 import lombok.RequiredArgsConstructor;
 

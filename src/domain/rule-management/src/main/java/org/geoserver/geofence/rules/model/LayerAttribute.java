@@ -14,7 +14,7 @@ import lombok.With;
  */
 @Value
 @With
-@Builder
+@Builder(toBuilder = true, builderClassName = "Builder")
 public class LayerAttribute {
 
     public enum AccessType {

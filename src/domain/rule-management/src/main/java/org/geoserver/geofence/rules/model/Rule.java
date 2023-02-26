@@ -13,7 +13,7 @@ import lombok.With;
 
 @Value
 @With
-@Builder(toBuilder = true)
+@Builder(toBuilder = true, builderClassName = "Builder")
 public class Rule {
 
     private static final RuleIdentifier EMPTY_IDENTIFIER = RuleIdentifier.builder().build();
@@ -26,11 +26,55 @@ public class Rule {
 
     private RuleLimits ruleLimits;
 
-    public Rule withAccess(@NonNull GrantType access) {
-        return withIdentifier(getIdentifier().withAccess(access));
+    public Rule withInstanceName(String instanceName) {
+        return withIdentifier(identifier.withInstanceName(instanceName));
     }
 
-    public Rule withInstance(@NonNull String geoserverInstanceName) {
-        return withIdentifier(getIdentifier().withInstanceName(geoserverInstanceName));
+    public Rule withUsername(String username) {
+        return withIdentifier(identifier.withUsername(username));
+    }
+
+    public Rule withRolename(String rolename) {
+        return withIdentifier(identifier.withRolename(rolename));
+    }
+
+    public Rule withService(String service) {
+        return withIdentifier(identifier.withService(service));
+    }
+
+    public Rule withAddressRange(IPAddressRange ar) {
+        return withIdentifier(identifier.withAddressRange(ar));
+    }
+
+    public Rule withRequest(String request) {
+        return withIdentifier(identifier.withRequest(request));
+    }
+
+    public Rule withSubfield(String subfield) {
+        return withIdentifier(identifier.withSubfield(subfield));
+    }
+
+    public Rule withWorkspace(String workspace) {
+        return withIdentifier(identifier.withWorkspace(workspace));
+    }
+
+    public Rule withLayer(String layer) {
+        return withIdentifier(identifier.withLayer(layer));
+    }
+
+    public Rule withAccess(GrantType access) {
+        return withIdentifier(identifier.withAccess(access));
+    }
+
+    public static Rule allow() {
+        return Rule.builder().build().withAccess(GrantType.ALLOW);
+    }
+
+    public static Rule deny() {
+        return Rule.builder().build().withAccess(GrantType.DENY);
+    }
+
+    public static Rule limit() {
+        return Rule.builder().build().withAccess(GrantType.LIMIT);
     }
 }

@@ -20,7 +20,7 @@ import java.util.Set;
  */
 @Value
 @With
-@Builder(toBuilder = true)
+@Builder(toBuilder = true, builderClassName = "Builder")
 public class LayerDetails {
 
     public enum LayerType {

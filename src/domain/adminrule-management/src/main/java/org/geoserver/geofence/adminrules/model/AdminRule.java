@@ -11,6 +11,8 @@ import lombok.NonNull;
 import lombok.Value;
 import lombok.With;
 
+import org.geoserver.geofence.rules.model.IPAddressRange;
+
 /**
  * An AdminRule expresses if a given combination of request access is allowed or not.
  *
@@ -33,4 +35,24 @@ public class AdminRule {
     private AdminRuleIdentifier identifier = AdminRuleIdentifier.builder().build();
 
     private AdminGrantType access;
+
+    public AdminRule withInstanceName(String instanceName) {
+        return withIdentifier(identifier.withInstanceName(instanceName));
+    }
+
+    public AdminRule withUsername(String username) {
+        return withIdentifier(identifier.withUsername(username));
+    }
+
+    public AdminRule withRolename(String rolename) {
+        return withIdentifier(identifier.withRolename(rolename));
+    }
+
+    public AdminRule withWorkspace(String workspace) {
+        return withIdentifier(identifier.withWorkspace(workspace));
+    }
+
+    public AdminRule withAddressRange(IPAddressRange addressRange) {
+        return withIdentifier(identifier.withAddressRange(addressRange));
+    }
 }

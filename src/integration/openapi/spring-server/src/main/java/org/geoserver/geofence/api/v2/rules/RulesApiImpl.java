@@ -106,6 +106,18 @@ public class RulesApiImpl implements RulesApiDelegate {
     }
 
     @Override
+    public ResponseEntity<Rule> findOneRuleByPriority(Long priority) {
+        Optional<org.geoserver.geofence.rules.model.Rule> found;
+        try {
+            found = service.getRuleByPriority(priority);
+        } catch (IllegalStateException multipleResults) {
+            return ResponseEntity.status(CONFLICT).build();
+        }
+        return ResponseEntity.status(found.isPresent() ? OK : NOT_FOUND)
+                .body(found.map(mapper::toApi).orElse(null));
+    }
+
+    @Override
     public ResponseEntity<Integer> countAllRules() {
         return ResponseEntity.ok(service.getCountAll());
     }

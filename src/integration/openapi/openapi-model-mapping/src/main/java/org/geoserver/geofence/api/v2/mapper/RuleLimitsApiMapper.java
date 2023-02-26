@@ -23,6 +23,6 @@ public interface RuleLimitsApiMapper {
             org.geoserver.geofence.api.v2.model.RuleLimits limits);
 
     RuleLimits updateLimits(
-            @MappingTarget RuleLimits.RuleLimitsBuilder builder,
+            @MappingTarget RuleLimits.Builder builder,
             org.geoserver.geofence.api.v2.model.RuleLimits source);
 }

@@ -13,7 +13,7 @@ import lombok.With;
 
 @Value
 @With
-@Builder(toBuilder = true)
+@Builder(toBuilder = true, builderClassName = "Builder")
 public class RuleIdentifier {
 
     /** The GeoServer instance name this rule belongs to */

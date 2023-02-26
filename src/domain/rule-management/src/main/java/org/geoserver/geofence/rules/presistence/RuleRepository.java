@@ -1,5 +1,6 @@
 package org.geoserver.geofence.rules.presistence;
 
+import org.geoserver.geofence.rules.model.GrantType;
 import org.geoserver.geofence.rules.model.InsertPosition;
 import org.geoserver.geofence.rules.model.LayerDetails;
 import org.geoserver.geofence.rules.model.Rule;
@@ -8,7 +9,6 @@ import org.geoserver.geofence.rules.model.RuleIdentifier;
 import org.geoserver.geofence.rules.model.RuleLimits;
 import org.geoserver.geofence.rules.model.RuleQuery;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -39,34 +39,32 @@ public interface RuleRepository {
 
     Optional<Rule> findById(long id);
 
+    /**
+     * @throws IllegalStateException if there are multiple rules with the requested priority
+     */
+    Optional<Rule> findByPriority(long priority);
+
     int shift(long priorityStart, long offset);
 
     void swap(long id1, long id2);
 
     /**
-     * @param ruleId
-     * @param styles
-     * @throws NoSuchElementException if the rule does not exist
-     * @throws IllegalArgumentException if the rule has no {@link RuleIdentifier#getLayer() layer
-     *     set}
+     * @throws IllegalArgumentException if the rule does not exist or has no {@link
+     *     RuleIdentifier#getLayer() layer set}
      */
-    void setAllowedStyles(Long ruleId, Set<String> styles);
+    void setAllowedStyles(long ruleId, Set<String> styles);
 
     /**
-     * @param ruleId
-     * @param styles
-     * @throws NoSuchElementException if the rule does not exist
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if the rule does not exist or the access type is not {@link
+     *     GrantType#LIMIT}
      */
-    void setLimits(Long ruleId, RuleLimits limits);
+    void setLimits(long ruleId, RuleLimits limits);
 
     /**
-     * @param ruleId
-     * @param styles
-     * @throws NoSuchElementException if the rule does not exist
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if the rule does not exist or the access type is not {@link
+     *     GrantType#ALLOW}
      */
-    void setLayerDetails(Long ruleId, LayerDetails detailsNew);
+    void setLayerDetails(long ruleId, LayerDetails detailsNew);
 
     Optional<LayerDetails> findLayerDetailsByRuleId(long ruleId);
 }

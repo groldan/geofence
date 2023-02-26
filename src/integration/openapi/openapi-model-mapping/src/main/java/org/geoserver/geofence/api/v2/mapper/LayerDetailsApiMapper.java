@@ -40,6 +40,6 @@ public abstract class LayerDetailsApiMapper {
     @Mapping(target = "area", source = "allowedArea")
     @Mapping(target = "attributes", source = "layerAttributes")
     public abstract LayerDetails updateDetails(
-            @MappingTarget LayerDetails.LayerDetailsBuilder target,
+            @MappingTarget LayerDetails.Builder target,
             org.geoserver.geofence.api.v2.model.LayerDetails source);
 }

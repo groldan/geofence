@@ -19,7 +19,7 @@ import java.util.Date;
  */
 @Value
 @With
-@Builder
+@Builder(toBuilder = true, builderClassName = "Builder")
 @ToString(exclude = {"password"})
 public class GeoserverInstance {
 

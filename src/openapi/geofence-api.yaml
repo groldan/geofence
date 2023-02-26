@@ -86,6 +86,27 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/Count'
+  /rules/query/one/priority/{priority}:
+    get:
+      operationId: findOneRuleByPriority
+      description: Finds the Rule with the given priority
+      tags:
+        - Rules
+      parameters:
+      - name: priority
+        in: path
+        required: true
+        description: The rule priority to search for
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          $ref: '#/components/responses/Rule'
+        '404':
+          description: Not found
+        '409':
+          description: Conflict, there's more than one rule with the requested priority
 
   /rules/id/{id}:
     parameters:
@@ -405,7 +426,7 @@ paths:
       - name: priority
         in: path
         required: true
-        description: The rule identifier to swap priorities with
+        description: The rule priority to search for
         schema:
           type: integer
           format: int64
@@ -414,6 +435,8 @@ paths:
           $ref: '#/components/responses/AdminRule'
         '404':
           description: Not found
+        '409':
+          description: Conflict, there's more than one rule with the requested priority
   /adminrules/query/first:
     post:
       operationId: findFirstAdminRule

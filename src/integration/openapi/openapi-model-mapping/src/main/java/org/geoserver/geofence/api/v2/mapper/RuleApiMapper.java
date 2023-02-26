@@ -1,11 +1,9 @@
 package org.geoserver.geofence.api.v2.mapper;
 
 import org.geoserver.geofence.rules.model.LayerDetails;
-import org.geoserver.geofence.rules.model.LayerDetails.LayerDetailsBuilder;
 import org.geoserver.geofence.rules.model.Rule;
 import org.geoserver.geofence.rules.model.RuleIdentifier;
 import org.geoserver.geofence.rules.model.RuleLimits;
-import org.geoserver.geofence.rules.model.RuleLimits.RuleLimitsBuilder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -76,7 +74,7 @@ public abstract class RuleApiMapper {
 
         org.geoserver.geofence.api.v2.model.RuleLimits patch = limits.orElse(null);
         if (null != patch) {
-            RuleLimitsBuilder builder = target == null ? RuleLimits.builder() : target.toBuilder();
+            RuleLimits.Builder builder = target == null ? RuleLimits.builder() : target.toBuilder();
             target = limitsMapper.updateLimits(builder, patch);
         }
         return target;
@@ -88,7 +86,7 @@ public abstract class RuleApiMapper {
 
         org.geoserver.geofence.api.v2.model.LayerDetails patch = source.orElse(null);
         if (null != patch) {
-            LayerDetailsBuilder detailsBuilder =
+            LayerDetails.Builder detailsBuilder =
                     target == null ? LayerDetails.builder() : target.toBuilder();
             target = detailsMapper.updateDetails(detailsBuilder, patch);
         }
@@ -98,12 +96,12 @@ public abstract class RuleApiMapper {
     @Mapping(target = "identifier", ignore = true)
     @Mapping(target = "ruleLimits", ignore = true)
     abstract Rule updateEntity(
-            @MappingTarget Rule.RuleBuilder entity, org.geoserver.geofence.api.v2.model.Rule dto);
+            @MappingTarget Rule.Builder entity, org.geoserver.geofence.api.v2.model.Rule dto);
 
     @Mapping(target = "instanceName", source = "instancename")
     @Mapping(target = "username", source = "userName")
     @Mapping(target = "rolename", source = "roleName")
     abstract RuleIdentifier updateIdentifier(
-            @MappingTarget RuleIdentifier.RuleIdentifierBuilder entity,
+            @MappingTarget RuleIdentifier.Builder entity,
             org.geoserver.geofence.api.v2.model.Rule dto);
 }

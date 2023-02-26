@@ -61,8 +61,7 @@ public class RuleAdminService {
         }
 
         rule = sanitizeFields(rule);
-        Rule updated = ruleRepository.save(rule);
-        return updated;
+        return ruleRepository.save(rule);
     }
 
     /**
@@ -114,46 +113,27 @@ public class RuleAdminService {
     }
 
     // gr: is it a good idea to delete by user without forcing a geoserver instance?
-    public void deleteRulesByUser(String username) {
-        // Search searchCriteria = new Search(Rule.class);
-        // searchCriteria.addFilter(Filter.equal("username", username));
-        //
-        // List<Rule> list = ruleDAO.search(searchCriteria);
-        // if (LOGGER.isInfoEnabled())
-        // LOGGER.info("Removing " + list.size() + " rules for user " + username);
-        // for (Rule rule : list) {
-        // if (LOGGER.isInfoEnabled())
-        // LOGGER.info("Removing rule for user " + username + ": " + rule);
-        // ruleDAO.remove(rule);
-        // }
-        throw new UnsupportedOperationException("Not yet implemented");
+    public List<Long> deleteRulesByUser(@NonNull String username) {
+        return delete(new RuleFilter().setUser(username));
     }
 
     // gr: is it a good idea to delete by role without forcing a geoserver instance?
-    public void deleteRulesByRole(String rolename) {
-        // Search searchCriteria = new Search(Rule.class);
-        // searchCriteria.addFilter(Filter.equal("rolename", rolename));
-        //
-        // List<Rule> list = ruleDAO.search(searchCriteria);
-        // for (Rule rule : list) {
-        // if (LOGGER.isInfoEnabled())
-        // LOGGER.info("Removing rule for role " + rolename + ": " + rule);
-        // ruleDAO.remove(rule);
-        // }
-        throw new UnsupportedOperationException("Not yet implemented");
+    public List<Long> deleteRulesByRole(@NonNull String rolename) {
+        return delete(new RuleFilter().setRole(rolename));
     }
 
-    public void deleteRulesByInstance(long instanceId) {
-        // Search searchCriteria = new Search(Rule.class);
-        // searchCriteria.addFilter(Filter.equal("instance.id", instanceId));
-        //
-        // List<Rule> list = ruleDAO.search(searchCriteria);
-        // for (Rule rule : list) {
-        // if (LOGGER.isInfoEnabled())
-        // LOGGER.info("Removing rule for instance " + instanceId + ": " + rule);
-        // ruleDAO.remove(rule);
-        // }
-        throw new UnsupportedOperationException("Not yet implemented");
+    public List<Long> deleteRulesByInstance(long instanceId) {
+        return delete(new RuleFilter().setInstance(instanceId));
+    }
+
+    /** Deletes all rules matching the filter and returns their ids */
+    private List<Long> delete(RuleFilter filter) {
+        return this.ruleRepository
+                .query(RuleQuery.of(filter))
+                .map(Rule::getId)
+                .map(id -> ruleRepository.delete(id) ? id : null)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     // REVISIT: return Stream?
@@ -166,7 +146,7 @@ public class RuleAdminService {
      *
      * @param query provides a filter predicate, paging, and priority offset
      */
-    public List<Rule> getList(RuleQuery<RuleFilter> query) {
+    public List<Rule> getList(@NonNull RuleQuery<RuleFilter> query) {
         return ruleRepository.query(query).collect(Collectors.toList());
     }
 
@@ -179,7 +159,7 @@ public class RuleAdminService {
      * @return the matching rule or null if not found
      * @throws BadRequestServiceEx if a wildcard type is used in filter
      */
-    public Optional<Rule> getRule(RuleFilter filter) throws IllegalArgumentException {
+    public Optional<Rule> getRule(@NonNull RuleFilter filter) throws IllegalArgumentException {
         RuleQuery<RuleFilter> query = RuleQuery.of(filter).setPageSize(0).setPageSize(2);
         List<Rule> found = ruleRepository.query(query).collect(Collectors.toList());
         if (found.size() > 1) {
@@ -196,7 +176,8 @@ public class RuleAdminService {
      *
      * <p>Returns the rule having the requested priority, or null if none found.
      */
-    public Rule getRuleByPriority(long priority) throws IllegalArgumentException {
+    public Optional<Rule> getRuleByPriority(long priority) throws IllegalArgumentException {
+        return ruleRepository.findByPriority(priority);
         // Search searchCriteria = new Search(Rule.class);
         // searchCriteria.addFilter(Filter.equal("priority", priority));
         // List<Rule> found = ruleDAO.search(searchCriteria);
@@ -208,7 +189,6 @@ public class RuleAdminService {
         // }
         //
         // return new ShortRule(found.get(0));
-        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     // protected Search buildSearch(Integer page, Integer entries, RuleFilter filter)
@@ -277,7 +257,7 @@ public class RuleAdminService {
     // Limits
     // =========================================================================
 
-    public void setLimits(Long ruleId, RuleLimits limits)
+    public void setLimits(long ruleId, RuleLimits limits)
             throws IllegalArgumentException, NoSuchElementException {
 
         ruleRepository.setLimits(ruleId, limits);
@@ -287,7 +267,7 @@ public class RuleAdminService {
     // Details
     // =========================================================================
 
-    public Optional<LayerDetails> getLayerDetails(Rule rule) {
+    public Optional<LayerDetails> getLayerDetails(@NonNull Rule rule) {
         Objects.requireNonNull(rule.getId());
         return getLayerDetails(rule.getId());
     }
@@ -302,11 +282,19 @@ public class RuleAdminService {
         return ruleRepository.findLayerDetailsByRuleId(ruleId);
     }
 
-    public void setLayerDetails(Long ruleId, LayerDetails detailsNew) {
+    /**
+     * @throws IllegalArgumentException if the rule does not exist or has no {@link
+     *     RuleIdentifier#getLayer() layer set}
+     */
+    public void setLayerDetails(long ruleId, LayerDetails detailsNew) {
         ruleRepository.setLayerDetails(ruleId, detailsNew);
     }
 
-    public void setAllowedStyles(Long ruleId, Set<String> styles) {
+    /**
+     * @throws IllegalArgumentException if the rule does not exist or has no {@link
+     *     RuleIdentifier#getLayer() layer} set
+     */
+    public void setAllowedStyles(long ruleId, Set<String> styles) {
         ruleRepository.setAllowedStyles(ruleId, styles);
     }
 
@@ -316,7 +304,7 @@ public class RuleAdminService {
      * @throws IllegalArgumentException if the rule does not exist or has no {@link
      *     RuleIdentifier#getLayer() layer} set
      */
-    public Set<String> getAllowedStyles(Long ruleId) {
+    public Set<String> getAllowedStyles(long ruleId) {
         return getLayerDetails(ruleId).map(LayerDetails::getAllowedStyles).orElse(Set.of());
     }
 
