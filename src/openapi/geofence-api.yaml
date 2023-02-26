@@ -148,6 +148,20 @@ paths:
   /rules/id/{id}/layer-details:
     parameters:
       - $ref: '#/components/parameters/id'
+    get:
+      operationId: getLayerDetailsByRuleId
+      description: Returns the LayerDetails for the Rule with the given identifier
+      tags:
+        - Rules
+      responses:
+        '200':
+          $ref: '#/components/responses/LayerDetails'
+        '204':
+          description: The rule has a layer set but does not have LayerDetails set
+        '400':
+          description: Bad request if the rule does not have a layer name set
+        '404':
+          description: Not found if the rule does not exist
     put:
       operationId: setRuleLayerDetails
       tags:
@@ -542,6 +556,15 @@ components:
         application/x-jackson-smile:
           schema:
             $ref: 'geofence-model.yaml#/components/schemas/Rule'
+    LayerDetails:
+      description: The requested or updated Rule LayerDetails
+      content:
+        application/json:
+          schema:
+            $ref: 'geofence-model.yaml#/components/schemas/LayerDetails'
+        application/x-jackson-smile:
+          schema:
+            $ref: 'geofence-model.yaml#/components/schemas/LayerDetails'
     AdminRule:
       description: The requested or updated AdminRule
       content:

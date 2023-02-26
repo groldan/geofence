@@ -31,8 +31,9 @@
     <pom.fmt.skip>${fmt.skip}</pom.fmt.skip>
     <spring-boot.version>2.7.8</spring-boot.version>
     <lombok.version>1.18.26</lombok.version>
+    <gs.version>2.23-SNAPSHOT</gs.version>
     <gt.version>29-SNAPSHOT</gt.version>
-    <jts.version>1.19.0</jts.version>
+    <geolatte.version>1.8.2</geolatte.version>
     <mapstruct.version>1.5.3.Final</mapstruct.version>
     <querydsl.version>5.0.0</querydsl.version>
     <testcontainers.version>1.17.4</testcontainers.version>
@@ -70,15 +71,9 @@
         <scope>provided</scope>
       </dependency>
       <dependency>
-        <groupId>org.locationtech.jts</groupId>
-        <artifactId>jts-core</artifactId>
-        <version>${jts.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>xerces</groupId>
-            <artifactId>xercesImpl</artifactId>
-          </exclusion>
-        </exclusions>
+        <groupId>org.geolatte</groupId>
+        <artifactId>geolatte-geom</artifactId>
+        <version>${geolatte.version}</version>
       </dependency>
       <dependency>
         <groupId>org.mapstruct</groupId>

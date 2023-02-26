@@ -66,6 +66,30 @@ components:
       enum:
         - INTERSECT
         - CLIP
+        
+
+    Geom:
+      anyOf:
+      - $ref: '#/components/schemas/wkt'
+      - $ref: '#/components/schemas/wkb'
+
+    wkt:
+      type: object
+      required:
+      - wkt
+      properties:
+        wkt:
+          type: string
+          example: "CRS=EPSG:4326;MULTIPOLYGON(....)"
+    wkb:
+      type: object
+      required:
+      - wkb
+      properties:
+        wkb:
+          type: string
+          format: byte
+
     Rule:
       type: object
       description: >-
@@ -114,17 +138,13 @@ components:
         layer:
           type: string
           nullable: true
-        layerDetails:
-          $ref: '#/components/schemas/LayerDetails'
     RuleLimits:
       type: object
       description: Defines general limits (such as an Area ) for a Rule, when  access type is LIMIT
       nullable: true
       properties:
         allowedArea:
-          type: string
-          example: 'SRID=4326;MULTIPOLYGON (((0 0, 1 1, 2 2, 3 3, 0 0)))'
-          nullable: true
+          $ref: '#/components/schemas/Geom'
         spatialFilterType:
           $ref: '#/components/schemas/SpatialFilterType'
         catalogMode:
@@ -152,9 +172,7 @@ components:
           type: string
           nullable: true
         allowedArea:
-          type: string
-          nullable: true
-          example: "CRS=EPSG:4326;MULTIPOLYGON(....)"
+          $ref: '#/components/schemas/Geom'
         spatialFilterType:
           $ref: '#/components/schemas/SpatialFilterType'
         catalogMode:

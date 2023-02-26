@@ -15,7 +15,7 @@ import org.openapitools.jackson.nullable.JsonNullable;
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
         uses = {
             JsonNullableMapper.class,
-            GeometryWKTMapper.class,
+            GeometryApiMapper.class,
             LayerAttributeApiMapper.class,
             EnumsApiMapper.class
         })

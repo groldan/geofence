@@ -1,6 +1,6 @@
 package org.geoserver.geofence.api.v2.rules;
 
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.HttpStatus.OK;
 
 import lombok.NonNull;
@@ -128,15 +128,22 @@ public class RulesApiImpl implements RulesApiDelegate {
     }
 
     @Override
+    public ResponseEntity<LayerDetails> getLayerDetailsByRuleId(Long id) {
+        LayerDetails details =
+                service.getLayerDetails(id).map(layerDetailsMapper::map).orElse(null);
+        return ResponseEntity.status(details == null ? NO_CONTENT : OK).body(details);
+    }
+
+    @Override
     public ResponseEntity<Void> setRuleLayerDetails(Long id, LayerDetails layerDetails) {
         org.geoserver.geofence.rules.model.LayerDetails ld = layerDetailsMapper.map(layerDetails);
-        service.setDetails(id, ld);
+        service.setLayerDetails(id, ld);
         return ResponseEntity.status(OK).build();
     }
 
     @Override
     public ResponseEntity<Void> unsetRuleLayerDetails(Long id) {
-        service.setDetails(id, null);
+        service.setLayerDetails(id, null);
         return ResponseEntity.status(OK).build();
     }
 

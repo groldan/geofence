@@ -1,5 +1,7 @@
 package org.geoserver.geofence.client.integration;
 
+import static org.springframework.http.HttpStatus.*;
+
 import lombok.RequiredArgsConstructor;
 
 import org.geoserver.geofence.api.v2.client.RulesApi;
@@ -16,7 +18,10 @@ import org.geoserver.geofence.rules.model.RuleFilter;
 import org.geoserver.geofence.rules.model.RuleLimits;
 import org.geoserver.geofence.rules.model.RuleQuery;
 import org.geoserver.geofence.rules.presistence.RuleRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.util.List;
 import java.util.Objects;
@@ -147,7 +152,29 @@ public class RuleRepositoryClientAdaptor implements RuleRepository {
     }
 
     @Override
-    public void setDetails(Long ruleId, LayerDetails detailsNew) {
+    public Optional<LayerDetails> findLayerDetailsByRuleId(long ruleId) {
+        ResponseEntity<org.geoserver.geofence.api.v2.model.LayerDetails> response;
+        try {
+            response = apiClient.getLayerDetailsByRuleIdWithHttpInfo(ruleId);
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new IllegalArgumentException("Rule does not exist", e);
+        } catch (HttpClientErrorException.BadRequest e) {
+            throw new IllegalArgumentException("Rule has no layer set", e);
+        } catch (RestClientResponseException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+
+        HttpStatus statusCode = response.getStatusCode();
+        if (OK.equals(statusCode)) {
+            return Optional.of(detailsMapper.map(response.getBody()));
+        } else if (NO_CONTENT.equals(statusCode)) {
+            return Optional.empty();
+        }
+        throw new IllegalStateException("Unexpected response status code: " + statusCode);
+    }
+
+    @Override
+    public void setLayerDetails(Long ruleId, LayerDetails detailsNew) {
         apiClient.setRuleLayerDetails(ruleId, detailsMapper.map(detailsNew));
     }
 }

@@ -11,14 +11,14 @@ import org.junit.jupiter.api.Test;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class GeometryWKTMapperTest {
+class GeometryApiMapperTest {
 
     @BeforeEach
     void setUp() throws Exception {}
 
     @Test
     void testPattern() {
-        Pattern pattern = GeometryWKTMapper.pattern;
+        Pattern pattern = GeometryApiMapper.pattern;
 
         final String test1 = "SRID=123456567 ;\t\t MULTIPOLYGON ( ( ( )))";
         final String test2 = "SRID=4326;             MULTIPOLYGON((()))";

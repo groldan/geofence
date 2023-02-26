@@ -13,7 +13,7 @@ import org.mapstruct.ReportingPolicy;
         unmappedTargetPolicy = ReportingPolicy.ERROR,
         //        nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT,
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-        uses = {JsonNullableMapper.class, GeometryWKTMapper.class, EnumsApiMapper.class})
+        uses = {JsonNullableMapper.class, GeometryApiMapper.class, EnumsApiMapper.class})
 public interface RuleLimitsApiMapper {
 
     org.geoserver.geofence.api.v2.model.RuleLimits toApi(

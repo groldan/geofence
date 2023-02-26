@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
         uses = {
             JsonNullableMapper.class,
             OptionalApiMapper.class,
-            GeometryWKTMapper.class,
+            GeometryApiMapper.class,
             IPAddressRangeApiMapper.class,
             EnumsApiMapper.class
         })

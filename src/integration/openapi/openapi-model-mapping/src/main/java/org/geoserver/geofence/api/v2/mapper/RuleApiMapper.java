@@ -23,7 +23,7 @@ import javax.validation.Valid;
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
         uses = {
             JsonNullableMapper.class, EnumsApiMapper.class, OptionalApiMapper.class,
-            LayerDetailsApiMapper.class, GeometryWKTMapper.class, RuleLimitsApiMapper.class,
+            LayerDetailsApiMapper.class, GeometryApiMapper.class, RuleLimitsApiMapper.class,
             IPAddressRangeApiMapper.class
         })
 public abstract class RuleApiMapper {
@@ -56,7 +56,6 @@ public abstract class RuleApiMapper {
     @Mapping(target = "layer", source = "identifier.layer")
     @Mapping(target = "addressRange", source = "identifier.addressRange")
     @Mapping(target = "limits", source = "ruleLimits")
-    @Mapping(target = "layerDetails", source = "layerDetails")
     public abstract org.geoserver.geofence.api.v2.model.Rule toApi(
             org.geoserver.geofence.rules.model.Rule rule);
 
@@ -64,16 +63,11 @@ public abstract class RuleApiMapper {
 
         RuleIdentifier identifier = updateIdentifier(target.getIdentifier().toBuilder(), source);
 
-        LayerDetails apiDetails =
-                patchLayerDetails(target.getLayerDetails(), source.getLayerDetails());
-
         RuleLimits limits = patchLimits(target.getRuleLimits(), source.getLimits());
 
         org.geoserver.geofence.rules.model.Rule patched = updateEntity(target.toBuilder(), source);
 
-        return patched.withIdentifier(identifier)
-                .withLayerDetails(apiDetails)
-                .withRuleLimits(limits);
+        return patched.withIdentifier(identifier).withRuleLimits(limits);
     }
 
     private RuleLimits patchLimits(
@@ -88,7 +82,7 @@ public abstract class RuleApiMapper {
         return target;
     }
 
-    private LayerDetails patchLayerDetails(
+    public LayerDetails patchLayerDetails(
             LayerDetails target,
             @Valid JsonNullable<org.geoserver.geofence.api.v2.model.LayerDetails> source) {
 
