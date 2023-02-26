@@ -13,8 +13,6 @@ import org.geoserver.geofence.api.v2.server.AdminRulesApiController;
 import org.geoserver.geofence.api.v2.server.AdminRulesApiDelegate;
 import org.geoserver.geofence.api.v2.server.RulesApiController;
 import org.geoserver.geofence.api.v2.server.RulesApiDelegate;
-import org.geoserver.geofence.authorization.rules.RuleReaderService;
-import org.geoserver.geofence.authorization.rules.RuleReaderServiceImpl;
 import org.geoserver.geofence.rules.presistence.RuleRepository;
 import org.geoserver.geofence.rules.service.RuleAdminService;
 import org.openapitools.jackson.nullable.JsonNullableModule;
@@ -22,9 +20,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.NativeWebRequest;
-
-import java.util.Set;
-import java.util.function.Function;
 
 @Configuration(proxyBeanMethods = false)
 @ComponentScan(basePackageClasses = RuleApiMapper.class)
@@ -75,13 +70,5 @@ public class RulesApiConfiguration {
     @Bean
     AdminRuleAdminService adminRuleAdminService(AdminRuleRepository repository) {
         return new AdminRuleAdminService(repository);
-    }
-
-    @Bean
-    RuleReaderService ruleReaderService(
-            AdminRuleRepository adminRulesRepository, RuleRepository ruleRepository) {
-        // TODO: hook users api
-        Function<String, Set<String>> userResolver = s -> Set.of("ROLE_ADMINISTRATOR");
-        return new RuleReaderServiceImpl(adminRulesRepository, ruleRepository, userResolver);
     }
 }

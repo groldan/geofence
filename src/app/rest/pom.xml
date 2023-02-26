@@ -25,11 +25,6 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.geoserver.geofence.domain</groupId>
-      <artifactId>geofence-authorization</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.geoserver.geofence.integration</groupId>
       <artifactId>geofence-integration-jpa</artifactId>
       <version>${project.version}</version>
@@ -38,14 +33,6 @@
       <groupId>org.geoserver.geofence.integration</groupId>
       <artifactId>geofence-openapi-server-impl</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.geotools</groupId>
-      <artifactId>gt-main</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.geotools</groupId>
-      <artifactId>gt-epsg-hsql</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
