@@ -1,7 +1,5 @@
-package org.geoserver.geofence.rest.config;
+package org.geoserver.geofence.config.rest;
 
-import org.geoserver.geofence.access.RuleReaderService;
-import org.geoserver.geofence.access.RuleReaderServiceImpl;
 import org.geoserver.geofence.adminrules.persistence.AdminRuleRepository;
 import org.geoserver.geofence.adminrules.service.AdminRuleAdminService;
 import org.geoserver.geofence.api.v2.mapper.AdminRuleApiMapper;
@@ -15,8 +13,11 @@ import org.geoserver.geofence.api.v2.server.AdminRulesApiController;
 import org.geoserver.geofence.api.v2.server.AdminRulesApiDelegate;
 import org.geoserver.geofence.api.v2.server.RulesApiController;
 import org.geoserver.geofence.api.v2.server.RulesApiDelegate;
+import org.geoserver.geofence.authorization.rules.RuleReaderService;
+import org.geoserver.geofence.authorization.rules.RuleReaderServiceImpl;
 import org.geoserver.geofence.rules.presistence.RuleRepository;
 import org.geoserver.geofence.rules.service.RuleAdminService;
+import org.openapitools.jackson.nullable.JsonNullableModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,11 @@ import java.util.function.Function;
 @Configuration(proxyBeanMethods = false)
 @ComponentScan(basePackageClasses = RuleApiMapper.class)
 public class RulesApiConfiguration {
+
+    @Bean
+    public JsonNullableModule jsonNullableModule() {
+        return new JsonNullableModule();
+    }
 
     @Bean
     public RulesApiController rulesApiController(RulesApiDelegate delegate) {

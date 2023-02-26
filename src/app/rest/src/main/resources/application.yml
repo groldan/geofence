@@ -20,19 +20,9 @@ spring:
     exclude:
       - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
       - org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
 
-  data:
-    web:
-      pageable:
-        default-page-size: 100
-  jpa:
-    show-sql: false
-    open-in-view: false
-    properties:
-      hibernate:
-        '[format_sql]': true
-        '[dialect]': org.hibernate.spatial.dialect.h2geodb.GeoDBDialect
-        '[hbm2ddl.auto]': update
+  data.web.pageable.default-page-size: 100
 
 openapi.geoFence.base-path: /api/v2
 
@@ -41,6 +31,19 @@ geofence:
     url: jdbc:h2:mem:geofence
     username: sa
     password: sa
+    hikari:
+      minimum-idle: 0
+      maximum-pool-size: 20
+  jpa:
+    show-sql: false
+    open-in-view: false
+    generate-ddl: false
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: public
+        hbm2ddl.auto: validate
+#       dialect: org.hibernate.spatial.dialect.h2geodb.GeoDBDialect
 
 springdoc:
   api-docs:
@@ -49,3 +52,19 @@ springdoc:
   swagger-ui:
     enabled: true
     path: ${openapi.geoFence.base-path}/swagger-ui.html
+
+---
+spring.config.activate.on-profile: dev
+
+geofence:
+  datasource:
+    url: jdbc:h2:mem:geofence
+    hikari:
+      minimum-idle: 0
+      maximum-pool-size: 20
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        hbm2ddl.auto: create
+

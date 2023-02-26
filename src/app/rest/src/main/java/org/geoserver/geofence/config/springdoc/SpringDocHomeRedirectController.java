@@ -1,17 +1,22 @@
-package org.geoserver.geofence.springdoc;
+package org.geoserver.geofence.config.springdoc;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 class SpringDocHomeRedirectController {
 
-    @Value("${springdoc.swagger-ui.path}")
     private String basePath;
+
+    /**
+     * @param basePath e.g. {@literal /api/v2/swagger-ui/index.html"}
+     */
+    public SpringDocHomeRedirectController(String basePath) {
+        this.basePath = basePath;
+    }
 
     @RequestMapping(value = "/")
     public String redirectToSwaggerUI() {
-        return "redirect:/api/v2/swagger-ui/index.html";
+        return "redirect:" + basePath;
     }
 }
