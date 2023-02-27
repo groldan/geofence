@@ -1,4 +1,4 @@
-package org.geoserver.geofence.adminrules.persistence;
+package org.geoserver.geofence.adminrules.repository;
 
 import org.geoserver.geofence.adminrules.model.AdminRule;
 import org.geoserver.geofence.adminrules.model.AdminRuleFilter;

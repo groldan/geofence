@@ -2,10 +2,10 @@ package org.geoserver.geofence.jpa.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.geoserver.geofence.adminrules.persistence.AdminRuleRepository;
+import org.geoserver.geofence.adminrules.repository.AdminRuleRepository;
 import org.geoserver.geofence.jpa.integration.mapper.AdminRuleMapper;
 import org.geoserver.geofence.jpa.integration.mapper.RuleMapper;
-import org.geoserver.geofence.rules.presistence.RuleRepository;
+import org.geoserver.geofence.rules.repository.RuleRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 

@@ -17,7 +17,7 @@ import org.geoserver.geofence.rules.model.Rule;
 import org.geoserver.geofence.rules.model.RuleFilter;
 import org.geoserver.geofence.rules.model.RuleLimits;
 import org.geoserver.geofence.rules.model.RuleQuery;
-import org.geoserver.geofence.rules.presistence.RuleRepository;
+import org.geoserver.geofence.rules.repository.RuleRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;

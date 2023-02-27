@@ -15,7 +15,7 @@ import org.geoserver.geofence.rules.model.RuleFilter;
 import org.geoserver.geofence.rules.model.RuleIdentifier;
 import org.geoserver.geofence.rules.model.RuleLimits;
 import org.geoserver.geofence.rules.model.RuleQuery;
-import org.geoserver.geofence.rules.presistence.RuleRepository;
+import org.geoserver.geofence.rules.repository.RuleRepository;
 
 import java.util.List;
 import java.util.NoSuchElementException;

@@ -23,7 +23,7 @@ import org.geoserver.geofence.rules.model.Rule;
 import org.geoserver.geofence.rules.model.RuleFilter;
 import org.geoserver.geofence.rules.model.RuleLimits;
 import org.geoserver.geofence.rules.model.RuleQuery;
-import org.geoserver.geofence.rules.presistence.RuleRepository;
+import org.geoserver.geofence.rules.repository.RuleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

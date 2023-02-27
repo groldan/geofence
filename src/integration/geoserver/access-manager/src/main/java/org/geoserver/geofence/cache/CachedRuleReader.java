@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.geoserver.geofence.authorization.rules.AccessInfo;
 import org.geoserver.geofence.authorization.rules.RuleReaderService;
 import org.geoserver.geofence.authorization.users.AuthUser;
+import org.geoserver.geofence.authorization.users.AuthorizationException;
 import org.geoserver.geofence.authorization.users.AuthorizationService;
 import org.geoserver.geofence.config.GeoFenceConfigurationManager;
 import org.geoserver.geofence.rules.model.RuleFilter;
@@ -161,23 +162,20 @@ public class CachedRuleReader implements RuleReaderService {
     private class UserLoader extends CacheLoader<NamePw, AuthUser> {
 
         @Override
-        public AuthUser load(NamePw user) throws NoAuthException {
+        public AuthUser load(NamePw user) throws AuthorizationException {
             if (LOGGER.isLoggable(Level.FINE))
                 LOGGER.log(Level.FINE, "Loading user '" + user.getName() + "'");
-            AuthUser auth = authorizationService.authorize(user.getName(), user.getPw());
-            if (auth == null) throw new NoAuthException("Can't auth user [" + user.getName() + "]");
-            return auth;
+            return authorizationService.authorize(user.getName(), user.getPw());
         }
 
         @Override
         public ListenableFuture<AuthUser> reload(final NamePw user, AuthUser authUser)
-                throws NoAuthException {
+                throws AuthorizationException {
             if (LOGGER.isLoggable(Level.FINE))
                 LOGGER.log(Level.FINE, "Reloading user '" + user.getName() + "'");
 
             // this is a sync implementation
             AuthUser auth = authorizationService.authorize(user.getName(), user.getPw());
-            if (auth == null) throw new NoAuthException("Can't auth user [" + user.getName() + "]");
             return Futures.immediateFuture(auth);
 
             // todo: we may want a asynchronous implementation
@@ -335,24 +333,6 @@ public class CachedRuleReader implements RuleReaderService {
                 return false;
             }
             return true;
-        }
-    }
-
-    class NoAuthException extends Exception {
-        private static final long serialVersionUID = 1L;
-
-        public NoAuthException() {}
-
-        public NoAuthException(String message) {
-            super(message);
-        }
-
-        public NoAuthException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public NoAuthException(Throwable cause) {
-            super(cause);
         }
     }
 }

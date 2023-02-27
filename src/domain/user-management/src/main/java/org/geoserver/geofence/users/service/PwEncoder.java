@@ -3,7 +3,7 @@
  * GPL 2.0 license, available at the root application directory.
  */
 
-package org.geoserver.geofence.users;
+package org.geoserver.geofence.users.service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;

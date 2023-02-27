@@ -18,7 +18,7 @@ import org.geoserver.geofence.rules.model.Rule;
 import org.geoserver.geofence.rules.model.RuleFilter;
 import org.geoserver.geofence.rules.model.RuleLimits;
 import org.geoserver.geofence.rules.model.RuleQuery;
-import org.geoserver.geofence.rules.presistence.RuleRepository;
+import org.geoserver.geofence.rules.repository.RuleRepository;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,13 +32,13 @@ import java.util.stream.Stream;
 import javax.persistence.EntityNotFoundException;
 
 @TransactionSupported
-public class RuleRepositoryJPAAdaptor implements RuleRepository {
+public class RuleRepositoryJpaAdaptor implements RuleRepository {
 
     private final JpaRuleRepository jparepo;
     private final RuleMapper modelMapper;
     private final PredicateMapper queryMapper;
 
-    public RuleRepositoryJPAAdaptor(JpaRuleRepository jparepo, RuleMapper mapper) {
+    public RuleRepositoryJpaAdaptor(JpaRuleRepository jparepo, RuleMapper mapper) {
         Objects.requireNonNull(jparepo);
         Objects.requireNonNull(mapper);
         this.modelMapper = mapper;

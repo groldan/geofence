@@ -9,7 +9,7 @@ import org.geoserver.geofence.jpa.repository.JpaGeoServerInstanceRepository;
 import org.geoserver.geofence.rules.model.GrantType;
 import org.geoserver.geofence.rules.model.InsertPosition;
 import org.geoserver.geofence.rules.model.Rule;
-import org.geoserver.geofence.rules.presistence.RuleRepository;
+import org.geoserver.geofence.rules.repository.RuleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @SpringBootTest(classes = {GeoFenceJPAIntegrationConfiguration.class})
 @ActiveProfiles("test") // see config props in src/test/resource/application-test.yaml
-class RuleRepositoryJPAAdaptorTest {
+class RuleRepositoryJpaAdaptorTest {
 
     private static final String WORLD =
             "MULTIPOLYGON (((-180 -90, -180 90, 180 90, 180 -90, -180 -90)))";

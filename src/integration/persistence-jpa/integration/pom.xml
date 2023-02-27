@@ -30,6 +30,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.geoserver.geofence.domain</groupId>
+      <artifactId>geofence-user-management</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
     </dependency>

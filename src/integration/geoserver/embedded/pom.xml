@@ -15,13 +15,18 @@
   <artifactId>gs-geofence-embedded</artifactId>
   <dependencies>
     <dependency>
-      <groupId>org.geoserver.geofence.integration.jpa</groupId>
-      <artifactId>geofence-jpa-integration</artifactId>
+      <groupId>org.geoserver.geofence.integration.geoserver</groupId>
+      <artifactId>gs-geofence-restconfig</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geoserver.geofence.integration.geoserver</groupId>
       <artifactId>gs-geofence-access-manager</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geoserver.geofence.integration.jpa</groupId>
+      <artifactId>geofence-jpa-integration</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

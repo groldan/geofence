@@ -17,6 +17,7 @@
   <artifactId>integration</artifactId>
   <packaging>pom</packaging>
   <modules>
+    <module>domain</module>
     <module>persistence-jpa</module>
     <module>openapi</module>
     <module>geoserver</module>

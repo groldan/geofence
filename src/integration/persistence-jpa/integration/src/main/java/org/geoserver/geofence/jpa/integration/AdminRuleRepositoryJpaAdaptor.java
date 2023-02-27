@@ -6,7 +6,7 @@ import lombok.NonNull;
 
 import org.geoserver.geofence.adminrules.model.AdminRule;
 import org.geoserver.geofence.adminrules.model.AdminRuleFilter;
-import org.geoserver.geofence.adminrules.persistence.AdminRuleRepository;
+import org.geoserver.geofence.adminrules.repository.AdminRuleRepository;
 import org.geoserver.geofence.jpa.integration.mapper.AdminRuleMapper;
 import org.geoserver.geofence.jpa.model.QAdminRule;
 import org.geoserver.geofence.jpa.repository.JpaAdminRuleRepository;
@@ -28,13 +28,13 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityNotFoundException;
 
 @TransactionSupported
-public class AdminRuleRepositoryJPAAdaptor implements AdminRuleRepository {
+public class AdminRuleRepositoryJpaAdaptor implements AdminRuleRepository {
 
     private final JpaAdminRuleRepository jparepo;
     private final AdminRuleMapper modelMapper;
     private final PredicateMapper queryMapper;
 
-    public AdminRuleRepositoryJPAAdaptor(JpaAdminRuleRepository jparepo, AdminRuleMapper mapper) {
+    public AdminRuleRepositoryJpaAdaptor(JpaAdminRuleRepository jparepo, AdminRuleMapper mapper) {
         Objects.requireNonNull(jparepo);
         Objects.requireNonNull(mapper);
         this.modelMapper = mapper;

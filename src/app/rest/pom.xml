@@ -15,23 +15,13 @@
   <artifactId>geofence-rest-app</artifactId>
   <dependencies>
     <dependency>
-      <groupId>org.geoserver.geofence.domain</groupId>
-      <artifactId>geofence-rule-management</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.geoserver.geofence.domain</groupId>
-      <artifactId>geofence-adminrule-management</artifactId>
+      <groupId>org.geoserver.geofence.integration.openapi</groupId>
+      <artifactId>geofence-api-impl</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geoserver.geofence.integration.jpa</groupId>
       <artifactId>geofence-jpa-integration</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.geoserver.geofence.integration.openapi</groupId>
-      <artifactId>geofence-api-impl</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

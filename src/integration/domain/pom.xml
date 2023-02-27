@@ -8,64 +8,44 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.geoserver.geofence.integration.openapi</groupId>
-    <artifactId>openapi</artifactId>
+    <groupId>org.geoserver.geofence.integration</groupId>
+    <artifactId>integration</artifactId>
     <version>${revision}</version>
   </parent>
-  <artifactId>geofence-api-impl</artifactId>
+  <artifactId>geofence-domain-spring-integration</artifactId>
   <dependencies>
-    <dependency>
-      <groupId>org.geoserver.geofence.openapi</groupId>
-      <artifactId>geofence-openapi-server</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.geoserver.geofence.integration</groupId>
-      <artifactId>geofence-domain-spring-integration</artifactId>
-      <version>${project.version}</version>
-    </dependency>
     <dependency>
       <groupId>org.geoserver.geofence.domain</groupId>
       <artifactId>geofence-rule-management</artifactId>
       <version>${project.version}</version>
+      <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.geoserver.geofence.domain</groupId>
       <artifactId>geofence-adminrule-management</artifactId>
       <version>${project.version}</version>
+      <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.geoserver.geofence.domain</groupId>
       <artifactId>geofence-user-management</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.dataformat</groupId>
-      <artifactId>jackson-dataformat-smile</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.geoserver.geofence.domain</groupId>
-      <artifactId>geofence-rule-management</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.geoserver.geofence.domain</groupId>
-      <artifactId>geofence-adminrule-management</artifactId>
-      <version>${project.version}</version>
+      <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.geoserver.geofence.domain</groupId>
       <artifactId>geofence-authorization</artifactId>
       <version>${project.version}</version>
+      <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.geoserver.geofence.integration.openapi</groupId>
-      <artifactId>geofence-api-model-mapper</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

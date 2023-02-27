@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.geoserver.geofence.adminrules.model.AdminRule;
 import org.geoserver.geofence.adminrules.model.AdminRuleFilter;
-import org.geoserver.geofence.adminrules.persistence.AdminRuleRepository;
+import org.geoserver.geofence.adminrules.repository.AdminRuleRepository;
 import org.geoserver.geofence.rules.model.InsertPosition;
 import org.geoserver.geofence.rules.model.RuleQuery;
 

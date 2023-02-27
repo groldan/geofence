@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.geoserver.geofence.adminrules.model.AdminRule;
 import org.geoserver.geofence.adminrules.model.AdminRuleFilter;
-import org.geoserver.geofence.adminrules.persistence.AdminRuleRepository;
+import org.geoserver.geofence.adminrules.repository.AdminRuleRepository;
 import org.geoserver.geofence.api.v2.client.AdminRulesApi;
 import org.geoserver.geofence.api.v2.mapper.AdminRuleApiMapper;
 import org.geoserver.geofence.api.v2.mapper.EnumsApiMapper;

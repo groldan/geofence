@@ -1,4 +1,4 @@
-package org.geoserver.geofence.rules.presistence;
+package org.geoserver.geofence.rules.repository;
 
 import org.geoserver.geofence.rules.model.GrantType;
 import org.geoserver.geofence.rules.model.InsertPosition;

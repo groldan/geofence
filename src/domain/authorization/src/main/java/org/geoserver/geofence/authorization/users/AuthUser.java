@@ -14,7 +14,7 @@ import lombok.With;
  */
 @Value
 @With
-@Builder(toBuilder = true)
+@Builder(toBuilder = true, builderClassName = "Builder")
 public class AuthUser {
 
     public static enum Role {

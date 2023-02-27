@@ -3,10 +3,13 @@
  * under the GPL 2.0 license, available at the root application directory.
  */
 
-package org.geoserver.geofence.users;
+package org.geoserver.geofence.users.service;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+
+import org.geoserver.geofence.users.model.GeoServerUser;
+import org.geoserver.geofence.users.repository.GeoServerUserRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,13 +23,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserAdminService {
 
-    private final GeoServerUserReposiroty repository;
+    private final @NonNull GeoServerUserRepository repository;
 
     // ==========================================================================
     // Basic operations
 
     public GeoServerUser insert(@NonNull GeoServerUser user) {
-        return repository.insert(pwdEncode(user));
+        return repository.insert(pwdEncode(user).withCreatedDate(null));
     }
 
     public GeoServerUser update(GeoServerUser user) {

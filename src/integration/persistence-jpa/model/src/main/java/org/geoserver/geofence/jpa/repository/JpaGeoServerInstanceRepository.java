@@ -3,7 +3,6 @@ package org.geoserver.geofence.jpa.repository;
 import lombok.NonNull;
 
 import org.geoserver.geofence.jpa.model.GeoServerInstance;
-import org.geoserver.geofence.jpa.model.Rule;
 import org.geoserver.geofence.jpa.model.RuleIdentifier;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -12,7 +11,8 @@ import java.util.Optional;
 
 @TransactionSupported
 public interface JpaGeoServerInstanceRepository
-        extends JpaRepository<GeoServerInstance, Long>, QuerydslPredicateExecutor<Rule> {
+        extends JpaRepository<GeoServerInstance, Long>,
+                QuerydslPredicateExecutor<GeoServerInstance> {
 
     Optional<GeoServerInstance> findByName(String instanceName);
 

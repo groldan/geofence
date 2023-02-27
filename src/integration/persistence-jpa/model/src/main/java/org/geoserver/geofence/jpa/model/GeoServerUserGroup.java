@@ -56,7 +56,7 @@ public class GeoServerUserGroup extends Auditable implements Serializable {
 
     /** The date creation. */
     @Column(updatable = false)
-    private LocalDateTime creationDate;
+    private LocalDateTime createdDate;
 
     /** The enabled. */
     @Column(nullable = false)

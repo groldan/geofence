@@ -1,6 +1,5 @@
 package org.geoserver.geofence.config.api;
 
-import org.geoserver.geofence.adminrules.persistence.AdminRuleRepository;
 import org.geoserver.geofence.adminrules.service.AdminRuleAdminService;
 import org.geoserver.geofence.api.v2.mapper.AdminRuleApiMapper;
 import org.geoserver.geofence.api.v2.mapper.EnumsApiMapper;
@@ -13,15 +12,23 @@ import org.geoserver.geofence.api.v2.server.AdminRulesApiController;
 import org.geoserver.geofence.api.v2.server.AdminRulesApiDelegate;
 import org.geoserver.geofence.api.v2.server.RulesApiController;
 import org.geoserver.geofence.api.v2.server.RulesApiDelegate;
-import org.geoserver.geofence.rules.presistence.RuleRepository;
+import org.geoserver.geofence.config.domain.AdminRuleAdminServiceConfiguration;
+import org.geoserver.geofence.config.domain.RuleAdminServiceConfiguration;
+import org.geoserver.geofence.config.domain.UserAdminServiceConfiguration;
 import org.geoserver.geofence.rules.service.RuleAdminService;
 import org.openapitools.jackson.nullable.JsonNullableModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.web.context.request.NativeWebRequest;
 
 @Configuration(proxyBeanMethods = false)
+@Import({
+    RuleAdminServiceConfiguration.class,
+    AdminRuleAdminServiceConfiguration.class,
+    UserAdminServiceConfiguration.class
+})
 @ComponentScan(basePackageClasses = RuleApiMapper.class)
 public class RulesApiConfiguration {
 
@@ -60,15 +67,5 @@ public class RulesApiConfiguration {
             EnumsApiMapper enumsMapper,
             NativeWebRequest request) {
         return new AdminRulesApiImpl(service, mapper, enumsMapper, request);
-    }
-
-    @Bean
-    RuleAdminService ruleAdminService(RuleRepository ruleRepository) {
-        return new RuleAdminService(ruleRepository);
-    }
-
-    @Bean
-    AdminRuleAdminService adminRuleAdminService(AdminRuleRepository repository) {
-        return new AdminRuleAdminService(repository);
     }
 }

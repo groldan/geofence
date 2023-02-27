@@ -3,7 +3,7 @@
  * under the GPL 2.0 license, available at the root application directory.
  */
 
-package org.geoserver.geofence.users;
+package org.geoserver.geofence.users.model;
 
 import lombok.Builder;
 import lombok.Builder.Default;
@@ -48,13 +48,13 @@ public class GeoServerUser {
     private String emailAddress;
 
     /** The date of creation of this user */
-    private LocalDateTime creationDate;
+    private LocalDateTime createdDate;
 
     /** Is the GSUser Enabled or not in the system? */
     private boolean enabled = true;
 
     /** Is the GSUser a GS admin? */
-    private boolean admin = false;
+    @Default private boolean admin = false;
 
     /** Groups to which the user is associated */
     @Default private Set<String> userGroups = Set.of();

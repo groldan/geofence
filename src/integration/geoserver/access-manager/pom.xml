@@ -15,6 +15,11 @@
   <artifactId>gs-geofence-access-manager</artifactId>
   <dependencies>
     <dependency>
+      <groupId>org.geoserver.geofence.integration</groupId>
+      <artifactId>geofence-domain-spring-integration</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.geoserver.geofence.domain</groupId>
       <artifactId>geofence-authorization</artifactId>
       <version>${project.version}</version>
