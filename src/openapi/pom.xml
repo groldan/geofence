@@ -13,7 +13,7 @@
     <version>${revision}</version>
   </parent>
   <groupId>org.geoserver.geofence.openapi</groupId>
-  <artifactId>geofence-openapi</artifactId>
+  <artifactId>openapi</artifactId>
   <packaging>pom</packaging>
 
   <modules>

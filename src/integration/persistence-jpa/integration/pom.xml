@@ -9,15 +9,14 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.geoserver.geofence.integration</groupId>
-    <artifactId>geofence-openapi-integration</artifactId>
+    <artifactId>persistence-jpa</artifactId>
     <version>${revision}</version>
   </parent>
-
-  <artifactId>geofence-openapi-model-mapper</artifactId>
+  <artifactId>geofence-jpa-integration</artifactId>
   <dependencies>
     <dependency>
-      <groupId>org.geoserver.geofence.openapi</groupId>
-      <artifactId>geofence-openapi-model</artifactId>
+      <groupId>org.geoserver.geofence.integration</groupId>
+      <artifactId>geofence-jpa-persistence</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -29,10 +28,6 @@
       <groupId>org.geoserver.geofence.domain</groupId>
       <artifactId>geofence-adminrule-management</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -48,7 +43,23 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
+
   <build>
     <plugins>
       <plugin>

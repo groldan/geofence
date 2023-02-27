@@ -14,7 +14,7 @@
   </parent>
 
   <groupId>org.geoserver.geofence.app</groupId>
-  <artifactId>geofence-application</artifactId>
+  <artifactId>application</artifactId>
   <packaging>pom</packaging>
 
   <modules>

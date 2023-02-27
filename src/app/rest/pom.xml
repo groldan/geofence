@@ -9,7 +9,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.geoserver.geofence.app</groupId>
-    <artifactId>geofence-application</artifactId>
+    <artifactId>application</artifactId>
     <version>${revision}</version>
   </parent>
   <artifactId>geofence-rest-app</artifactId>
@@ -26,7 +26,7 @@
     </dependency>
     <dependency>
       <groupId>org.geoserver.geofence.integration</groupId>
-      <artifactId>geofence-integration-jpa</artifactId>
+      <artifactId>geofence-jpa-integration</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
