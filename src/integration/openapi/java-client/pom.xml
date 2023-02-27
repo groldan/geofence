@@ -29,8 +29,8 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.geoserver.geofence.integration</groupId>
-      <artifactId>geofence-openapi-model-mapper</artifactId>
+      <groupId>org.geoserver.geofence.integration.openapi</groupId>
+      <artifactId>geofence-api-model-mapper</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

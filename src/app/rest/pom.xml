@@ -25,13 +25,13 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.geoserver.geofence.integration</groupId>
+      <groupId>org.geoserver.geofence.integration.jpa</groupId>
       <artifactId>geofence-jpa-integration</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.geoserver.geofence.integration</groupId>
-      <artifactId>geofence-openapi-server-impl</artifactId>
+      <groupId>org.geoserver.geofence.integration.openapi</groupId>
+      <artifactId>geofence-api-impl</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

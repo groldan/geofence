@@ -13,6 +13,7 @@
     <version>${revision}</version>
   </parent>
 
+  <groupId>org.geoserver.geofence.integration.jpa</groupId>
   <artifactId>persistence-jpa</artifactId>
   <packaging>pom</packaging>
   <modules>
