@@ -1,6 +1,6 @@
-package org.geoserver.geofence.autoconfigure.rest;
+package org.geoserver.geofence.autoconfigure.api;
 
-import org.geoserver.geofence.config.rest.RulesApiConfiguration;
+import org.geoserver.geofence.config.api.RulesApiConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
 

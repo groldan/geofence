@@ -1,4 +1,4 @@
-package org.geoserver.geofence.config.rest;
+package org.geoserver.geofence.config.api;
 
 import org.geoserver.geofence.adminrules.persistence.AdminRuleRepository;
 import org.geoserver.geofence.adminrules.service.AdminRuleAdminService;
@@ -26,11 +26,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 public class RulesApiConfiguration {
 
     @Bean
-    public JsonNullableModule jsonNullableModule() {
-        return new JsonNullableModule();
-    }
-
-    @Bean
     public RulesApiController rulesApiController(RulesApiDelegate delegate) {
         return new RulesApiController(delegate);
     }
@@ -38,6 +33,11 @@ public class RulesApiConfiguration {
     @Bean
     public AdminRulesApiController adminRulesApiController(AdminRulesApiDelegate delegate) {
         return new AdminRulesApiController(delegate);
+    }
+
+    @Bean
+    JsonNullableModule jsonNullableModule() {
+        return new JsonNullableModule();
     }
 
     @Bean
