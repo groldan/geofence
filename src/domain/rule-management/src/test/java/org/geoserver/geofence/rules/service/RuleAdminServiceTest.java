@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.same;
@@ -52,7 +52,7 @@ class RuleAdminServiceTest {
     @Test
     void insertRule() {
         Rule rule = Rule.allow();
-        Rule expected = rule.withId(1L);
+        Rule expected = rule.withId("1");
         when(repository.create(eq(rule), eq(InsertPosition.FIXED))).thenReturn(expected);
 
         Rule created = service.insert(rule);
@@ -66,7 +66,7 @@ class RuleAdminServiceTest {
         IllegalArgumentException expected =
                 assertThrows(
                         IllegalArgumentException.class,
-                        () -> service.insert(Rule.deny().withId(100L)));
+                        () -> service.insert(Rule.deny().withId("100")));
         assertThat(expected.getMessage()).contains("a new Rule must not have id, got 100");
     }
 
@@ -103,8 +103,8 @@ class RuleAdminServiceTest {
 
     @Test
     void testUpdate() {
-        Rule rule = Rule.allow().withId(5L);
-        Rule ret = Rule.allow().withId(5L);
+        Rule rule = Rule.allow().withId("5");
+        Rule ret = Rule.allow().withId("5");
         when(repository.save(same(rule))).thenReturn(ret);
         assertSame(ret, service.update(rule));
 
@@ -116,7 +116,7 @@ class RuleAdminServiceTest {
     void update_sanitizeFields() {
         Rule rule =
                 Rule.allow()
-                        .withId(1L)
+                        .withId("1")
                         .withPriority(10)
                         .withService("wms")
                         .withRequest("getcapabilities");
@@ -145,28 +145,28 @@ class RuleAdminServiceTest {
 
     @Test
     void swapPriority() {
-        service.swapPriority(1, 2);
-        verify(repository, times(1)).swap(1, 2);
+        service.swapPriority("1", "2");
+        verify(repository, times(1)).swap(eq("1"), eq("2"));
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void testGet() {
-        Optional<Rule> expected = Optional.of(Rule.deny().withId(10L));
-        when(repository.findById(10L)).thenReturn(expected);
-        assertSame(expected, service.get(10L));
-        verify(repository, times(1)).findById(10L);
+        Optional<Rule> expected = Optional.of(Rule.deny().withId("10L"));
+        when(repository.findById("10L")).thenReturn(expected);
+        assertSame(expected, service.get("10L"));
+        verify(repository, times(1)).findById("10L");
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void delete() {
-        when(repository.delete(1)).thenReturn(false);
-        when(repository.delete(2)).thenReturn(true);
-        assertFalse(service.delete(1));
-        assertTrue(service.delete(2));
-        verify(repository, times(1)).delete(1);
-        verify(repository, times(1)).delete(2);
+        when(repository.delete("1")).thenReturn(false);
+        when(repository.delete("2")).thenReturn(true);
+        assertFalse(service.delete("1"));
+        assertTrue(service.delete("2"));
+        verify(repository, times(1)).delete("1");
+        verify(repository, times(1)).delete("2");
         verifyNoMoreInteractions(repository);
     }
 
@@ -191,27 +191,27 @@ class RuleAdminServiceTest {
     }
 
     private void testDeleteWithFilter(
-            RuleFilter expectedFilter, Supplier<List<Long>> serviceMethodCall) {
+            RuleFilter expectedFilter, Supplier<List<String>> serviceMethodCall) {
         // four rules match the filter
-        Rule match1 = Rule.allow().withId(1L);
-        Rule match2 = Rule.allow().withId(2L);
-        Rule match3 = Rule.allow().withId(3L);
-        Rule match4 = Rule.allow().withId(4L);
+        Rule match1 = Rule.allow().withId("1");
+        Rule match2 = Rule.allow().withId("2");
+        Rule match3 = Rule.allow().withId("3");
+        Rule match4 = Rule.allow().withId("4");
 
         // but only rules with id 1 and 3 get deleted (lets say someone else deleted them)
-        when(repository.delete(eq(1L))).thenReturn(true);
-        when(repository.delete(eq(2L))).thenReturn(false);
-        when(repository.delete(eq(3L))).thenReturn(true);
-        when(repository.delete(eq(4L))).thenReturn(false);
+        when(repository.delete(eq("1"))).thenReturn(true);
+        when(repository.delete(eq("2"))).thenReturn(false);
+        when(repository.delete(eq("3"))).thenReturn(true);
+        when(repository.delete(eq("4"))).thenReturn(false);
 
         when(repository.query(eq(RuleQuery.of(expectedFilter))))
                 .thenReturn(Stream.of(match1, match2, match3, match4));
 
-        List<Long> expectedIds = List.of(1L, 3L);
-        List<Long> ret = serviceMethodCall.get();
+        List<String> expectedIds = List.of("1", "3");
+        List<String> ret = serviceMethodCall.get();
 
         verify(repository, times(1)).query(eq(RuleQuery.of(expectedFilter)));
-        verify(repository, times(4)).delete(anyLong());
+        verify(repository, times(4)).delete(anyString());
 
         assertThat(ret).isEqualTo(expectedIds);
     }
@@ -261,7 +261,7 @@ class RuleAdminServiceTest {
 
     @Test
     void getRule_multiple_matches() {
-        RuleFilter filter = new RuleFilter().setInstance(1L).setLayer("states");
+        RuleFilter filter = new RuleFilter().setInstance("1").setLayer("states");
         RuleQuery<RuleFilter> query = RuleQuery.of(filter).setPageSize(0).setPageSize(2);
 
         when(repository.query(eq(query))).thenReturn(List.of(Rule.allow(), Rule.deny()).stream());
@@ -273,7 +273,7 @@ class RuleAdminServiceTest {
 
     @Test
     void getRule_no_match() {
-        RuleFilter filter = new RuleFilter().setInstance(1L).setLayer("states");
+        RuleFilter filter = new RuleFilter().setInstance("1").setLayer("states");
         RuleQuery<RuleFilter> query = RuleQuery.of(filter).setPageSize(0).setPageSize(2);
 
         when(repository.query(eq(query))).thenReturn(Stream.of());
@@ -282,10 +282,10 @@ class RuleAdminServiceTest {
 
     @Test
     void getRule() {
-        RuleFilter filter = new RuleFilter().setInstance(1L).setLayer("states");
+        RuleFilter filter = new RuleFilter().setInstance("1").setLayer("states");
         RuleQuery<RuleFilter> query = RuleQuery.of(filter).setPageSize(0).setPageSize(2);
 
-        Rule match = Rule.allow().withId(10L);
+        Rule match = Rule.allow().withId("10L");
         when(repository.query(eq(query))).thenReturn(Stream.of(match));
 
         assertThat(service.getRule(filter)).isPresent().get().isEqualTo(match);
@@ -321,12 +321,12 @@ class RuleAdminServiceTest {
 
     @Test
     void setLimits() {
-        service.setLimits(1L, (RuleLimits) null);
-        verify(repository, times(1)).setLimits(eq(1L), isNull());
+        service.setLimits("1", (RuleLimits) null);
+        verify(repository, times(1)).setLimits(eq("1"), isNull());
 
         RuleLimits limits = RuleLimits.builder().catalogMode(CatalogMode.CHALLENGE).build();
-        service.setLimits(1L, limits);
-        verify(repository, times(1)).setLimits(eq(1L), same(limits));
+        service.setLimits("1", limits);
+        verify(repository, times(1)).setLimits(eq("1"), same(limits));
     }
 
     @Test
@@ -336,13 +336,13 @@ class RuleAdminServiceTest {
         Rule withNullId = Rule.allow();
         assertThrows(NullPointerException.class, () -> service.getLayerDetails(withNullId));
 
-        Rule rule = withNullId.withId(100L);
+        Rule rule = withNullId.withId("100");
         LayerDetails ld = LayerDetails.builder().allowedStyles(Set.of("s1")).build();
 
-        when(repository.findLayerDetailsByRuleId(eq(100L))).thenReturn(Optional.of(ld));
+        when(repository.findLayerDetailsByRuleId(eq("100"))).thenReturn(Optional.of(ld));
 
         Optional<LayerDetails> actual = service.getLayerDetails(rule);
-        verify(repository, times(1)).findLayerDetailsByRuleId(eq(100L));
+        verify(repository, times(1)).findLayerDetailsByRuleId(eq("100"));
         assertThat(actual).isPresent().get().isEqualTo(ld);
     }
 
@@ -350,43 +350,43 @@ class RuleAdminServiceTest {
     void getLayerDetailsLong() {
         LayerDetails ld = LayerDetails.builder().allowedStyles(Set.of("s1")).build();
 
-        when(repository.findLayerDetailsByRuleId(eq(100L))).thenReturn(Optional.of(ld));
+        when(repository.findLayerDetailsByRuleId(eq("100"))).thenReturn(Optional.of(ld));
 
-        Optional<LayerDetails> actual = service.getLayerDetails(100L);
-        verify(repository, times(1)).findLayerDetailsByRuleId(eq(100L));
+        Optional<LayerDetails> actual = service.getLayerDetails("100");
+        verify(repository, times(1)).findLayerDetailsByRuleId(eq("100"));
         assertThat(actual).isPresent().get().isEqualTo(ld);
     }
 
     @Test
     void setLayerDetails() {
-        service.setLayerDetails(1L, null);
-        verify(repository, times(1)).setLayerDetails(eq(1L), isNull());
+        service.setLayerDetails("1", null);
+        verify(repository, times(1)).setLayerDetails(eq("1"), isNull());
         clearInvocations(repository);
 
         LayerDetails ld = LayerDetails.builder().allowedStyles(Set.of("s1")).build();
-        service.setLayerDetails(2L, ld);
-        verify(repository, times(1)).setLayerDetails(eq(2L), same(ld));
+        service.setLayerDetails("2", ld);
+        verify(repository, times(1)).setLayerDetails(eq("2"), same(ld));
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void setAllowedStyles() {
-        service.setAllowedStyles(1L, null);
-        verify(repository, times(1)).setAllowedStyles(eq(1L), isNull());
+        service.setAllowedStyles("1", null);
+        verify(repository, times(1)).setAllowedStyles(eq("1"), isNull());
         clearInvocations(repository);
 
-        service.setAllowedStyles(1L, Set.of("s1", "s2"));
-        verify(repository, times(1)).setAllowedStyles(eq(1L), eq(Set.of("s1", "s2")));
+        service.setAllowedStyles("1", Set.of("s1", "s2"));
+        verify(repository, times(1)).setAllowedStyles(eq("1"), eq(Set.of("s1", "s2")));
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void getAllowedStyles() {
         LayerDetails ld = LayerDetails.builder().allowedStyles(Set.of("s1")).build();
-        when(repository.findLayerDetailsByRuleId(eq(1L))).thenReturn(Optional.of(ld));
+        when(repository.findLayerDetailsByRuleId(eq("1"))).thenReturn(Optional.of(ld));
 
-        Set<String> actual = service.getAllowedStyles(1l);
-        verify(repository, times(1)).findLayerDetailsByRuleId(eq(1L));
+        Set<String> actual = service.getAllowedStyles("1");
+        verify(repository, times(1)).findLayerDetailsByRuleId(eq("1"));
         verifyNoMoreInteractions(repository);
         assertThat(actual).isEqualTo(ld.getAllowedStyles());
     }

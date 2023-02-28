@@ -1,5 +1,6 @@
 package org.geoserver.geofence.api.v2.client.integration;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import org.geoserver.geofence.adminrules.model.AdminRule;
@@ -44,7 +45,7 @@ public class AdminRuleRepositoryClientAdaptor implements AdminRuleRepository {
     }
 
     @Override
-    public Optional<AdminRule> findById(long id) {
+    public Optional<AdminRule> findById(@NonNull String id) {
         org.geoserver.geofence.api.v2.model.AdminRule rule;
         try {
             rule = apiClient.getAdminRuleById(id);
@@ -130,12 +131,12 @@ public class AdminRuleRepositoryClientAdaptor implements AdminRuleRepository {
     }
 
     @Override
-    public void swap(long id1, long id2) {
+    public void swap(@NonNull String id1, @NonNull String id2) {
         apiClient.swapAdminRulesById(id1, id2);
     }
 
     @Override
-    public boolean deleteById(long id) {
+    public boolean deleteById(@NonNull String id) {
         try {
             apiClient.deleteAdminRuleById(id);
             return true;

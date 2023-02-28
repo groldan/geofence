@@ -20,9 +20,9 @@ public interface GeoServerUserGroupRepository {
      */
     GeoServerUserGroup save(GeoServerUserGroup group);
 
-    boolean delete(long id);
+    boolean delete(String id);
 
-    Optional<GeoServerUserGroup> findById(long id);
+    Optional<GeoServerUserGroup> findById(String id);
 
     Optional<GeoServerUserGroup> findByName(String name);
 

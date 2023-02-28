@@ -27,7 +27,7 @@ import java.util.Set;
 @ToString(exclude = "password")
 public class GeoServerUser {
 
-    private Long id;
+    private String id;
 
     /**
      * External Id. An ID used in an external systems. This field should simplify Geofence

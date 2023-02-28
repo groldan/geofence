@@ -81,7 +81,7 @@ public class RuleAdminService {
     }
 
     /** Swaps the priorities of two rules. */
-    public void swapPriority(long id1, long id2) {
+    public void swapPriority(String id1, String id2) {
         ruleRepository.swap(id1, id2);
     }
 
@@ -102,32 +102,32 @@ public class RuleAdminService {
         return rule.withIdentifier(identifier);
     }
 
-    public Optional<Rule> get(long id) {
+    public Optional<Rule> get(String id) {
         return ruleRepository.findById(id);
     }
 
     // gr: used to return boolean but threw a NotFoundServiceEx, changed to return false instead for
     // consistency
-    public boolean delete(long id) {
+    public boolean delete(String id) {
         return ruleRepository.delete(id);
     }
 
     // gr: is it a good idea to delete by user without forcing a geoserver instance?
-    public List<Long> deleteRulesByUser(@NonNull String username) {
+    public List<String> deleteRulesByUser(@NonNull String username) {
         return delete(new RuleFilter().setUser(username));
     }
 
     // gr: is it a good idea to delete by role without forcing a geoserver instance?
-    public List<Long> deleteRulesByRole(@NonNull String rolename) {
+    public List<String> deleteRulesByRole(@NonNull String rolename) {
         return delete(new RuleFilter().setRole(rolename));
     }
 
-    public List<Long> deleteRulesByInstance(long instanceId) {
+    public List<String> deleteRulesByInstance(long instanceId) {
         return delete(new RuleFilter().setInstance(instanceId));
     }
 
     /** Deletes all rules matching the filter and returns their ids */
-    private List<Long> delete(RuleFilter filter) {
+    private List<String> delete(RuleFilter filter) {
         return this.ruleRepository
                 .query(RuleQuery.of(filter))
                 .map(Rule::getId)
@@ -257,7 +257,7 @@ public class RuleAdminService {
     // Limits
     // =========================================================================
 
-    public void setLimits(long ruleId, RuleLimits limits)
+    public void setLimits(String ruleId, RuleLimits limits)
             throws IllegalArgumentException, NoSuchElementException {
 
         ruleRepository.setLimits(ruleId, limits);
@@ -278,7 +278,7 @@ public class RuleAdminService {
      * @throws IllegalArgumentException if the rule does not exist or has no {@link
      *     RuleIdentifier#getLayer() layer} set
      */
-    public Optional<LayerDetails> getLayerDetails(long ruleId) {
+    public Optional<LayerDetails> getLayerDetails(String ruleId) {
         return ruleRepository.findLayerDetailsByRuleId(ruleId);
     }
 
@@ -286,7 +286,7 @@ public class RuleAdminService {
      * @throws IllegalArgumentException if the rule does not exist or has no {@link
      *     RuleIdentifier#getLayer() layer set}
      */
-    public void setLayerDetails(long ruleId, LayerDetails detailsNew) {
+    public void setLayerDetails(String ruleId, LayerDetails detailsNew) {
         ruleRepository.setLayerDetails(ruleId, detailsNew);
     }
 
@@ -294,7 +294,7 @@ public class RuleAdminService {
      * @throws IllegalArgumentException if the rule does not exist or has no {@link
      *     RuleIdentifier#getLayer() layer} set
      */
-    public void setAllowedStyles(long ruleId, Set<String> styles) {
+    public void setAllowedStyles(String ruleId, Set<String> styles) {
         ruleRepository.setAllowedStyles(ruleId, styles);
     }
 
@@ -304,7 +304,7 @@ public class RuleAdminService {
      * @throws IllegalArgumentException if the rule does not exist or has no {@link
      *     RuleIdentifier#getLayer() layer} set
      */
-    public Set<String> getAllowedStyles(long ruleId) {
+    public Set<String> getAllowedStyles(String ruleId) {
         return getLayerDetails(ruleId).map(LayerDetails::getAllowedStyles).orElse(Set.of());
     }
 

@@ -13,11 +13,11 @@ import java.util.Optional;
 @Mapper(
         componentModel = "spring",
         injectionStrategy = InjectionStrategy.CONSTRUCTOR,
-        uses = RuleIdentifierMapper.class,
+        uses = {RuleIdentifierJpaMapper.class},
         // in case something changes in the model, make the code generation fail so we make sure the
         // mapper stays in sync
         unmappedTargetPolicy = ReportingPolicy.ERROR)
-public interface RuleMapper {
+public interface RuleJpaMapper {
 
     Rule toModel(org.geoserver.geofence.jpa.model.Rule entity);
 
@@ -50,4 +50,12 @@ public interface RuleMapper {
 
     org.geoserver.geofence.rules.model.RuleLimits toModel(
             org.geoserver.geofence.jpa.model.RuleLimits value);
+
+    static String encodeId(Long id) {
+        return id == null ? null : Long.toHexString(id);
+    }
+
+    static Long decodeId(String id) {
+        return id == null ? null : Long.decode(id);
+    }
 }

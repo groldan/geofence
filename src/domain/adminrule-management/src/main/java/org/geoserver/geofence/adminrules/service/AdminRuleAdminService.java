@@ -38,7 +38,11 @@ public class AdminRuleAdminService {
     }
 
     public AdminRule insert(AdminRule rule, InsertPosition position) {
-        return repository.create(rule, position);
+        try {
+            return repository.create(rule, position);
+        } catch (RuntimeException e) {
+            throw e;
+        }
     }
 
     public AdminRule update(AdminRule rule) {
@@ -62,22 +66,35 @@ public class AdminRuleAdminService {
         return repository.shiftPriority(priorityStart, offset);
     }
 
-    public void swap(long id1, long id2) {
+    public void swap(@NonNull String id1, @NonNull String id2) {
         repository.swap(id1, id2);
     }
 
     /**
      * @throws IllegalArgumentException if the filter produces more than one result
      */
-    public Optional<AdminRule> get(long id) {
+    public Optional<AdminRule> get(@NonNull String id) {
         return repository.findById(id);
     }
 
-    public Optional<AdminRule> get(AdminRuleFilter filter) {
+    /**
+     * Return a single Rule according to the filter.
+     *
+     * <p>Search for a precise rule match. No ANY filter is allowed. Name/id specification with
+     * default inclusion is not allowed.
+     *
+     * @return the matching rule or null if not found
+     * @throws BadRequestServiceEx if a wildcard type is used in filter
+     */
+    public Optional<AdminRule> getRule(AdminRuleFilter filter) {
         return repository.findOne(filter);
     }
 
-    public boolean delete(long id) {
+    public Optional<AdminRule> getFirstMatch(AdminRuleFilter filter) {
+        return repository.findFirst(filter);
+    }
+
+    public boolean delete(@NonNull String id) {
         return repository.deleteById(id);
     }
 
@@ -135,19 +152,6 @@ public class AdminRuleAdminService {
     }
 
     /**
-     * Return a single Rule according to the filter.
-     *
-     * <p>Search for a precise rule match. No ANY filter is allowed. Name/id specification with
-     * default inclusion is not allowed.
-     *
-     * @return the matching rule or null if not found
-     * @throws BadRequestServiceEx if a wildcard type is used in filter
-     */
-    public Optional<AdminRule> getRule(AdminRuleFilter filter) {
-        return repository.findOne(filter);
-    }
-
-    /**
      * Return the Rules according to the priority.
      *
      * <p>Returns the rules having priority greater or equal to <code>priority</code>
@@ -183,7 +187,7 @@ public class AdminRuleAdminService {
         return repository.count(filter);
     }
 
-    public boolean exists(Long id) {
+    public boolean exists(@NonNull String id) {
         return repository.findById(id).isPresent();
     }
 

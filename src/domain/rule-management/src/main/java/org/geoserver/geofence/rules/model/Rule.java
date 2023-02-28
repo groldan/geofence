@@ -18,7 +18,7 @@ public class Rule {
 
     private static final RuleIdentifier EMPTY_IDENTIFIER = RuleIdentifier.builder().build();
 
-    private Long id;
+    private String id;
 
     private long priority;
 

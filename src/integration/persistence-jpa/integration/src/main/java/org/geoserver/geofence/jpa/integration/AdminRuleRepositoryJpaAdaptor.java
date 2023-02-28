@@ -1,5 +1,7 @@
 package org.geoserver.geofence.jpa.integration;
 
+import static org.geoserver.geofence.jpa.integration.mapper.AdminRuleJpaMapper.decodeId;
+
 import com.querydsl.core.types.Predicate;
 
 import lombok.NonNull;
@@ -7,7 +9,7 @@ import lombok.NonNull;
 import org.geoserver.geofence.adminrules.model.AdminRule;
 import org.geoserver.geofence.adminrules.model.AdminRuleFilter;
 import org.geoserver.geofence.adminrules.repository.AdminRuleRepository;
-import org.geoserver.geofence.jpa.integration.mapper.AdminRuleMapper;
+import org.geoserver.geofence.jpa.integration.mapper.AdminRuleJpaMapper;
 import org.geoserver.geofence.jpa.model.QAdminRule;
 import org.geoserver.geofence.jpa.repository.JpaAdminRuleRepository;
 import org.geoserver.geofence.jpa.repository.TransactionRequired;
@@ -31,10 +33,11 @@ import javax.persistence.EntityNotFoundException;
 public class AdminRuleRepositoryJpaAdaptor implements AdminRuleRepository {
 
     private final JpaAdminRuleRepository jparepo;
-    private final AdminRuleMapper modelMapper;
+    private final AdminRuleJpaMapper modelMapper;
     private final PredicateMapper queryMapper;
 
-    public AdminRuleRepositoryJpaAdaptor(JpaAdminRuleRepository jparepo, AdminRuleMapper mapper) {
+    public AdminRuleRepositoryJpaAdaptor(
+            JpaAdminRuleRepository jparepo, AdminRuleJpaMapper mapper) {
         Objects.requireNonNull(jparepo);
         Objects.requireNonNull(mapper);
         this.modelMapper = mapper;
@@ -57,8 +60,8 @@ public class AdminRuleRepositoryJpaAdaptor implements AdminRuleRepository {
     }
 
     @Override
-    public Optional<AdminRule> findById(long id) {
-        return jparepo.findById(id).map(modelMapper::toModel);
+    public Optional<AdminRule> findById(@NonNull String id) {
+        return jparepo.findById(decodeId(id).longValue()).map(modelMapper::toModel);
     }
 
     @Override
@@ -169,7 +172,7 @@ public class AdminRuleRepositoryJpaAdaptor implements AdminRuleRepository {
 
     @Override
     @TransactionRequired
-    public void swap(long id1, long id2) {
+    public void swap(@NonNull String id1, @NonNull String id2) {
         org.geoserver.geofence.jpa.model.AdminRule rule1 = getOrThrow(id1);
         org.geoserver.geofence.jpa.model.AdminRule rule2 = getOrThrow(id2);
 
@@ -184,8 +187,8 @@ public class AdminRuleRepositoryJpaAdaptor implements AdminRuleRepository {
 
     @Override
     @TransactionRequired
-    public boolean deleteById(long id) {
-        return jparepo.deleteById(id);
+    public boolean deleteById(@NonNull String id) {
+        return jparepo.deleteById(decodeId(id).longValue());
     }
 
     @Override
@@ -203,10 +206,10 @@ public class AdminRuleRepositoryJpaAdaptor implements AdminRuleRepository {
                 "A predicate must be provided, deleting all AdminRules is not allowed");
     }
 
-    private org.geoserver.geofence.jpa.model.AdminRule getOrThrow(Long ruleId) {
+    private org.geoserver.geofence.jpa.model.AdminRule getOrThrow(@NonNull String ruleId) {
         org.geoserver.geofence.jpa.model.AdminRule rule;
         try {
-            rule = jparepo.getReferenceById(ruleId);
+            rule = jparepo.getReferenceById(decodeId(ruleId).longValue());
         } catch (EntityNotFoundException e) {
             throw new NoSuchElementException("AdminRule " + ruleId + " does not exist");
         }

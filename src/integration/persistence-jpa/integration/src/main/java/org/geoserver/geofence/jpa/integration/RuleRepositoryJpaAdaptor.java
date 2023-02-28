@@ -1,10 +1,12 @@
 package org.geoserver.geofence.jpa.integration;
 
+import static org.geoserver.geofence.jpa.integration.mapper.RuleJpaMapper.decodeId;
+
 import com.querydsl.core.types.Predicate;
 
 import lombok.NonNull;
 
-import org.geoserver.geofence.jpa.integration.mapper.RuleMapper;
+import org.geoserver.geofence.jpa.integration.mapper.RuleJpaMapper;
 import org.geoserver.geofence.jpa.model.GrantType;
 import org.geoserver.geofence.jpa.model.LayerDetails;
 import org.geoserver.geofence.jpa.model.QRule;
@@ -35,10 +37,10 @@ import javax.persistence.EntityNotFoundException;
 public class RuleRepositoryJpaAdaptor implements RuleRepository {
 
     private final JpaRuleRepository jparepo;
-    private final RuleMapper modelMapper;
+    private final RuleJpaMapper modelMapper;
     private final PredicateMapper queryMapper;
 
-    public RuleRepositoryJpaAdaptor(JpaRuleRepository jparepo, RuleMapper mapper) {
+    public RuleRepositoryJpaAdaptor(JpaRuleRepository jparepo, RuleJpaMapper mapper) {
         Objects.requireNonNull(jparepo);
         Objects.requireNonNull(mapper);
         this.modelMapper = mapper;
@@ -47,8 +49,8 @@ public class RuleRepositoryJpaAdaptor implements RuleRepository {
     }
 
     @Override
-    public Optional<Rule> findById(long id) {
-        return jparepo.findById(id).map(modelMapper::toModel);
+    public Optional<Rule> findById(@NonNull String id) {
+        return jparepo.findById(decodeId(id)).map(modelMapper::toModel);
     }
 
     @Override
@@ -120,13 +122,13 @@ public class RuleRepositoryJpaAdaptor implements RuleRepository {
 
     @Override
     @TransactionRequired
-    public boolean delete(long id) {
-        return jparepo.deleteById(id);
+    public boolean delete(@NonNull String id) {
+        return jparepo.deleteById(decodeId(id).longValue());
     }
 
     @Override
-    public boolean existsById(long id) {
-        return jparepo.existsById(id);
+    public boolean existsById(@NonNull String id) {
+        return jparepo.existsById(decodeId(id));
     }
 
     @Override
@@ -137,7 +139,7 @@ public class RuleRepositoryJpaAdaptor implements RuleRepository {
 
     @Override
     @TransactionRequired
-    public void swap(long id1, long id2) {
+    public void swap(String id1, String id2) {
 
         org.geoserver.geofence.jpa.model.Rule rule1 = getOrThrow(id1);
         org.geoserver.geofence.jpa.model.Rule rule2 = getOrThrow(id2);
@@ -153,7 +155,7 @@ public class RuleRepositoryJpaAdaptor implements RuleRepository {
 
     @Override
     @TransactionRequired
-    public void setAllowedStyles(long ruleId, Set<String> styles) {
+    public void setAllowedStyles(@NonNull String ruleId, Set<String> styles) {
 
         org.geoserver.geofence.jpa.model.Rule rule = getOrThrow(ruleId);
 
@@ -171,7 +173,7 @@ public class RuleRepositoryJpaAdaptor implements RuleRepository {
 
     @Override
     @TransactionRequired
-    public void setLimits(long ruleId, RuleLimits limits) {
+    public void setLimits(String ruleId, RuleLimits limits) {
         org.geoserver.geofence.jpa.model.Rule rule = getOrThrow(ruleId);
         if (rule.getIdentifier().getAccess() != GrantType.LIMIT) {
             throw new IllegalArgumentException("Rule is not of LIMIT type");
@@ -185,7 +187,7 @@ public class RuleRepositoryJpaAdaptor implements RuleRepository {
     @Override
     @TransactionRequired
     public void setLayerDetails(
-            long ruleId, org.geoserver.geofence.rules.model.LayerDetails detailsNew) {
+            String ruleId, org.geoserver.geofence.rules.model.LayerDetails detailsNew) {
 
         org.geoserver.geofence.jpa.model.Rule rule = getOrThrow(ruleId);
 
@@ -203,7 +205,7 @@ public class RuleRepositoryJpaAdaptor implements RuleRepository {
     @Override
     @TransactionReadOnly
     public Optional<org.geoserver.geofence.rules.model.LayerDetails> findLayerDetailsByRuleId(
-            long ruleId) {
+            @NonNull String ruleId) {
 
         org.geoserver.geofence.jpa.model.Rule jparule = getOrThrow(ruleId);
 
@@ -218,10 +220,10 @@ public class RuleRepositoryJpaAdaptor implements RuleRepository {
         return Optional.of(modelMapper.toModel(jpadetails));
     }
 
-    private org.geoserver.geofence.jpa.model.Rule getOrThrow(Long ruleId) {
+    private org.geoserver.geofence.jpa.model.Rule getOrThrow(@NonNull String ruleId) {
         org.geoserver.geofence.jpa.model.Rule rule;
         try {
-            rule = jparepo.getReferenceById(ruleId);
+            rule = jparepo.getReferenceById(decodeId(ruleId));
         } catch (EntityNotFoundException e) {
             throw new IllegalArgumentException("Rule " + ruleId + " does not exist");
         }

@@ -36,7 +36,7 @@ public class UserAdminService {
         return repository.save(pwdEncode(user));
     }
 
-    public boolean delete(long id) {
+    public boolean delete(@NonNull String id) {
         return repository.delete(id);
     }
 
@@ -46,11 +46,11 @@ public class UserAdminService {
      *
      * @return Basic GSUser, with some info left unreferenced.
      */
-    public Optional<GeoServerUser> get(long id) {
+    public Optional<GeoServerUser> get(@NonNull String id) {
         return repository.findById(id).map(this::pwdDecode);
     }
 
-    public Optional<GeoServerUser> get(String name) {
+    public Optional<GeoServerUser> getByName(@NonNull String name) {
         return repository.findByName(name).map(this::pwdDecode);
     }
 

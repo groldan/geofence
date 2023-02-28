@@ -61,7 +61,7 @@ public class RulesApiImpl implements RulesApiDelegate {
     }
 
     @Override
-    public ResponseEntity<Void> deleteRuleById(Long id) {
+    public ResponseEntity<Void> deleteRuleById(@NonNull String id) {
 
         boolean deleted = service.delete(id);
         HttpStatus status = deleted ? OK : NOT_FOUND;
@@ -98,7 +98,7 @@ public class RulesApiImpl implements RulesApiDelegate {
     }
 
     @Override
-    public ResponseEntity<Rule> getRuleById(Long id) {
+    public ResponseEntity<Rule> getRuleById(@NonNull String id) {
         Optional<org.geoserver.geofence.rules.model.Rule> found = service.get(id);
 
         return ResponseEntity.status(found.isPresent() ? OK : NOT_FOUND)
@@ -128,39 +128,39 @@ public class RulesApiImpl implements RulesApiDelegate {
     }
 
     @Override
-    public ResponseEntity<Boolean> ruleExistsById(Long id) {
+    public ResponseEntity<Boolean> ruleExistsById(@NonNull String id) {
 
         return ResponseEntity.ok(service.get(id).isPresent());
     }
 
     @Override
-    public ResponseEntity<Void> setRuleAllowedStyles(Long id, Set<String> requestBody) {
+    public ResponseEntity<Void> setRuleAllowedStyles(@NonNull String id, Set<String> requestBody) {
         service.setAllowedStyles(id, requestBody);
         return ResponseEntity.status(OK).build();
     }
 
     @Override
-    public ResponseEntity<LayerDetails> getLayerDetailsByRuleId(Long id) {
+    public ResponseEntity<LayerDetails> getLayerDetailsByRuleId(@NonNull String id) {
         LayerDetails details =
                 service.getLayerDetails(id).map(layerDetailsMapper::map).orElse(null);
         return ResponseEntity.status(details == null ? NO_CONTENT : OK).body(details);
     }
 
     @Override
-    public ResponseEntity<Void> setRuleLayerDetails(Long id, LayerDetails layerDetails) {
+    public ResponseEntity<Void> setRuleLayerDetails(@NonNull String id, LayerDetails layerDetails) {
         org.geoserver.geofence.rules.model.LayerDetails ld = layerDetailsMapper.map(layerDetails);
         service.setLayerDetails(id, ld);
         return ResponseEntity.status(OK).build();
     }
 
     @Override
-    public ResponseEntity<Void> unsetRuleLayerDetails(Long id) {
+    public ResponseEntity<Void> unsetRuleLayerDetails(@NonNull String id) {
         service.setLayerDetails(id, null);
         return ResponseEntity.status(OK).build();
     }
 
     @Override
-    public ResponseEntity<Void> setRuleLimits(Long id, RuleLimits ruleLimits) {
+    public ResponseEntity<Void> setRuleLimits(@NonNull String id, RuleLimits ruleLimits) {
         service.setLimits(id, limitsMapper.toModel(ruleLimits));
         return ResponseEntity.status(OK).build();
     }
@@ -172,13 +172,13 @@ public class RulesApiImpl implements RulesApiDelegate {
     }
 
     @Override
-    public ResponseEntity<Void> swapRulesById(Long id, Long id2) {
+    public ResponseEntity<Void> swapRulesById(@NonNull String id, @NonNull String id2) {
         service.swapPriority(id, id2);
         return ResponseEntity.status(OK).build();
     }
 
     @Override
-    public ResponseEntity<Rule> updateRuleById(Long id, Rule patchBody) {
+    public ResponseEntity<Rule> updateRuleById(@NonNull String id, Rule patchBody) {
         org.geoserver.geofence.rules.model.Rule rule =
                 service.get(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
 

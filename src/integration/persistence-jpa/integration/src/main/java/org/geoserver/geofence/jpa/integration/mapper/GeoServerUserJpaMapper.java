@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
         // in case something changes in the model, make the code generation fail so we make sure the
         // mapper stays in sync
         unmappedTargetPolicy = ReportingPolicy.ERROR)
-public interface JPAGeoServerUserMapper {
+public interface GeoServerUserJpaMapper {
 
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "createdDate", ignore = true)
@@ -37,5 +37,13 @@ public interface JPAGeoServerUserMapper {
                 : groups.stream()
                         .map(org.geoserver.geofence.jpa.model.GeoServerUserGroup::getName)
                         .collect(Collectors.toSet());
+    }
+
+    static String encodeId(Long id) {
+        return id == null ? null : Long.toHexString(id);
+    }
+
+    static Long decodeId(String id) {
+        return id == null ? null : Long.decode(id);
     }
 }

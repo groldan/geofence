@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 public class GeoServerUserGroup {
 
     /** The identity assigned by the storage provider. */
-    private Long id;
+    private String id;
 
     /**
      * External Id. An ID used in an external systems. This field should simplify Geofence

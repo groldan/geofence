@@ -31,14 +31,14 @@ class AuthorizationServiceImplTest {
         assertThrows(NullPointerException.class, () -> authService.authorize(null, "s3cret"));
         assertThrows(NullPointerException.class, () -> authService.authorize("jdoe", null));
 
-        when(userService.get(eq("jdoe"))).thenReturn(Optional.empty());
+        when(userService.getByName(eq("jdoe"))).thenReturn(Optional.empty());
         assertThrows(UserNotFoundException.class, () -> authService.authorize("jdoe", "s3cret"));
 
         GeoServerUser user = GeoServerUser.builder().name("jdoe").password("notsecret").build();
         GeoServerUser admin = user.withName("admin").withAdmin(true);
 
-        when(userService.get(eq("jdoe"))).thenReturn(Optional.of(user));
-        when(userService.get(eq("admin"))).thenReturn(Optional.of(admin));
+        when(userService.getByName(eq("jdoe"))).thenReturn(Optional.of(user));
+        when(userService.getByName(eq("admin"))).thenReturn(Optional.of(admin));
 
         assertThrows(
                 InvalidCredentialsException.class, () -> authService.authorize("jdoe", "s3cret"));

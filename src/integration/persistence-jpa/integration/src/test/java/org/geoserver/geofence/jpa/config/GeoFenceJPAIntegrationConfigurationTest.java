@@ -3,8 +3,8 @@ package org.geoserver.geofence.jpa.config;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.geoserver.geofence.adminrules.repository.AdminRuleRepository;
-import org.geoserver.geofence.jpa.integration.mapper.AdminRuleMapper;
-import org.geoserver.geofence.jpa.integration.mapper.RuleMapper;
+import org.geoserver.geofence.jpa.integration.mapper.AdminRuleJpaMapper;
+import org.geoserver.geofence.jpa.integration.mapper.RuleJpaMapper;
 import org.geoserver.geofence.rules.repository.RuleRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -25,8 +25,8 @@ class GeoFenceJPAIntegrationConfigurationTest {
                             .hasNotFailed()
                             .hasSingleBean(RuleRepository.class)
                             .hasSingleBean(AdminRuleRepository.class)
-                            .hasSingleBean(RuleMapper.class)
-                            .hasSingleBean(AdminRuleMapper.class);
+                            .hasSingleBean(RuleJpaMapper.class)
+                            .hasSingleBean(AdminRuleJpaMapper.class);
                 });
     }
 }

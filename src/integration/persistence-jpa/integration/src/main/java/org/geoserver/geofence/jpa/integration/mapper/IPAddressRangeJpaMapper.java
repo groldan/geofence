@@ -12,7 +12,7 @@ import org.mapstruct.ReportingPolicy;
         // in case something changes in the model, make the code generation fail so we make sure the
         // mapper stays in sync
         unmappedTargetPolicy = ReportingPolicy.ERROR)
-interface IPAddressRangeMapper {
+interface IPAddressRangeJpaMapper {
 
     public abstract org.geoserver.geofence.jpa.model.IPAddressRange toEntity(
             IPAddressRange addressRange);

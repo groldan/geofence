@@ -15,13 +15,13 @@ import java.util.stream.Stream;
 
 public interface RuleRepository {
 
-    boolean existsById(long id);
+    boolean existsById(String id);
 
     Rule create(Rule rule, InsertPosition position);
 
     Rule save(Rule rule);
 
-    boolean delete(long id);
+    boolean delete(String id);
 
     int count();
 
@@ -37,7 +37,7 @@ public interface RuleRepository {
      */
     Stream<Rule> query(RuleQuery<RuleFilter> query);
 
-    Optional<Rule> findById(long id);
+    Optional<Rule> findById(String id);
 
     /**
      * @throws IllegalStateException if there are multiple rules with the requested priority
@@ -46,25 +46,25 @@ public interface RuleRepository {
 
     int shift(long priorityStart, long offset);
 
-    void swap(long id1, long id2);
+    void swap(String id1, String id2);
 
     /**
      * @throws IllegalArgumentException if the rule does not exist or has no {@link
      *     RuleIdentifier#getLayer() layer set}
      */
-    void setAllowedStyles(long ruleId, Set<String> styles);
+    void setAllowedStyles(String ruleId, Set<String> styles);
 
     /**
      * @throws IllegalArgumentException if the rule does not exist or the access type is not {@link
      *     GrantType#LIMIT}
      */
-    void setLimits(long ruleId, RuleLimits limits);
+    void setLimits(String ruleId, RuleLimits limits);
 
     /**
      * @throws IllegalArgumentException if the rule does not exist or the access type is not {@link
      *     GrantType#ALLOW}
      */
-    void setLayerDetails(long ruleId, LayerDetails detailsNew);
+    void setLayerDetails(String ruleId, LayerDetails detailsNew);
 
-    Optional<LayerDetails> findLayerDetailsByRuleId(long ruleId);
+    Optional<LayerDetails> findLayerDetailsByRuleId(String ruleId);
 }

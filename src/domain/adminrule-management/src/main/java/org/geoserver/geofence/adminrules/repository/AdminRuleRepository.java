@@ -19,7 +19,7 @@ public interface AdminRuleRepository {
      */
     AdminRule save(AdminRule rule);
 
-    Optional<AdminRule> findById(long id);
+    Optional<AdminRule> findById(String id);
 
     /**
      * Returns a single entity matching the given {@link AdminRuleFilter} or {@link
@@ -46,9 +46,9 @@ public interface AdminRuleRepository {
 
     int shiftPriority(long priorityStart, long offset);
 
-    void swap(long id1, long id2);
+    void swap(String id1, String id2);
 
-    boolean deleteById(long id);
+    boolean deleteById(String id);
 
     int delete(AdminRuleFilter filter);
 

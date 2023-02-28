@@ -99,8 +99,7 @@ components:
         - access
       properties:
         id:
-          type: integer
-          format: int64
+          type: string
           nullable: true
         priority:
           type: integer
@@ -270,8 +269,7 @@ components:
         - access
       properties:
         id:
-          type: integer
-          format: int64
+          type: string
           nullable: true
         priority:
           type: integer

@@ -9,7 +9,7 @@ import org.mapstruct.ReportingPolicy;
         // in case something changes in the model, make the code generation fail so we make sure the
         // mapper stays in sync
         unmappedTargetPolicy = ReportingPolicy.ERROR)
-public interface JPAGeoServerUserGroupMapper {
+public interface GeoServerUserGroupJpaMapper {
 
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "createdDate", ignore = true)
@@ -20,4 +20,12 @@ public interface JPAGeoServerUserGroupMapper {
 
     org.geoserver.geofence.users.model.GeoServerUserGroup map(
             org.geoserver.geofence.jpa.model.GeoServerUserGroup group);
+
+    static String encodeId(Long id) {
+        return id == null ? null : Long.toHexString(id);
+    }
+
+    static Long decodeId(String id) {
+        return id == null ? null : Long.decode(id);
+    }
 }

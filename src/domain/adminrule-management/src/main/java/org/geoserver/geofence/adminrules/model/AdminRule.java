@@ -27,7 +27,7 @@ import org.geoserver.geofence.rules.model.IPAddressRange;
 @Builder(toBuilder = true)
 public class AdminRule {
 
-    private Long id;
+    private String id;
 
     private long priority;
 

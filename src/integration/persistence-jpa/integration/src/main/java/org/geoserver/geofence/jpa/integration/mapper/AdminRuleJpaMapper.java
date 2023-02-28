@@ -12,8 +12,8 @@ import org.mapstruct.ReportingPolicy;
         // in case something changes in the model, make the code generation fail so we make sure the
         // mapper stays in sync
         unmappedTargetPolicy = ReportingPolicy.ERROR,
-        uses = AdminRuleIdentifierMapper.class)
-public interface AdminRuleMapper {
+        uses = {AdminRuleIdentifierJpaMapper.class})
+public interface AdminRuleJpaMapper {
 
     public abstract AdminRule toModel(org.geoserver.geofence.jpa.model.AdminRule entity);
 
@@ -22,4 +22,12 @@ public interface AdminRuleMapper {
     @Mapping(target = "lastModifiedBy", ignore = true)
     @Mapping(target = "lastModifiedDate", ignore = true)
     public abstract org.geoserver.geofence.jpa.model.AdminRule toEntity(AdminRule model);
+
+    static String encodeId(Long id) {
+        return id == null ? null : Long.toHexString(id);
+    }
+
+    static Long decodeId(String id) {
+        return id == null ? null : Long.decode(id);
+    }
 }

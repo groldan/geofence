@@ -28,7 +28,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
         GeoServerUser user =
                 userAdminService
-                        .get(username)
+                        .getByName(username)
                         .orElseThrow(
                                 () ->
                                         new UserNotFoundException(

@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.geoserver.geofence.adminrules.model.AdminGrantType;
 import org.geoserver.geofence.adminrules.model.AdminRule;
 import org.geoserver.geofence.adminrules.model.AdminRuleFilter;
-import org.geoserver.geofence.adminrules.repository.AdminRuleRepository;
+import org.geoserver.geofence.adminrules.service.AdminRuleAdminService;
 import org.geoserver.geofence.rules.model.CatalogMode;
 import org.geoserver.geofence.rules.model.GrantType;
 import org.geoserver.geofence.rules.model.LayerAttribute;
@@ -25,7 +25,6 @@ import org.geoserver.geofence.rules.model.RuleFilter.TextFilter;
 import org.geoserver.geofence.rules.model.RuleLimits;
 import org.geoserver.geofence.rules.model.RuleQuery;
 import org.geoserver.geofence.rules.model.SpatialFilterType;
-import org.geoserver.geofence.rules.repository.RuleRepository;
 import org.geoserver.geofence.rules.service.RuleAdminService;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
@@ -46,7 +45,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * <B>Note:</B> <TT>service</TT> and <TT>request</TT> params are usually set by the client, and by
@@ -61,9 +59,9 @@ public class RuleReaderServiceImpl implements RuleReaderService {
 
     // private final static Logger LOGGER = LogManager.getLogger(RuleReaderServiceImpl.class);
 
-    private final AdminRuleRepository adminRulesRepo;
-    private final RuleRepository rulesRepo;
-    private final Function<String, Set<String>> userResolver;
+    private final AdminRuleAdminService adminRulesRepo;
+    private final RuleAdminService rulesRepo;
+    private final Function<String, Set<String>> userRolesResolver;
 
     @Override
     public AccessInfo getAccessInfo(RuleFilter filter) {
@@ -359,7 +357,7 @@ public class RuleReaderServiceImpl implements RuleReaderService {
     private LayerDetails getLayerDetails(Rule rule) {
         final boolean hasLayer = null != rule.getIdentifier().getLayer();
         if (hasLayer) {
-            return rulesRepo.findLayerDetailsByRuleId(rule.getId()).orElse(null);
+            return rulesRepo.getLayerDetails(rule.getId()).orElse(null);
         }
         return null;
     }
@@ -489,7 +487,7 @@ public class RuleReaderServiceImpl implements RuleReaderService {
             // filter.getRole().isIncludeDefault());
             // List<Rule> found = getRuleAux(filter, roleFilter);
 
-            List<Rule> found = rulesRepo.query(RuleQuery.of(filter)).collect(Collectors.toList());
+            List<Rule> found = rulesRepo.getList(RuleQuery.of(filter));
             ret.put(null, found);
         } else {
             for (String role : finalRoleFilter) {
@@ -528,7 +526,7 @@ public class RuleReaderServiceImpl implements RuleReaderService {
         filter = filter.clone();
         filter.setRole(role);
         filter.getRole().setIncludeDefault(true);
-        return rulesRepo.query(RuleQuery.of(filter)).collect(Collectors.toList());
+        return rulesRepo.getList(RuleQuery.of(filter));
     }
 
     /**
@@ -556,7 +554,7 @@ public class RuleReaderServiceImpl implements RuleReaderService {
                 // rolenames
 
                 if (username != null) {
-                    Set<String> userRoles = userResolver.apply(username);
+                    Set<String> userRoles = userRolesResolver.apply(username);
                     for (String role : requestedRoles) {
                         if (userRoles.contains(role)) {
                             finalRoleFilter.add(role);
@@ -575,7 +573,7 @@ public class RuleReaderServiceImpl implements RuleReaderService {
 
             case ANY:
                 if (username != null) {
-                    Set<String> resolvedRoles = userResolver.apply(username);
+                    Set<String> resolvedRoles = userRolesResolver.apply(username);
                     if (!resolvedRoles.isEmpty()) {
                         finalRoleFilter = resolvedRoles;
                     } else {
@@ -678,7 +676,7 @@ public class RuleReaderServiceImpl implements RuleReaderService {
             // isAdmin = rule == null ? false : rule.getAccess() == AdminGrantType.ADMIN;
             isAdmin =
                     adminRulesRepo
-                            .findOne(adminRuleFilter)
+                            .getRule(adminRuleFilter)
                             .map(AdminRule::getAccess)
                             .map(AdminGrantType.ADMIN::equals)
                             .orElse(false);
@@ -687,7 +685,7 @@ public class RuleReaderServiceImpl implements RuleReaderService {
             adminRuleFilter.setRole(RuleFilter.asTextValue(finalRoleFilter));
             adminRuleFilter.getRole().setIncludeDefault(true);
             adminRuleFilter.setGrantType(AdminGrantType.ADMIN);
-            Optional<AdminRule> found = adminRulesRepo.findFirst(adminRuleFilter);
+            Optional<AdminRule> found = adminRulesRepo.getFirstMatch(adminRuleFilter);
             isAdmin = found.isPresent();
 
             // for (String role : finalRoleFilter) {

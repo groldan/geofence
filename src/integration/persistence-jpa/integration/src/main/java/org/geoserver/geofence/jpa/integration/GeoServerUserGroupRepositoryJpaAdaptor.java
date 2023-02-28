@@ -1,10 +1,12 @@
 package org.geoserver.geofence.jpa.integration;
 
+import static org.geoserver.geofence.jpa.integration.mapper.GeoServerUserGroupJpaMapper.decodeId;
+
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 import lombok.NonNull;
 
-import org.geoserver.geofence.jpa.integration.mapper.JPAGeoServerUserGroupMapper;
+import org.geoserver.geofence.jpa.integration.mapper.GeoServerUserGroupJpaMapper;
 import org.geoserver.geofence.jpa.model.QGeoServerUserGroup;
 import org.geoserver.geofence.jpa.repository.JpaGeoServerUserGroupRepository;
 import org.geoserver.geofence.jpa.repository.TransactionRequired;
@@ -23,11 +25,11 @@ import java.util.stream.StreamSupport;
 public class GeoServerUserGroupRepositoryJpaAdaptor implements GeoServerUserGroupRepository {
 
     private final JpaGeoServerUserGroupRepository jpaRepository;
-    private final JPAGeoServerUserGroupMapper mapper;
+    private final GeoServerUserGroupJpaMapper mapper;
 
     public GeoServerUserGroupRepositoryJpaAdaptor(
             @NonNull JpaGeoServerUserGroupRepository jpaRepository,
-            @NonNull JPAGeoServerUserGroupMapper mapper) {
+            @NonNull GeoServerUserGroupJpaMapper mapper) {
         this.jpaRepository = jpaRepository;
         this.mapper = mapper;
     }
@@ -52,13 +54,13 @@ public class GeoServerUserGroupRepositoryJpaAdaptor implements GeoServerUserGrou
 
     @Override
     @TransactionRequired
-    public boolean delete(long id) {
-        return jpaRepository.deleteById(id);
+    public boolean delete(@NonNull String id) {
+        return jpaRepository.deleteById(decodeId(id).longValue());
     }
 
     @Override
-    public Optional<GeoServerUserGroup> findById(long id) {
-        return jpaRepository.findById(id).map(mapper::map);
+    public Optional<GeoServerUserGroup> findById(@NonNull String id) {
+        return jpaRepository.findById(decodeId(id).longValue()).map(mapper::map);
     }
 
     @Override

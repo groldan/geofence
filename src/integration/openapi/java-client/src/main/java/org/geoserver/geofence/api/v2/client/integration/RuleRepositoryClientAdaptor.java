@@ -2,6 +2,7 @@ package org.geoserver.geofence.api.v2.client.integration;
 
 import static org.springframework.http.HttpStatus.*;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import org.geoserver.geofence.api.v2.client.RulesApi;
@@ -41,7 +42,7 @@ public class RuleRepositoryClientAdaptor implements RuleRepository {
     private final RuleFilterApiMapper filterMapper = new RuleFilterApiMapper();
 
     @Override
-    public boolean existsById(long id) {
+    public boolean existsById(@NonNull String id) {
         return apiClient.ruleExistsById(id);
     }
 
@@ -62,7 +63,7 @@ public class RuleRepositoryClientAdaptor implements RuleRepository {
     }
 
     @Override
-    public boolean delete(long id) {
+    public boolean delete(@NonNull String id) {
         try {
             apiClient.deleteRuleById(id);
         } catch (HttpClientErrorException.NotFound e) {
@@ -109,7 +110,7 @@ public class RuleRepositoryClientAdaptor implements RuleRepository {
     }
 
     @Override
-    public Optional<Rule> findById(long id) {
+    public Optional<Rule> findById(@NonNull String id) {
         org.geoserver.geofence.api.v2.model.Rule rule;
         try {
             rule = apiClient.getRuleById(id);
@@ -150,27 +151,27 @@ public class RuleRepositoryClientAdaptor implements RuleRepository {
     }
 
     @Override
-    public void swap(long id1, long id2) {
+    public void swap(@NonNull String id1, @NonNull String id2) {
         apiClient.swapRulesById(id1, id2);
     }
 
     @Override
-    public void setAllowedStyles(long ruleId, Set<String> styles) {
+    public void setAllowedStyles(@NonNull String ruleId, Set<String> styles) {
         apiClient.setRuleAllowedStyles(ruleId, styles);
     }
 
     @Override
-    public void setLimits(long ruleId, RuleLimits limits) {
+    public void setLimits(@NonNull String ruleId, RuleLimits limits) {
         apiClient.setRuleLimits(ruleId, limitsMapper.toApi(limits));
     }
 
     @Override
-    public void setLayerDetails(long ruleId, LayerDetails detailsNew) {
+    public void setLayerDetails(@NonNull String ruleId, LayerDetails detailsNew) {
         apiClient.setRuleLayerDetails(ruleId, detailsMapper.map(detailsNew));
     }
 
     @Override
-    public Optional<LayerDetails> findLayerDetailsByRuleId(long ruleId) {
+    public Optional<LayerDetails> findLayerDetailsByRuleId(@NonNull String ruleId) {
         ResponseEntity<org.geoserver.geofence.api.v2.model.LayerDetails> response;
         try {
             response = apiClient.getLayerDetailsByRuleIdWithHttpInfo(ruleId);

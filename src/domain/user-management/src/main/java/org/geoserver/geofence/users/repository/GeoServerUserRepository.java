@@ -13,9 +13,9 @@ public interface GeoServerUserRepository {
 
     GeoServerUser save(GeoServerUser user);
 
-    boolean delete(long id);
+    boolean delete(String id);
 
-    Optional<GeoServerUser> findById(long id);
+    Optional<GeoServerUser> findById(String id);
 
     Optional<GeoServerUser> findByName(String name);
 

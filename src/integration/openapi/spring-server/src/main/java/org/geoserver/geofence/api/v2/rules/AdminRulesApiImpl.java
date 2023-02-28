@@ -61,12 +61,12 @@ public class AdminRulesApiImpl implements AdminRulesApiDelegate {
         return ResponseEntity.ok(service.deleteRules(map(filter)));
     }
 
-    public @Override ResponseEntity<Void> deleteAdminRuleById(Long id) {
+    public @Override ResponseEntity<Void> deleteAdminRuleById(@NonNull String id) {
         boolean deleted = service.delete(id);
         return ResponseEntity.status(deleted ? OK : NOT_FOUND).build();
     }
 
-    public @Override ResponseEntity<Boolean> adminRuleExistsById(Long id) {
+    public @Override ResponseEntity<Boolean> adminRuleExistsById(@NonNull String id) {
         return ResponseEntity.ok(service.exists(id));
     }
 
@@ -92,7 +92,7 @@ public class AdminRulesApiImpl implements AdminRulesApiDelegate {
 
     public @Override ResponseEntity<AdminRule> findOneAdminRule(AdminRuleFilter adminRuleFilter) {
         Optional<org.geoserver.geofence.adminrules.model.AdminRule> found =
-                service.get(map(adminRuleFilter));
+                service.getFirstMatch(map(adminRuleFilter));
 
         return ResponseEntity.status(found.isPresent() ? OK : NOT_FOUND)
                 .body(found.map(this::map).orElse(null));
@@ -118,7 +118,7 @@ public class AdminRulesApiImpl implements AdminRulesApiDelegate {
         return ResponseEntity.ok(matches.stream().map(this::map).collect(Collectors.toList()));
     }
 
-    public @Override ResponseEntity<AdminRule> getAdminRuleById(Long id) {
+    public @Override ResponseEntity<AdminRule> getAdminRuleById(@NonNull String id) {
 
         Optional<org.geoserver.geofence.adminrules.model.AdminRule> found = service.get(id);
 
@@ -131,12 +131,14 @@ public class AdminRulesApiImpl implements AdminRulesApiDelegate {
         return ResponseEntity.ok(service.shift(priorityStart, offset));
     }
 
-    public @Override ResponseEntity<Void> swapAdminRulesById(Long id, Long id2) {
+    public @Override ResponseEntity<Void> swapAdminRulesById(
+            @NonNull String id, @NonNull String id2) {
         service.swap(id, id2);
         return ResponseEntity.status(OK).build();
     }
 
-    public @Override ResponseEntity<AdminRule> updateAdminRule(Long id, AdminRule patchBody) {
+    public @Override ResponseEntity<AdminRule> updateAdminRule(
+            @NonNull String id, AdminRule patchBody) {
         org.geoserver.geofence.adminrules.model.AdminRule rule =
                 service.get(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
 

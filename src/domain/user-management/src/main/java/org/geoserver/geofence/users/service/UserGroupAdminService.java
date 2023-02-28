@@ -41,15 +41,15 @@ public class UserGroupAdminService {
         return userGroupRepository.save(group);
     }
 
-    public Optional<GeoServerUserGroup> get(long id) {
+    public Optional<GeoServerUserGroup> get(@NonNull String id) {
         return userGroupRepository.findById(id);
     }
 
-    public Optional<GeoServerUserGroup> get(@NonNull String name) {
+    public Optional<GeoServerUserGroup> getByName(@NonNull String name) {
         return userGroupRepository.findByName(name);
     }
 
-    public boolean delete(long id) {
+    public boolean delete(@NonNull String id) {
         return userGroupRepository.delete(id);
     }
 

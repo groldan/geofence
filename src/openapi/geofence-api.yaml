@@ -265,8 +265,7 @@ paths:
         required: true
         description: The rule identifier to swap priorities with
         schema:
-          type: integer
-          format: int64
+          type: string
     post:
       operationId: swapRulesById
       tags:
@@ -523,8 +522,7 @@ paths:
         required: true
         description: The admin rule identifier to swap priorities with
         schema:
-          type: integer
-          format: int64
+          type: string
     post:
       operationId: swapAdminRulesById
       tags:
@@ -636,5 +634,4 @@ components:
       required: true
       description: The rule identifier
       schema:
-        type: integer
-        format: int64        
+        type: string

@@ -5,10 +5,10 @@ import org.geoserver.geofence.jpa.integration.AdminRuleRepositoryJpaAdaptor;
 import org.geoserver.geofence.jpa.integration.GeoServerUserGroupRepositoryJpaAdaptor;
 import org.geoserver.geofence.jpa.integration.GeoServerUserRepositoryJpaAdaptor;
 import org.geoserver.geofence.jpa.integration.RuleRepositoryJpaAdaptor;
-import org.geoserver.geofence.jpa.integration.mapper.AdminRuleMapper;
-import org.geoserver.geofence.jpa.integration.mapper.JPAGeoServerUserGroupMapper;
-import org.geoserver.geofence.jpa.integration.mapper.JPAGeoServerUserMapper;
-import org.geoserver.geofence.jpa.integration.mapper.RuleMapper;
+import org.geoserver.geofence.jpa.integration.mapper.AdminRuleJpaMapper;
+import org.geoserver.geofence.jpa.integration.mapper.GeoServerUserGroupJpaMapper;
+import org.geoserver.geofence.jpa.integration.mapper.GeoServerUserJpaMapper;
+import org.geoserver.geofence.jpa.integration.mapper.RuleJpaMapper;
 import org.geoserver.geofence.jpa.repository.JpaAdminRuleRepository;
 import org.geoserver.geofence.jpa.repository.JpaGeoServerUserGroupRepository;
 import org.geoserver.geofence.jpa.repository.JpaGeoServerUserRepository;
@@ -23,31 +23,31 @@ import org.springframework.context.annotation.Import;
 
 @Configuration(proxyBeanMethods = false)
 @Import({GeoFenceDataSourceConfiguration.class, GeoFenceJPAConfiguration.class})
-@ComponentScan(basePackageClasses = {RuleMapper.class, AdminRuleMapper.class})
+@ComponentScan(basePackageClasses = {RuleJpaMapper.class, AdminRuleJpaMapper.class})
 public class GeoFenceJPAIntegrationConfiguration {
 
     @Bean
     public RuleRepository geofenceRuleRepositoryJpaAdaptor(
-            JpaRuleRepository jpaRuleRepository, RuleMapper modelMapper) {
+            JpaRuleRepository jpaRuleRepository, RuleJpaMapper modelMapper) {
 
         return new RuleRepositoryJpaAdaptor(jpaRuleRepository, modelMapper);
     }
 
     @Bean
     public AdminRuleRepository geofenceAdminRuleRepositoryJpaAdaptor(
-            JpaAdminRuleRepository jpaAdminRuleRepo, AdminRuleMapper modelMapper) {
+            JpaAdminRuleRepository jpaAdminRuleRepo, AdminRuleJpaMapper modelMapper) {
         return new AdminRuleRepositoryJpaAdaptor(jpaAdminRuleRepo, modelMapper);
     }
 
     @Bean
     public GeoServerUserRepository geofenceGeoServerUserRepositoryJpaAdaptor(
-            JpaGeoServerUserRepository jpaRepo, JPAGeoServerUserMapper mapper) {
+            JpaGeoServerUserRepository jpaRepo, GeoServerUserJpaMapper mapper) {
         return new GeoServerUserRepositoryJpaAdaptor(jpaRepo, mapper);
     }
 
     @Bean
     public GeoServerUserGroupRepository geofenceGeoServerUserGroupRepositoryJpaAdaptor(
-            JpaGeoServerUserGroupRepository jpaRepo, JPAGeoServerUserGroupMapper mapper) {
+            JpaGeoServerUserGroupRepository jpaRepo, GeoServerUserGroupJpaMapper mapper) {
         return new GeoServerUserGroupRepositoryJpaAdaptor(jpaRepo, mapper);
     }
 }
