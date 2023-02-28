@@ -31,3 +31,46 @@ or
 
 	java -jar target/geofence-rest-app-4.0-SNAPSHOT-exec.jar --spring.profiles.active=dev
 
+## Dependency graph
+
+```mermaid
+flowchart LR
+	subgraph external-dependencies
+		direction TB
+		spring-context
+		spring-data-jpa
+		hibernate-spatial
+		spring-boot-starter-web
+		springdoc-openapi-webmvc-core
+		h2
+		postgresql
+	end
+	direction TB
+	subgraph domain
+		direction TB
+		rule-management
+		adminrule-management --> rule-management
+		user-management
+	end
+	subgraph openapi-codegen
+		direction TB
+		openapi-model
+		openapi-server --> openapi-model
+	end
+	direction TB
+	subgraph spring-integration
+		direction TB
+		domain-spring-integration --> rule-management & adminrule-management & user-management & spring-context
+	end
+	subgraph openapi-integration
+		direction TB
+		api-model-mapper --> openapi-model & rule-management & adminrule-management & user-management
+		api-impl --> api-model-mapper & openapi-server & domain-spring-integration
+	end
+	subgraph persistence-jpa
+		direction TB
+		jpa-persistence --> spring-data-jpa & hibernate-spatial
+		jpa-integration --> jpa-persistence
+	end
+	rest-app --> api-impl & jpa-integration & spring-boot-starter-web & springdoc-openapi-webmvc-core & h2 & postgresql
+```
