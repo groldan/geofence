@@ -36,19 +36,19 @@ public class GeoServerUserGroupRepositoryJpaAdaptor implements GeoServerUserGrou
 
     @Override
     @TransactionRequired
-    public GeoServerUserGroup insert(@NonNull GeoServerUserGroup user) {
-        if (null != user.getId()) throw new IllegalArgumentException("user must have no id");
+    public GeoServerUserGroup insert(@NonNull GeoServerUserGroup group) {
+        if (null != group.getId()) throw new IllegalArgumentException("user must have no id");
         org.geoserver.geofence.jpa.model.GeoServerUserGroup created =
-                jpaRepository.save(mapper.map(user));
+                jpaRepository.save(mapper.map(group));
         return mapper.map(created);
     }
 
     @Override
     @TransactionRequired
-    public GeoServerUserGroup save(GeoServerUserGroup user) {
-        Objects.requireNonNull(user.getId());
+    public GeoServerUserGroup save(GeoServerUserGroup group) {
+        Objects.requireNonNull(group.getId());
         org.geoserver.geofence.jpa.model.GeoServerUserGroup saved =
-                jpaRepository.save(mapper.map(user));
+                jpaRepository.save(mapper.map(group));
         return mapper.map(saved);
     }
 
@@ -98,5 +98,10 @@ public class GeoServerUserGroupRepositoryJpaAdaptor implements GeoServerUserGrou
         BooleanExpression predicate =
                 QGeoServerUserGroup.geoServerUserGroup.name.likeIgnoreCase(nameLike);
         return predicate;
+    }
+
+    @Override
+    public List<GeoServerUserGroup> findAll() {
+        return jpaRepository.findAll().stream().map(mapper::map).collect(Collectors.toList());
     }
 }

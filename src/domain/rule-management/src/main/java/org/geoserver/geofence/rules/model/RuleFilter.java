@@ -1,16 +1,21 @@
-/* (c) 2014, 2023 Open Source Geospatial Foundation - all rights reserved
- * This code is licensed under the GPL 2.0 license, available at the root
- * application directory.
+/*
+ * (c) 2014, 2023 Open Source Geospatial Foundation - all rights reserved This code is licensed
+ * under the GPL 2.0 license, available at the root application directory.
  */
 
 package org.geoserver.geofence.rules.model;
+
+import lombok.NonNull;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -53,6 +58,7 @@ public class RuleFilter implements Cloneable {
          * a given field will be returned. This is probably the value you want to use.
          */
         DEFAULT(FilterType.DEFAULT);
+
         private FilterType relatedType;
 
         private SpecialFilterType(FilterType relatedType) {
@@ -314,14 +320,14 @@ public class RuleFilter implements Cloneable {
         return workspace;
     }
 
-    //    public InetAddress getSourceAddress() {
-    //        return sourceAddress;
-    //    }
+    // public InetAddress getSourceAddress() {
+    // return sourceAddress;
+    // }
     //
-    //    public RuleFilter setSourceAddress(InetAddress sourceAddress) {
-    //        this.sourceAddress = sourceAddress;
-    //        return this;
-    //    }
+    // public RuleFilter setSourceAddress(InetAddress sourceAddress) {
+    // this.sourceAddress = sourceAddress;
+    // return this;
+    // }
 
     private String sortNames(String s) {
         if (s.contains(COLLECTION_VALUE_SEPARATOR)) {
@@ -337,13 +343,16 @@ public class RuleFilter implements Cloneable {
     }
 
     public static SortedSet<String> asCollectionValue(String value) {
+        if (value == null || value.isBlank()) {
+            return Collections.emptySortedSet();
+        }
         if (value.contains(COLLECTION_VALUE_SEPARATOR)) {
             return Arrays.stream(value.split(COLLECTION_VALUE_SEPARATOR))
                     .map(n -> n.trim())
                     .filter(n -> !n.isBlank())
                     .collect(Collectors.toCollection(TreeSet::new));
         }
-        return Collections.emptySortedSet();
+        return new TreeSet<>(Set.of(value));
     }
 
     @Override
@@ -579,6 +588,24 @@ public class RuleFilter implements Cloneable {
         public IdNameFilter clone() throws CloneNotSupportedException {
             return (IdNameFilter) super.clone();
         }
+
+        public boolean matches(String value) {
+            switch (type) {
+                case ANY:
+                    return true;
+                case DEFAULT:
+                    return value == null || value.equals(getName());
+                case NAMEVALUE:
+                    if (this.isIncludeDefault()) {
+                        return value == null || value.equals(getName());
+                    }
+                    return value != null && value.equals(getName());
+                case IDVALUE:
+                    throw new UnsupportedOperationException("Not implemented for id values");
+                default:
+                    throw new IllegalArgumentException();
+            }
+        }
     }
 
     /** Contains a fixed text OR a special filtering condition (i.e. ANY, DEFAULT). */
@@ -708,5 +735,48 @@ public class RuleFilter implements Cloneable {
         public TextFilter clone() throws CloneNotSupportedException {
             return (TextFilter) super.clone();
         }
+
+        public boolean matches(String value) {
+            SortedSet<String> filter =
+                    getType() == FilterType.ANY ? null : RuleFilter.asCollectionValue(getText());
+            SortedSet<String> values =
+                    getType() == FilterType.ANY ? null : RuleFilter.asCollectionValue(value);
+            switch (type) {
+                case ANY:
+                    return true;
+                case DEFAULT:
+                    return value == null;
+                case NAMEVALUE:
+                    if (this.isIncludeDefault()) {
+                        return value == null || values.stream().anyMatch(filter::contains);
+                    }
+                    return value != null && values.stream().anyMatch(filter::contains);
+                case IDVALUE:
+                default:
+                    throw new IllegalArgumentException();
+            }
+        }
+
+        public boolean matches(IPAddressRange addressRange) {
+            return toIPAddressPredicate(Function.identity()).test(addressRange);
+        }
+
+        public <T> Predicate<T> toIPAddressPredicate(
+                Function<T, IPAddressRange> addrRangeExtractor) {
+            return FilterUtils.filterByAddress(this, addrRangeExtractor);
+        }
+    }
+
+    public boolean matches(@NonNull Rule rule) {
+        RuleIdentifier idf = rule.getIdentifier();
+        return getInstance().matches(idf.getInstanceName())
+                && getLayer().matches(idf.getLayer())
+                && getRequest().matches(idf.getRequest())
+                && getRole().matches(idf.getRolename())
+                && getService().matches(idf.getService())
+                && getSourceAddress().matches(idf.getAddressRange())
+                && getSubfield().matches(idf.getSubfield())
+                && getUser().matches(idf.getUsername())
+                && getWorkspace().matches(idf.getWorkspace());
     }
 }

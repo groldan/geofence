@@ -18,8 +18,10 @@ import org.geoserver.geofence.jpa.repository.TransactionSupported;
 import org.geoserver.geofence.rules.model.InsertPosition;
 import org.geoserver.geofence.rules.model.Rule;
 import org.geoserver.geofence.rules.model.RuleFilter;
+import org.geoserver.geofence.rules.model.RuleFilter.TextFilter;
 import org.geoserver.geofence.rules.model.RuleLimits;
 import org.geoserver.geofence.rules.model.RuleQuery;
+import org.geoserver.geofence.rules.repository.RuleIdentifierConflictException;
 import org.geoserver.geofence.rules.repository.RuleRepository;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
@@ -40,12 +42,16 @@ public class RuleRepositoryJpaAdaptor implements RuleRepository {
     private final RuleJpaMapper modelMapper;
     private final PredicateMapper queryMapper;
 
+    private final PriorityResolver<org.geoserver.geofence.jpa.model.Rule> priorityResolver;
+
     public RuleRepositoryJpaAdaptor(JpaRuleRepository jparepo, RuleJpaMapper mapper) {
         Objects.requireNonNull(jparepo);
         Objects.requireNonNull(mapper);
         this.modelMapper = mapper;
         this.jparepo = jparepo;
         this.queryMapper = new PredicateMapper();
+        this.priorityResolver =
+                new PriorityResolver<>(jparepo, org.geoserver.geofence.jpa.model.Rule::getPriority);
     }
 
     @Override
@@ -93,37 +99,77 @@ public class RuleRepositoryJpaAdaptor implements RuleRepository {
         }
 
         List<org.geoserver.geofence.jpa.model.Rule> found = page.getContent();
-        return found.stream().map(modelMapper::toModel);
+        return found.stream().map(modelMapper::toModel).filter(filterByAddress(query.getFilter()));
+    }
+
+    private java.util.function.Predicate<? super Rule> filterByAddress(
+            Optional<RuleFilter> filter) {
+        if (filter.isEmpty()) return r -> true;
+        TextFilter textFilter = filter.get().getSourceAddress();
+
+        return textFilter.toIPAddressPredicate(r -> r.getIdentifier().getAddressRange());
     }
 
     @Override
     @TransactionRequired
     public Rule save(Rule rule) {
         Objects.requireNonNull(rule.getId());
-        org.geoserver.geofence.jpa.model.Rule entity = getOrThrow(rule.getId());
+        org.geoserver.geofence.jpa.model.Rule entity = getOrThrowIAE(rule.getId());
+
+        long finalPriority =
+                priorityResolver.resolvePriorityUpdate(entity.getPriority(), rule.getPriority());
+
         modelMapper.updateEntity(entity, rule);
+        entity.setPriority(finalPriority);
+        checkForDups(entity);
+
         org.geoserver.geofence.jpa.model.Rule saved = jparepo.save(entity);
         return modelMapper.toModel(saved);
     }
 
     @Override
     @TransactionRequired
-    public Rule create(Rule rule, InsertPosition position) {
+    public Rule create(@NonNull Rule rule, @NonNull InsertPosition position) {
         if (null != rule.getId()) throw new IllegalArgumentException("Rule must have no id");
-        if (null == position) position = InsertPosition.FIXED;
+        if (rule.getPriority() < 0)
+            throw new IllegalArgumentException(
+                    "Negative priority is not allowed: " + rule.getPriority());
 
-        if (InsertPosition.FIXED != position)
-            throw new UnsupportedOperationException("implement insert position");
+        final long finalPriority =
+                priorityResolver.resolveFinalPriority(rule.getPriority(), position);
 
         org.geoserver.geofence.jpa.model.Rule entity = modelMapper.toEntity(rule);
+        entity.setPriority(finalPriority);
+        checkForDups(entity);
+
         org.geoserver.geofence.jpa.model.Rule saved = jparepo.save(entity);
+
         return modelMapper.toModel(saved);
+    }
+
+    private void checkForDups(org.geoserver.geofence.jpa.model.Rule rule) {
+        if (rule.getIdentifier().getAccess() == GrantType.LIMIT) {
+            return;
+        }
+
+        RuleIdentifier identifier = rule.getIdentifier();
+        List<org.geoserver.geofence.jpa.model.Rule> matches =
+                jparepo.findAllByIdentifier(identifier);
+        matches.stream()
+                .filter(r -> !r.getId().equals(rule.getId()))
+                .findFirst()
+                .ifPresent(
+                        dup -> {
+                            throw new RuleIdentifierConflictException(
+                                    "A Rule with the same identifier already exists: "
+                                            + rule.getIdentifier().toShortString());
+                        });
     }
 
     @Override
     @TransactionRequired
     public boolean delete(@NonNull String id) {
-        return jparepo.deleteById(decodeId(id).longValue());
+        return 1 == jparepo.deleteById(decodeId(id).longValue());
     }
 
     @Override
@@ -134,15 +180,19 @@ public class RuleRepositoryJpaAdaptor implements RuleRepository {
     @Override
     @TransactionRequired
     public int shift(long priorityStart, long offset) {
-        return jparepo.shiftPriority(priorityStart, offset);
+        if (offset <= 0) {
+            throw new IllegalArgumentException("Positive offset required");
+        }
+        int affectedCount = jparepo.shiftPriority(priorityStart, offset);
+        return affectedCount > 0 ? affectedCount : -1;
     }
 
     @Override
     @TransactionRequired
     public void swap(String id1, String id2) {
 
-        org.geoserver.geofence.jpa.model.Rule rule1 = getOrThrow(id1);
-        org.geoserver.geofence.jpa.model.Rule rule2 = getOrThrow(id2);
+        org.geoserver.geofence.jpa.model.Rule rule1 = getOrThrowIAE(id1);
+        org.geoserver.geofence.jpa.model.Rule rule2 = getOrThrowIAE(id2);
 
         long p1 = rule1.getPriority();
         long p2 = rule2.getPriority();
@@ -157,10 +207,13 @@ public class RuleRepositoryJpaAdaptor implements RuleRepository {
     @TransactionRequired
     public void setAllowedStyles(@NonNull String ruleId, Set<String> styles) {
 
-        org.geoserver.geofence.jpa.model.Rule rule = getOrThrow(ruleId);
+        org.geoserver.geofence.jpa.model.Rule rule = getOrThrowIAE(ruleId);
 
         if (RuleIdentifier.ANY.equals(rule.getIdentifier().getLayer())) {
             throw new IllegalArgumentException("Rule has no layer, can't set allowed styles");
+        }
+        if (rule.getLayerDetails() == null || rule.getLayerDetails().isEmpty()) {
+            throw new IllegalArgumentException("Rule has no details associated");
         }
 
         LayerDetails layerDetails = rule.getLayerDetails();
@@ -174,8 +227,8 @@ public class RuleRepositoryJpaAdaptor implements RuleRepository {
     @Override
     @TransactionRequired
     public void setLimits(String ruleId, RuleLimits limits) {
-        org.geoserver.geofence.jpa.model.Rule rule = getOrThrow(ruleId);
-        if (rule.getIdentifier().getAccess() != GrantType.LIMIT) {
+        org.geoserver.geofence.jpa.model.Rule rule = getOrThrowIAE(ruleId);
+        if (limits != null && rule.getIdentifier().getAccess() != GrantType.LIMIT) {
             throw new IllegalArgumentException("Rule is not of LIMIT type");
         }
 
@@ -189,7 +242,7 @@ public class RuleRepositoryJpaAdaptor implements RuleRepository {
     public void setLayerDetails(
             String ruleId, org.geoserver.geofence.rules.model.LayerDetails detailsNew) {
 
-        org.geoserver.geofence.jpa.model.Rule rule = getOrThrow(ruleId);
+        org.geoserver.geofence.jpa.model.Rule rule = getOrThrowIAE(ruleId);
 
         if (rule.getIdentifier().getAccess() != GrantType.ALLOW && detailsNew != null)
             throw new IllegalArgumentException("Rule is not of ALLOW type");
@@ -207,11 +260,11 @@ public class RuleRepositoryJpaAdaptor implements RuleRepository {
     public Optional<org.geoserver.geofence.rules.model.LayerDetails> findLayerDetailsByRuleId(
             @NonNull String ruleId) {
 
-        org.geoserver.geofence.jpa.model.Rule jparule = getOrThrow(ruleId);
+        org.geoserver.geofence.jpa.model.Rule jparule = getOrThrowIAE(ruleId);
 
-        if (RuleIdentifier.ANY.equals(jparule.getIdentifier().getLayer())) {
-            throw new IllegalArgumentException("Rule " + ruleId + " has not layer set");
-        }
+        // if (RuleIdentifier.ANY.equals(jparule.getIdentifier().getLayer())) {
+        // throw new IllegalArgumentException("Rule " + ruleId + " has not layer set");
+        // }
 
         LayerDetails jpadetails = jparule.getLayerDetails();
         if (jpadetails.isEmpty()) {
@@ -220,10 +273,11 @@ public class RuleRepositoryJpaAdaptor implements RuleRepository {
         return Optional.of(modelMapper.toModel(jpadetails));
     }
 
-    private org.geoserver.geofence.jpa.model.Rule getOrThrow(@NonNull String ruleId) {
+    private org.geoserver.geofence.jpa.model.Rule getOrThrowIAE(@NonNull String ruleId) {
         org.geoserver.geofence.jpa.model.Rule rule;
         try {
             rule = jparepo.getReferenceById(decodeId(ruleId));
+            rule.getIdentifier().getLayer();
         } catch (EntityNotFoundException e) {
             throw new IllegalArgumentException("Rule " + ruleId + " does not exist");
         }

@@ -4,6 +4,7 @@ import org.geoserver.geofence.adminrules.model.AdminRule;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
 @Mapper(
@@ -28,6 +29,13 @@ public interface AdminRuleJpaMapper {
     }
 
     static Long decodeId(String id) {
-        return id == null ? null : Long.decode(id);
+        return id == null ? null : Long.decode("0x" + id);
     }
+
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "createdDate", ignore = true)
+    @Mapping(target = "lastModifiedBy", ignore = true)
+    @Mapping(target = "lastModifiedDate", ignore = true)
+    void updateEntity(
+            @MappingTarget org.geoserver.geofence.jpa.model.AdminRule entity, AdminRule model);
 }

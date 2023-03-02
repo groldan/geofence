@@ -23,7 +23,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -34,27 +33,24 @@ import javax.persistence.UniqueConstraint;
         name = "gf_rule",
         // NOTE unique constraints don't work with null values, so all RuleIdentifier attributes
         // have default values
-        uniqueConstraints = {
-            @UniqueConstraint(
-                    name = "gf_rule_priority_by_instance",
-                    columnNames = {"instance_id", "priority"}),
-            @UniqueConstraint(
-                    name = "gf_rule_identifier",
-                    columnNames = {
-                        "instance_id",
-                        "username",
-                        "rolename",
-                        "service",
-                        "ip_low",
-                        "ip_high",
-                        "ip_size",
-                        "request",
-                        "subfield",
-                        "workspace",
-                        "layer",
-                        "grant_type"
-                    })
-        },
+        //        uniqueConstraints = {
+        //            @UniqueConstraint(
+        //                    name = "gf_rule_identifier",
+        //                    columnNames = {
+        //                        "instance_id",
+        //                        "username",
+        //                        "rolename",
+        //                        "service",
+        //                        "ip_low",
+        //                        "ip_high",
+        //                        "ip_size",
+        //                        "request",
+        //                        "subfield",
+        //                        "workspace",
+        //                        "layer",
+        //                        "grant_type"
+        //                    })
+        //        },
         indexes = {
             @Index(name = "idx_rule_priority", columnList = "priority"),
             @Index(name = "idx_rule_service", columnList = "service"),
@@ -69,6 +65,7 @@ public class Rule extends Auditable implements Serializable, Cloneable {
 
     @Id @GeneratedValue @Column private Long id;
 
+    /** Unique, prevent overlapping priorities and force the upper layers to be careful */
     @Column(nullable = false)
     private long priority;
 

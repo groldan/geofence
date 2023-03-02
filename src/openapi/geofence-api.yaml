@@ -21,7 +21,8 @@ paths:
       tags:
         - Rules
       parameters:
-        - $ref: 'geofence-model.yaml#/components/parameters/pageable'
+        - $ref: 'geofence-model.yaml#/components/parameters/page'
+        - $ref: 'geofence-model.yaml#/components/parameters/size'
       responses:
         '200':
           $ref: '#/components/responses/PageOfRules'
@@ -32,6 +33,7 @@ paths:
       parameters:
         - $ref: 'geofence-model.yaml#/components/parameters/insertPosition'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -42,15 +44,28 @@ paths:
       responses:
         '201':
           $ref: '#/components/responses/Rule'
+        '400':
+          description: Bad request body, for example providing a Rule with a non null id
+        '409':
+          description: A Rule with the same identifier already exists (i.e. with the same values for
+              instanceName, username, rolename, service, request, subfield, workspace, layer, and addressRange)
+          headers:
+           X-Reason:
+             schema:
+               type: string
+               description: Error reason, including offending property names
+
   /rules/query:
     post:
       parameters:
-        - $ref: 'geofence-model.yaml#/components/parameters/pageable'
+        - $ref: 'geofence-model.yaml#/components/parameters/page'
+        - $ref: 'geofence-model.yaml#/components/parameters/size'
         - $ref: 'geofence-model.yaml#/components/parameters/priorityOffset'        
       operationId: queryRules
       tags:
         - Rules
       requestBody:
+        required: false
         content:
           application/json:
             schema:
@@ -76,6 +91,7 @@ paths:
       tags:
         - Rules
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -126,6 +142,7 @@ paths:
       tags:
         - Rules
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -136,8 +153,12 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/Rule'
+        '400':
+          description: Bad request body
         '404':
           description: Not found
+        '409':
+          description: Conflict, tried to update the rule identifier properties to one that belongs to another rule
     delete:
       operationId: deleteRuleById
       tags:
@@ -188,6 +209,7 @@ paths:
       tags:
         - Rules
       requestBody:
+        required: false
         content:
           application/json:
             schema:
@@ -200,14 +222,6 @@ paths:
           description: Updated
         '404':
           description: Not found
-    delete:
-      operationId: unsetRuleLayerDetails
-      tags:
-        - Rules
-      responses:
-        '204':
-          description: Deleted
-
   /rules/id/{id}/limits:
     parameters:
       - $ref: '#/components/parameters/id'
@@ -216,6 +230,7 @@ paths:
       tags:
         - Rules
       requestBody:
+        required: false
         content:
           application/json:
             schema:
@@ -226,6 +241,8 @@ paths:
       responses:
         '204':
           description: Updated
+        '400':
+          description: Bad request, the rule is not of LIMIT type
         '404':
           description: Not found
   /rules/id/{id}/styles:
@@ -236,6 +253,7 @@ paths:
       tags:
         - Rules
       requestBody:
+        required: false
         content:
           application/json:
             schema:
@@ -267,7 +285,7 @@ paths:
         schema:
           type: string
     post:
-      operationId: swapRulesById
+      operationId: swapRules
       tags:
         - Rules
       responses:
@@ -315,7 +333,8 @@ paths:
       tags:
         - AdminRules
       parameters:
-        - $ref: 'geofence-model.yaml#/components/parameters/pageable'
+        - $ref: 'geofence-model.yaml#/components/parameters/page'
+        - $ref: 'geofence-model.yaml#/components/parameters/size'
       responses:
         '200':
           $ref: '#/components/responses/PageOfAdminRules'
@@ -326,6 +345,7 @@ paths:
       parameters:
         - $ref: 'geofence-model.yaml#/components/parameters/insertPosition'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -342,6 +362,7 @@ paths:
       tags:
         - AdminRules
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -355,12 +376,14 @@ paths:
   /adminrules/query:
     post:
       parameters:
-        - $ref: 'geofence-model.yaml#/components/parameters/pageable'
+        - $ref: 'geofence-model.yaml#/components/parameters/page'
+        - $ref: 'geofence-model.yaml#/components/parameters/size'
         - $ref: 'geofence-model.yaml#/components/parameters/priorityOffset'        
       operationId: findAdminRules
       tags:
         - AdminRules
       requestBody:
+        required: false
         content:
           application/json:
             schema:
@@ -386,6 +409,7 @@ paths:
       tags:
         - AdminRules
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -403,6 +427,7 @@ paths:
       tags:
         - AdminRules
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -443,6 +468,7 @@ paths:
       tags:
         - AdminRules
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -474,6 +500,7 @@ paths:
       tags:
         - AdminRules
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -484,8 +511,12 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/AdminRule'
+        '400':
+          description: Bad request body
         '404':
           description: Not found
+        '409':
+          description: Conflict, tried to update the rule identifier properties to one that belongs to another rule
     delete:
       operationId: deleteAdminRuleById
       tags:
@@ -524,7 +555,7 @@ paths:
         schema:
           type: string
     post:
-      operationId: swapAdminRulesById
+      operationId: swapAdminRules
       tags:
         - AdminRules
       responses:

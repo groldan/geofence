@@ -56,6 +56,10 @@ public interface RuleJpaMapper {
     }
 
     static Long decodeId(String id) {
-        return id == null ? null : Long.decode(id);
+        try {
+            return id == null ? null : Long.decode("0x" + id);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid id: " + id);
+        }
     }
 }

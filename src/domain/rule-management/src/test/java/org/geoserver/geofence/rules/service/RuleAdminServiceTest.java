@@ -233,7 +233,8 @@ class RuleAdminServiceTest {
 
     @Test
     void getList() {
-        assertThrows(NullPointerException.class, () -> service.getList(null));
+        assertThrows(
+                NullPointerException.class, () -> service.getList((RuleQuery<RuleFilter>) null));
 
         RuleQuery<RuleFilter> query = RuleQuery.of(new RuleFilter().setRole("role1"));
         when(repository.query(eq(query))).thenReturn(null);

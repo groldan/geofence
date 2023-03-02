@@ -7,6 +7,7 @@ package org.geoserver.geofence.users.model;
 
 import lombok.Builder;
 import lombok.Builder.Default;
+import lombok.NonNull;
 import lombok.ToString;
 import lombok.Value;
 import lombok.With;
@@ -57,14 +58,14 @@ public class GeoServerUser {
     @Default private boolean admin = false;
 
     /** Groups to which the user is associated */
-    @Default private Set<String> userGroups = Set.of();
+    @NonNull private Set<String> userGroups;
 
     public static class Builder {
-        @SuppressWarnings("unused")
         private Set<String> userGroups = Set.of();
 
         public Builder userGroups(Set<String> groups) {
-            this.userGroups = groups == null || groups.isEmpty() ? Set.of() : Set.copyOf(groups);
+            if (null == groups) this.userGroups = Set.of();
+            else this.userGroups = Set.copyOf(groups);
             return this;
         }
     }

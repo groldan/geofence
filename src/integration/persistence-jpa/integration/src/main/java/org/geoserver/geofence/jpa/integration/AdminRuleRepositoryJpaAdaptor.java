@@ -15,7 +15,10 @@ import org.geoserver.geofence.jpa.repository.JpaAdminRuleRepository;
 import org.geoserver.geofence.jpa.repository.TransactionRequired;
 import org.geoserver.geofence.jpa.repository.TransactionSupported;
 import org.geoserver.geofence.rules.model.InsertPosition;
+import org.geoserver.geofence.rules.model.RuleFilter.TextFilter;
 import org.geoserver.geofence.rules.model.RuleQuery;
+import org.geoserver.geofence.rules.repository.RuleIdentifierConflictException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +38,7 @@ public class AdminRuleRepositoryJpaAdaptor implements AdminRuleRepository {
     private final JpaAdminRuleRepository jparepo;
     private final AdminRuleJpaMapper modelMapper;
     private final PredicateMapper queryMapper;
+    private final PriorityResolver<org.geoserver.geofence.jpa.model.AdminRule> priorityResolver;
 
     public AdminRuleRepositoryJpaAdaptor(
             JpaAdminRuleRepository jparepo, AdminRuleJpaMapper mapper) {
@@ -43,19 +47,37 @@ public class AdminRuleRepositoryJpaAdaptor implements AdminRuleRepository {
         this.modelMapper = mapper;
         this.jparepo = jparepo;
         this.queryMapper = new PredicateMapper();
+        this.priorityResolver =
+                new PriorityResolver<>(
+                        jparepo, org.geoserver.geofence.jpa.model.AdminRule::getPriority);
     }
 
     @Override
     @TransactionRequired
     public AdminRule create(AdminRule rule, InsertPosition position) {
         if (null != rule.getId()) throw new IllegalArgumentException("Rule must have no id");
-        if (null == position) position = InsertPosition.FIXED;
+        if (rule.getPriority() < 0)
+            throw new IllegalArgumentException(
+                    "Negative priority is not allowed: " + rule.getPriority());
 
-        if (InsertPosition.FIXED != position)
-            throw new UnsupportedOperationException("implement insert position");
+        final long finalPriority =
+                priorityResolver.resolveFinalPriority(rule.getPriority(), position);
 
         org.geoserver.geofence.jpa.model.AdminRule entity = modelMapper.toEntity(rule);
-        org.geoserver.geofence.jpa.model.AdminRule saved = jparepo.save(entity);
+        entity.setPriority(finalPriority);
+
+        org.geoserver.geofence.jpa.model.AdminRule saved;
+        try {
+            // gotta use saveAndFlush to catch the exception before the method returns and the tx is
+            // committed
+            jparepo.flush();
+            saved = jparepo.saveAndFlush(entity);
+        } catch (DataIntegrityViolationException e) {
+            throw new RuleIdentifierConflictException(
+                    "A Rule with the same identifier already exists: "
+                            + rule.getIdentifier().toShortString(),
+                    e);
+        }
         return modelMapper.toModel(saved);
     }
 
@@ -74,21 +96,6 @@ public class AdminRuleRepositoryJpaAdaptor implements AdminRuleRepository {
         Optional<? extends Predicate> predicate = queryMapper.toPredicate(filter);
         if (predicate.isEmpty()) return (int) jparepo.count(predicate.get());
         return (int) jparepo.count();
-    }
-
-    @Override
-    public List<AdminRule> findAll(@NonNull AdminRuleFilter filter) {
-
-        Optional<? extends Predicate> predicate = queryMapper.toPredicate(filter);
-
-        List<org.geoserver.geofence.jpa.model.AdminRule> found;
-        if (predicate.isPresent()) {
-            found = jparepo.findAllNaturalOrder(predicate.get());
-        } else {
-            found = jparepo.findAllNaturalOrder();
-        }
-
-        return found.stream().map(modelMapper::toModel).collect(Collectors.toList());
     }
 
     @Override
@@ -136,8 +143,16 @@ public class AdminRuleRepositoryJpaAdaptor implements AdminRuleRepository {
     @TransactionRequired
     public AdminRule save(AdminRule rule) {
         Objects.requireNonNull(rule.getId());
-        org.geoserver.geofence.jpa.model.AdminRule entity = modelMapper.toEntity(rule);
+        org.geoserver.geofence.jpa.model.AdminRule entity = getOrThrowIAE(rule.getId());
+
+        long finalPriority =
+                priorityResolver.resolvePriorityUpdate(entity.getPriority(), rule.getPriority());
+
+        modelMapper.updateEntity(entity, rule);
+        entity.setPriority(finalPriority);
+
         org.geoserver.geofence.jpa.model.AdminRule saved = jparepo.save(entity);
+        jparepo.flush();
         return modelMapper.toModel(saved);
     }
 
@@ -149,10 +164,17 @@ public class AdminRuleRepositoryJpaAdaptor implements AdminRuleRepository {
     }
 
     @Override
+    public List<AdminRule> findAll(@NonNull AdminRuleFilter filter) {
+        return findAll(RuleQuery.of(filter));
+    }
+
+    @Override
     public List<AdminRule> findAll(RuleQuery<AdminRuleFilter> query) {
         Optional<? extends Predicate> predicate = queryMapper.toPredicate(query);
         Pageable pageRequest = queryMapper.toPageable(query);
 
+        // REVISIT: if filter contains a non-any address range filter, can't apply paging to the db
+        // query
         Page<org.geoserver.geofence.jpa.model.AdminRule> page;
         if (predicate.isPresent()) {
             page = jparepo.findAllNaturalOrder(predicate.get(), pageRequest);
@@ -161,7 +183,18 @@ public class AdminRuleRepositoryJpaAdaptor implements AdminRuleRepository {
         }
 
         List<org.geoserver.geofence.jpa.model.AdminRule> found = page.getContent();
-        return found.stream().map(modelMapper::toModel).collect(Collectors.toList());
+        return found.stream()
+                .map(modelMapper::toModel)
+                .filter(filterByAddress(query.getFilter()))
+                .collect(Collectors.toList());
+    }
+
+    private java.util.function.Predicate<? super AdminRule> filterByAddress(
+            Optional<AdminRuleFilter> filter) {
+        if (filter.isEmpty()) return r -> true;
+        TextFilter textFilter = filter.get().getSourceAddress();
+
+        return textFilter.toIPAddressPredicate(r -> r.getIdentifier().getAddressRange());
     }
 
     @Override
@@ -173,8 +206,8 @@ public class AdminRuleRepositoryJpaAdaptor implements AdminRuleRepository {
     @Override
     @TransactionRequired
     public void swap(@NonNull String id1, @NonNull String id2) {
-        org.geoserver.geofence.jpa.model.AdminRule rule1 = getOrThrow(id1);
-        org.geoserver.geofence.jpa.model.AdminRule rule2 = getOrThrow(id2);
+        org.geoserver.geofence.jpa.model.AdminRule rule1 = getOrThrowIAE(id1);
+        org.geoserver.geofence.jpa.model.AdminRule rule2 = getOrThrowIAE(id2);
 
         long p1 = rule1.getPriority();
         long p2 = rule2.getPriority();
@@ -188,7 +221,7 @@ public class AdminRuleRepositoryJpaAdaptor implements AdminRuleRepository {
     @Override
     @TransactionRequired
     public boolean deleteById(@NonNull String id) {
-        return jparepo.deleteById(decodeId(id).longValue());
+        return 1 == jparepo.deleteById(decodeId(id).longValue());
     }
 
     @Override
@@ -206,7 +239,7 @@ public class AdminRuleRepositoryJpaAdaptor implements AdminRuleRepository {
                 "A predicate must be provided, deleting all AdminRules is not allowed");
     }
 
-    private org.geoserver.geofence.jpa.model.AdminRule getOrThrow(@NonNull String ruleId) {
+    private org.geoserver.geofence.jpa.model.AdminRule getOrThrowIAE(@NonNull String ruleId) {
         org.geoserver.geofence.jpa.model.AdminRule rule;
         try {
             rule = jparepo.getReferenceById(decodeId(ruleId).longValue());

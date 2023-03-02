@@ -1,0 +1,399 @@
+openapi: 3.0.0
+info:
+  title: GeoFence
+  description: GeoFence Rules API
+  version: 1.0.0
+servers:
+- url: http://localhost:8080/geofence/rest/v2
+- url: http://localhost:8080/geoserver/rest/geofence/v2
+tags:
+  - name: Users
+    description: CRUD operations on GeoServer Users.
+  - name: UserGroups
+    description: CRUD operations on GeoServer UserGroups.
+security:
+  - basicAuth: []
+paths:
+###### Users
+  /users:
+    get:
+      operationId: getAllUsers
+      description: Returns all users
+      tags:
+        - Users
+      responses:
+        '200':
+          $ref: '#/components/responses/PageOfUsers'
+    post:
+      operationId: createUser
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GeoServerUser'
+          application/x-jackson-smile:
+            schema:
+              $ref: '#/components/schemas/GeoServerUser'
+      responses:
+        '201':
+          $ref: '#/components/responses/GeoServerUser'
+        '400':
+          description: Bad request body, for example providing a GeoServerUser with a non null id
+          headers:
+           X-Reason:
+             schema:
+               type: string
+               description: Error reason, including offending property names
+    patch:
+      operationId: updateUser
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GeoServerUser'
+          application/x-jackson-smile:
+            schema:
+              $ref: '#/components/schemas/GeoServerUser'
+      responses:
+        '200':
+          $ref: '#/components/responses/GeoServerUser'
+        '404':
+          description: Not found
+        '400':
+          description: Bad request body, for example providing a GeoServerUser with a non null id
+          headers:
+           X-Reason:
+             schema:
+               type: string
+               description: Error reason, including offending property names
+
+  /users/id/{id}:
+    parameters:
+      - $ref: '#/components/parameters/id'
+    get:
+      operationId: getUserById
+      description: Returns the GeoServerUser with the given identifier
+      tags:
+        - Users
+      responses:
+        '200':
+          $ref: '#/components/responses/GeoServerUser'
+        '404':
+          description: Not found
+    delete:
+      operationId: deleteUserById
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not found
+  /users/name/{name}:
+    parameters:
+      - $ref: '#/components/parameters/name'
+    get:
+      operationId: getUserByName
+      description: Returns the GeoServerUser with a matching name
+      tags:
+        - Users
+      responses:
+        '200':
+          $ref: '#/components/responses/GeoServerUser'
+        '404':
+          description: Not found
+  /users/name/like/{nameLike}:
+    parameters:
+      - $ref: '#/components/parameters/nameLike'
+    get:
+      parameters:
+        - $ref: 'geofence-model.yaml#/components/parameters/page'
+        - $ref: 'geofence-model.yaml#/components/parameters/size'
+      operationId: getAllUsersByNameLike
+      description: Returns all GeoServerUser with a name matching a case insentitive like filter
+      tags:
+        - Users
+      responses:
+        '200':
+          $ref: '#/components/responses/PageOfUsers'
+  /users/name/like/{nameLike}/count:
+    parameters:
+      - $ref: '#/components/parameters/nameLike'
+    get:
+      operationId: countAllUsersByNameLike
+      description: Returns the number of GeoServerUser with a name matching a case insentitive like filter
+      tags:
+        - Users
+      responses:
+        '200':
+          $ref: '#/components/responses/Count'
+
+###### User Groups
+
+  /usergroups:
+    get:
+      operationId: getAllUserGroups
+      description: Returns all user groups
+      tags:
+        - UserGroups
+      responses:
+        '200':
+          $ref: '#/components/responses/PageOfUserGroups'
+    post:
+      operationId: createUserGroup
+      tags:
+        - UserGroups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GeoServerUserGroup'
+          application/x-jackson-smile:
+            schema:
+              $ref: '#/components/schemas/GeoServerUserGroup'
+      responses:
+        '201':
+          $ref: '#/components/responses/GeoServerUserGroup'
+        '400':
+          description: Bad request body, for example providing a GeoServerUserGroup with a non null id
+          headers:
+           X-Reason:
+             schema:
+               type: string
+               description: Error reason, including offending property names
+    patch:
+      operationId: updateUserGroup
+      tags:
+        - UserGroups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GeoServerUserGroup'
+          application/x-jackson-smile:
+            schema:
+              $ref: '#/components/schemas/GeoServerUserGroup'
+      responses:
+        '200':
+          $ref: '#/components/responses/GeoServerUserGroup'
+        '404':
+          description: Not found
+        '400':
+          description: Bad request body, for example providing a GeoServerUserGroup with a non null id
+          headers:
+           X-Reason:
+             schema:
+               type: string
+               description: Error reason, including offending property names
+
+  /usergroups/id/{id}:
+    parameters:
+      - $ref: '#/components/parameters/id'
+    get:
+      operationId: getUserGroupById
+      description: Returns the GeoServerUserGroup with the given identifier
+      tags:
+        - UserGroups
+      responses:
+        '200':
+          $ref: '#/components/responses/GeoServerUserGroup'
+        '404':
+          description: Not found
+    delete:
+      operationId: deleteUserGroupById
+      tags:
+        - UserGroups
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not found
+  /usergroups/name/{name}:
+    parameters:
+      - $ref: '#/components/parameters/name'
+    get:
+      operationId: getUserGroupByName
+      description: Returns the GeoServerUserGroup with a matching name
+      tags:
+        - UserGroups
+      responses:
+        '200':
+          $ref: '#/components/responses/GeoServerUserGroup'
+        '404':
+          description: Not found
+  /usergroups/name/like/{nameLike}:
+    parameters:
+      - $ref: '#/components/parameters/nameLike'
+    get:
+      parameters:
+        - $ref: 'geofence-model.yaml#/components/parameters/page'
+        - $ref: 'geofence-model.yaml#/components/parameters/size'
+      operationId: getAllUserGroupsByNameLike
+      description: Returns all GeoServerUser with a name matching a case insentitive like filter
+      tags:
+        - UserGroups
+      responses:
+        '200':
+          $ref: '#/components/responses/PageOfUserGroups'
+  /usergroups/name/like/{nameLike}/count:
+    parameters:
+      - $ref: '#/components/parameters/nameLike'
+    get:
+      operationId: countAllUserGroupsByNameLike
+      description: Returns the number of GeoServerUserGroup with a name matching a case insentitive like filter
+      tags:
+        - UserGroups
+      responses:
+        '200':
+          $ref: '#/components/responses/Count'
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  responses:
+    GeoServerUser:
+      description: The requested or updated GeoServerUser
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GeoServerUser'
+        application/x-jackson-smile:
+          schema:
+            $ref: '#/components/schemas/GeoServerUser'
+    GeoServerUserGroup:
+      description: The requested or updated GeoServerUserGroup
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GeoServerUserGroup'
+        application/x-jackson-smile:
+          schema:
+            $ref: '#/components/schemas/GeoServerUserGroup'
+    Count:
+      description: Number of elements matching the request
+      content:
+        application/json:
+          schema:
+            type: integer
+    PageOfUsers:
+      description: A page of users, or an empty response if the requested page is off limits
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/GeoServerUser'
+        application/x-jackson-smile:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/GeoServerUser'
+    PageOfUserGroups:
+      description: A page of geoserver user groups, or an empty response if the requested page is off limits
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/GeoServerUserGroup'
+        application/x-jackson-smile:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/GeoServerUserGroup'
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      description: The rule identifier
+      schema:
+        type: string
+    name:
+      name: name
+      in: path
+      required: true
+      description: The element name
+      schema:
+        type: string
+    nameLike:
+      name: nameLike
+      in: path
+      required: true
+      description: Name or part of a name to apply a case insensitive like filter
+      schema:
+        type: string
+  schemas:
+    GeoServerUser:
+      type: object
+      required:
+      - name
+      properties:
+        id:
+          type: string
+          nullable: true
+        extId:
+          type: string
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        admin:
+          type: boolean
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        fullName:
+          type: string
+          nullable: true
+        password:
+          type: string
+          format: password
+          nullable: true
+        emailAddress:
+          type: string
+          format: email
+          nullable: true
+        createdDate:
+          type: string
+          format: date-time
+          nullable: true
+        userGroups:
+          type: array
+          nullable: true
+          uniqueItems: true
+          items:
+            type: string
+    GeoServerUserGroup:
+      type: object
+      required:
+      - name
+      properties:
+        id:
+          type: string
+          nullable: true
+        extId:
+          type: string
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        createdDate:
+          type: string
+          format: date-time
+          nullable: true
+          

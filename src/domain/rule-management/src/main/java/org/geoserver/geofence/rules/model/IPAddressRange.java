@@ -10,6 +10,9 @@ import lombok.NonNull;
 import lombok.Value;
 import lombok.With;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+
 /**
  * @author ETj (etj at geo-solutions.it)
  */
@@ -43,5 +46,24 @@ public class IPAddressRange {
         Long low = Long.valueOf(su.getInfo().getAddressAsInteger());
         Integer size = su.getInfo().getMaskSize();
         return new IPAddressRange(low, null, size);
+    }
+
+    public boolean matches(String address) {
+        if (!SubnetV4Utils.isAddress(address)) return false;
+
+        SubnetV4Utils su = new SubnetV4Utils(low, size);
+        return su.getInfo().isInRange(address);
+    }
+
+    public boolean matches(InetAddress address) {
+        if (address instanceof Inet4Address) {
+            return matches((Inet4Address) address);
+        }
+        throw new UnsupportedOperationException("IPv6 non implemented yet");
+    }
+
+    public boolean matches(Inet4Address address) {
+        SubnetV4Utils su = new SubnetV4Utils(low, size);
+        return su.getInfo().isInRange(address.getHostAddress());
     }
 }

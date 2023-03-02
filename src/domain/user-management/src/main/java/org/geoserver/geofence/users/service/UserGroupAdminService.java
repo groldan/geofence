@@ -53,6 +53,10 @@ public class UserGroupAdminService {
         return userGroupRepository.delete(id);
     }
 
+    public List<GeoServerUserGroup> getAll() {
+        return userGroupRepository.findAll();
+    }
+
     public List<GeoServerUserGroup> getList(String nameLike, Integer page, Integer entries) {
         return userGroupRepository.findAllByNameLike(nameLike, page, entries);
     }

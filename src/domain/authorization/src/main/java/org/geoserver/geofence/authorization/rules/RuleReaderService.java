@@ -5,7 +5,10 @@
 
 package org.geoserver.geofence.authorization.rules;
 
+import org.geoserver.geofence.rules.model.Rule;
 import org.geoserver.geofence.rules.model.RuleFilter;
+
+import java.util.List;
 
 /**
  * Operations on
@@ -23,6 +26,14 @@ public interface RuleReaderService {
      * <p>Returned AccessInfo will always be ALLOW, with the computed adminRights.
      */
     AccessInfo getAdminAuthorization(RuleFilter filter);
+
+    /**
+     * Return the unprocessed {@link Rule} list matching a given filter, sorted by priority.
+     *
+     * <p>Use {@link getAccessInfo(RuleFilter) getAccessInfo(RuleFilter)} if you need the resulting
+     * coalesced access info.
+     */
+    List<Rule> getMatchingRules(RuleFilter filter);
 
     // ==========================================================================
 

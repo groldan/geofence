@@ -1,4 +1,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 org.geoserver.geofence.autoconfigure.persistence.JPAIntegrationAutoConfiguration,\
-org.geoserver.geofence.autoconfigure.api.RestApiAutoConfiguration,\
+org.geoserver.geofence.autoconfigure.api.RulesApiAutoConfiguration,\
+org.geoserver.geofence.autoconfigure.api.UserManagementApiAutoConfiguration,\
 org.geoserver.geofence.autoconfigure.springdoc.SpringDocHomeRedirectAutoConfiguration

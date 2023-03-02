@@ -3,14 +3,22 @@ package org.geoserver.geofence.jpa.integration;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.EnumPath;
 import com.querydsl.core.types.dsl.StringPath;
 
+import lombok.extern.slf4j.Slf4j;
+
+import org.geoserver.geofence.adminrules.model.AdminGrantType;
 import org.geoserver.geofence.adminrules.model.AdminRuleFilter;
-import org.geoserver.geofence.jpa.model.QIPAddressRange;
+import org.geoserver.geofence.jpa.model.GeoServerInstance;
+import org.geoserver.geofence.jpa.model.QAdminRule;
+import org.geoserver.geofence.jpa.model.QAdminRuleIdentifier;
+import org.geoserver.geofence.jpa.model.QGeoServerInstance;
 import org.geoserver.geofence.jpa.model.QRule;
 import org.geoserver.geofence.jpa.model.QRuleIdentifier;
 import org.geoserver.geofence.rules.model.RuleFilter;
 import org.geoserver.geofence.rules.model.RuleFilter.FilterType;
+import org.geoserver.geofence.rules.model.RuleFilter.IdNameFilter;
 import org.geoserver.geofence.rules.model.RuleFilter.TextFilter;
 import org.geoserver.geofence.rules.model.RuleQuery;
 import org.springframework.data.domain.PageRequest;
@@ -18,21 +26,23 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.SortedSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+@Slf4j
 class PredicateMapper {
 
-    private final QRule qrule = QRule.rule;
-
     public Pageable toPageable(RuleQuery<?> query) {
-        if (query.getPageNumber().isPresent() || query.getPageSize().isPresent()) {
+        if (query.pageNumber().isPresent() || query.pageSize().isPresent()) {
             int page =
-                    query.getPageNumber()
+                    query.pageNumber()
                             .orElseThrow(
                                     () ->
                                             new IllegalArgumentException(
                                                     "Page number is mandatory if page size is present"));
             int size =
-                    query.getPageSize()
+                    query.pageSize()
                             .orElseThrow(
                                     () ->
                                             new IllegalArgumentException(
@@ -55,79 +65,148 @@ class PredicateMapper {
 
     Optional<BooleanExpression> toPriorityPredicate(OptionalLong pstart) {
         if (pstart.isPresent()) {
-            return Optional.of(qrule.priority.goe(pstart.getAsLong()));
+            return Optional.of(QRule.rule.priority.goe(pstart.getAsLong()));
         }
         return Optional.empty();
     }
 
     public Optional<Predicate> toPredicate(AdminRuleFilter filter) {
-        // TODO: handle AdminRuleFilter.grant
-        return toPredicate((RuleFilter) filter);
-    }
-
-    public Optional<Predicate> toPredicate(RuleFilter filter) {
-        if (true || RuleFilter.any().equals(filter)) {
+        if (AdminRuleFilter.any().equals(filter)) {
             return Optional.empty();
         }
 
-        QRuleIdentifier identifier = qrule.identifier;
-        // TODO filter.getInstance();
+        QAdminRuleIdentifier qIdentifier = QAdminRule.adminRule.identifier;
 
-        Predicate user = map(filter.getUser(), identifier.username);
-        Predicate role = map(filter.getRole(), identifier.rolename);
+        Predicate grantType = map(filter.getGrantType(), QAdminRule.adminRule.access);
+        Predicate gsInstance = map(filter.getInstance(), qIdentifier.instance);
+        Predicate user = map(filter.getUser(), qIdentifier.username);
+        Predicate role = map(filter.getRole(), qIdentifier.rolename);
+        // Predicate address = map(filter.getSourceAddress(), identifier.addressRange);
+        Predicate ws = map(filter.getWorkspace(), qIdentifier.workspace);
+        Predicate predicate =
+                new BooleanBuilder()
+                        .and(grantType)
+                        .and(gsInstance)
+                        .and(user)
+                        .and(role)
+                        // .and(address)
+                        .and(ws)
+                        .getValue();
 
-        Predicate service = map(filter.getService(), identifier.service);
-        Predicate request = map(filter.getRequest(), identifier.request);
-        Predicate subfield = map(filter.getSubfield(), identifier.subfield);
+        log.trace("Filter    : {}", filter);
+        log.trace("Predicate : {}", predicate);
+        return Optional.ofNullable(predicate);
+    }
 
-        Predicate address = map(filter.getSourceAddress(), identifier.addressRange);
+    private Predicate map(IdNameFilter filter, QGeoServerInstance qinstance) {
+        switch (filter.getType()) {
+            case ANY:
+                return null;
+            case DEFAULT:
+                return qinstance.name.eq(GeoServerInstance.ANY);
+            case IDVALUE:
+                return filter.isIncludeDefault()
+                        ? qinstance
+                                .name
+                                .eq(GeoServerInstance.ANY)
+                                .or(qinstance.id.eq(filter.getId()))
+                        : qinstance.id.eq(filter.getId());
+            case NAMEVALUE:
+                return filter.isIncludeDefault()
+                        ? qinstance.name.in(GeoServerInstance.ANY, filter.getName())
+                        : qinstance.name.eq(filter.getName());
+            default:
+                throw new IllegalStateException();
+        }
+    }
 
-        Predicate ws = map(filter.getWorkspace(), identifier.workspace);
-        Predicate layer = map(filter.getLayer(), identifier.layer);
+    private Predicate map(
+            AdminGrantType grantType,
+            EnumPath<org.geoserver.geofence.jpa.model.AdminGrantType> access) {
+
+        if (null == grantType) return null;
+        switch (grantType) {
+            case ADMIN:
+                return access.eq(org.geoserver.geofence.jpa.model.AdminGrantType.ADMIN);
+            case USER:
+                return access.eq(org.geoserver.geofence.jpa.model.AdminGrantType.USER);
+            default:
+                throw new IllegalArgumentException("Unknown AdminGrantType: " + grantType);
+        }
+    }
+
+    public Optional<Predicate> toPredicate(RuleFilter filter) {
+        if (filter instanceof AdminRuleFilter) {
+            return toPredicate((AdminRuleFilter) filter);
+        }
+        if (RuleFilter.any().equals(filter)) {
+            return Optional.empty();
+        }
+
+        QRuleIdentifier qIdentifier = QRule.rule.identifier;
+
+        Predicate gsInstance = map(filter.getInstance(), qIdentifier.instance);
+        Predicate user = map(filter.getUser(), qIdentifier.username);
+        Predicate role = map(filter.getRole(), qIdentifier.rolename);
+
+        Predicate service = map(filter.getService(), qIdentifier.service);
+        Predicate request = map(filter.getRequest(), qIdentifier.request);
+        Predicate subfield = map(filter.getSubfield(), qIdentifier.subfield);
+
+        // Predicate address = map(filter.getSourceAddress(), identifier.addressRange);
+
+        Predicate ws = map(filter.getWorkspace(), qIdentifier.workspace);
+        Predicate layer = map(filter.getLayer(), qIdentifier.layer);
 
         Predicate predicate =
                 new BooleanBuilder()
+                        .and(gsInstance)
                         .and(user)
                         .and(role)
                         .and(service)
                         .and(request)
                         .and(subfield)
-                        .and(address)
+                        // .and(address)
                         .and(ws)
                         .and(layer)
                         .getValue();
 
+        log.trace("Filter    : {}", filter);
+        log.trace("Predicate : {}", predicate);
         return Optional.ofNullable(predicate);
-    }
-
-    private Predicate map(TextFilter sourceAddress, QIPAddressRange addressRange) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     Predicate map(TextFilter filter, StringPath propertyPath) {
         if (null == filter) return null;
 
         final FilterType type = filter.getType();
-        final String text = filter.getText();
-        final boolean includeDefault = filter.isIncludeDefault();
 
-        if (includeDefault) {
-            return propertyPath.isNull();
-        }
+        final boolean includeDefault = filter.isIncludeDefault();
 
         switch (type) {
             case ANY:
-                break;
+                return null;
             case DEFAULT:
-                break;
-            case IDVALUE:
-                break;
+                return propertyPath.eq("*");
             case NAMEVALUE:
-                return propertyPath.eq(text);
+                {
+                    final String text = filter.getText();
+                    SortedSet<String> values = RuleFilter.asCollectionValue(text);
+                    if (values.isEmpty())
+                        throw new IllegalArgumentException(
+                                "Can't map TextFilter with empty value " + text);
+
+                    if (includeDefault) {
+                        return propertyPath.in(
+                                Stream.concat(Stream.of("*"), values.stream())
+                                        .collect(Collectors.toList()));
+                    }
+                    return 1 == values.size() ? propertyPath.eq(text) : propertyPath.in(values);
+                }
+            case IDVALUE:
             default:
-                throw new IllegalArgumentException("Unknown FilterType: " + type);
+                throw new IllegalArgumentException(
+                        "Unknown or unexpected FilterType for TextFilter: " + type);
         }
-        throw new UnsupportedOperationException(filter.toString());
     }
 }

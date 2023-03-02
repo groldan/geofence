@@ -1,7 +1,10 @@
 package org.geoserver.geofence.api.v2.rules;
 
 import static org.springframework.http.HttpStatus.*;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +21,11 @@ import org.geoserver.geofence.api.v2.model.RuleFilter;
 import org.geoserver.geofence.api.v2.model.RuleLimits;
 import org.geoserver.geofence.api.v2.server.RulesApiDelegate;
 import org.geoserver.geofence.rules.model.RuleQuery;
+import org.geoserver.geofence.rules.repository.RuleIdentifierConflictException;
 import org.geoserver.geofence.rules.service.RuleAdminService;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
-import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,25 +40,27 @@ public class RulesApiImpl implements RulesApiDelegate {
     private final @NonNull LayerDetailsApiMapper layerDetailsMapper;
     private final @NonNull RuleLimitsApiMapper limitsMapper;
     private final @NonNull EnumsApiMapper enumsMapper;
-    private final @NonNull NativeWebRequest request;
 
     private final RuleFilterApiMapper filterMapper = new RuleFilterApiMapper();
 
     @Override
-    public Optional<NativeWebRequest> getRequest() {
-        return Optional.ofNullable(request);
-    }
-
-    @Override
-    public ResponseEntity<Rule> createRule(InsertPosition position, @NonNull Rule rule) {
+    public ResponseEntity<Rule> createRule(@NonNull Rule rule, InsertPosition position) {
         org.geoserver.geofence.rules.model.Rule model = map(rule);
         org.geoserver.geofence.rules.model.Rule created;
-        if (null == position) {
-            created = service.insert(model);
-        } else {
-            created = service.insert(model, enumsMapper.map(position));
+        try {
+            if (null == position) {
+                created = service.insert(model);
+            } else {
+                created = service.insert(model, enumsMapper.map(position));
+            }
+        } catch (RuleIdentifierConflictException conflict) {
+            return error(CONFLICT, conflict.getMessage());
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toApi(created));
+    }
+
+    private <T> ResponseEntity<T> error(HttpStatus code, String reason) {
+        return ResponseEntity.status(code).header("X-Reason", reason).build();
     }
 
     @Override
@@ -69,14 +72,14 @@ public class RulesApiImpl implements RulesApiDelegate {
     }
 
     @Override
-    public ResponseEntity<List<Rule>> getRules(@NonNull Pageable pageable) {
-
-        return queryRules(pageable, null, null);
+    public ResponseEntity<List<Rule>> getRules(Integer page, Integer size) {
+        return query(RuleQuery.of().setPageNumber(page).setPageSize(size));
     }
 
     @Override
     public ResponseEntity<List<Rule>> queryRules( //
-            @Nullable Pageable pageable,
+            @Nullable Integer page,
+            @Nullable Integer size,
             @Nullable Long priorityOffset,
             @Nullable RuleFilter ruleFilter) {
 
@@ -85,12 +88,19 @@ public class RulesApiImpl implements RulesApiDelegate {
         RuleQuery<org.geoserver.geofence.rules.model.RuleFilter> query;
         query = RuleQuery.of(filter).setPriorityOffset(priorityOffset);
 
-        if (pageable != null && pageable.isPaged()) {
-            query.setPageNumber(pageable.getPageNumber()).setPageSize(pageable.getPageSize());
-        }
+        query.setPageNumber(page).setPageSize(size);
 
+        return query(query);
+    }
+
+    private ResponseEntity<List<Rule>> query(
+            RuleQuery<org.geoserver.geofence.rules.model.RuleFilter> query) {
         List<org.geoserver.geofence.rules.model.Rule> list;
-        list = service.getList(query);
+        try {
+            list = service.getList(query);
+        } catch (IllegalArgumentException e) {
+            return error(BAD_REQUEST, e.getMessage());
+        }
 
         List<Rule> body = list.stream().map(mapper::toApi).collect(Collectors.toList());
 
@@ -135,62 +145,97 @@ public class RulesApiImpl implements RulesApiDelegate {
 
     @Override
     public ResponseEntity<Void> setRuleAllowedStyles(@NonNull String id, Set<String> requestBody) {
-        service.setAllowedStyles(id, requestBody);
+        try {
+            service.setAllowedStyles(id, requestBody);
+        } catch (IllegalArgumentException e) {
+            return error(BAD_REQUEST, e.getMessage());
+        }
         return ResponseEntity.status(OK).build();
     }
 
     @Override
     public ResponseEntity<LayerDetails> getLayerDetailsByRuleId(@NonNull String id) {
-        LayerDetails details =
-                service.getLayerDetails(id).map(layerDetailsMapper::map).orElse(null);
-        return ResponseEntity.status(details == null ? NO_CONTENT : OK).body(details);
+        try {
+            LayerDetails details =
+                    service.getLayerDetails(id).map(layerDetailsMapper::map).orElse(null);
+            return ResponseEntity.status(details == null ? NO_CONTENT : OK).body(details);
+        } catch (IllegalArgumentException e) {
+            return error(BAD_REQUEST, e.getMessage());
+        }
     }
 
     @Override
     public ResponseEntity<Void> setRuleLayerDetails(@NonNull String id, LayerDetails layerDetails) {
-        org.geoserver.geofence.rules.model.LayerDetails ld = layerDetailsMapper.map(layerDetails);
-        service.setLayerDetails(id, ld);
-        return ResponseEntity.status(OK).build();
-    }
-
-    @Override
-    public ResponseEntity<Void> unsetRuleLayerDetails(@NonNull String id) {
-        service.setLayerDetails(id, null);
-        return ResponseEntity.status(OK).build();
+        try {
+            org.geoserver.geofence.rules.model.LayerDetails ld =
+                    layerDetailsMapper.map(layerDetails);
+            service.setLayerDetails(id, ld);
+            return ResponseEntity.status(OK).build();
+        } catch (IllegalArgumentException e) {
+            return error(BAD_REQUEST, e.getMessage());
+        }
     }
 
     @Override
     public ResponseEntity<Void> setRuleLimits(@NonNull String id, RuleLimits ruleLimits) {
-        service.setLimits(id, limitsMapper.toModel(ruleLimits));
-        return ResponseEntity.status(OK).build();
+        try {
+            service.setLimits(id, limitsMapper.toModel(ruleLimits));
+            return ResponseEntity.status(NO_CONTENT).build();
+        } catch (IllegalArgumentException e) {
+            return error(BAD_REQUEST, e.getMessage());
+        }
     }
 
     @Override
     public ResponseEntity<Integer> shiftRulesByPriority(Long priorityStart, Long offset) {
-        service.shift(priorityStart, offset);
-        return ResponseEntity.status(OK).build();
+        try {
+            int affectedCount = service.shift(priorityStart, offset);
+            return ResponseEntity.ok(affectedCount);
+        } catch (IllegalArgumentException e) {
+            return error(BAD_REQUEST, e.getMessage());
+        }
     }
 
     @Override
-    public ResponseEntity<Void> swapRulesById(@NonNull String id, @NonNull String id2) {
-        service.swapPriority(id, id2);
-        return ResponseEntity.status(OK).build();
+    public ResponseEntity<Void> swapRules(@NonNull String id, @NonNull String id2) {
+        try {
+            service.swapPriority(id, id2);
+            return ResponseEntity.status(NO_CONTENT).build();
+        } catch (IllegalArgumentException e) {
+            return error(BAD_REQUEST, e.getMessage());
+        }
     }
 
     @Override
     public ResponseEntity<Rule> updateRuleById(@NonNull String id, Rule patchBody) {
-        org.geoserver.geofence.rules.model.Rule rule =
-                service.get(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
+        org.geoserver.geofence.rules.model.Rule rule = service.get(id).orElse(null);
+        if (null == rule) {
+            return error(NOT_FOUND, "Rule " + id + " does not exist");
+        }
+        if (patchBody.getId().isPresent() && !id.equals(patchBody.getId().get())) {
+            return error(
+                    BAD_REQUEST,
+                    "Request body supplied a different id ("
+                            + patchBody.getId().get()
+                            + ") than the requested rule id: "
+                            + id);
+        }
 
         // this applies only the values actually sent in the request body, using JsonNullable to
         // discern
         org.geoserver.geofence.rules.model.Rule patched = mapper.patch(rule, patchBody);
-        org.geoserver.geofence.rules.model.Rule updated = service.update(patched);
-        return ResponseEntity.status(OK).body(mapper.toApi(updated));
+        try {
+            org.geoserver.geofence.rules.model.Rule updated = service.update(patched);
+            return ResponseEntity.status(OK).body(mapper.toApi(updated));
+        } catch (RuleIdentifierConflictException e) {
+            return error(CONFLICT, e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return error(BAD_REQUEST, e.getMessage());
+        }
     }
 
     private org.geoserver.geofence.rules.model.RuleFilter map(RuleFilter ruleFilter) {
-        return filterMapper.map(ruleFilter);
+        return filterMapper.toModel(ruleFilter);
     }
 
     private org.geoserver.geofence.rules.model.Rule map(Rule apiModel) {

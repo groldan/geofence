@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Mapper(componentModel = "spring")
-interface GeometryApiMapper {
+public interface GeometryApiMapper {
 
     Pattern pattern = Pattern.compile("((SRID=(\\d+))\\s*;)?\\s*(MULTIPOLYGON.*)");
 

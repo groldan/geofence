@@ -37,6 +37,8 @@
     <mapstruct.version>1.5.3.Final</mapstruct.version>
     <querydsl.version>5.0.0</querydsl.version>
     <testcontainers.version>1.17.4</testcontainers.version>
+    <springdoc.version>1.6.14</springdoc.version>
+    <swagger-ui.version>4.15.5</swagger-ui.version>
   </properties>
   <dependencyManagement>
     <dependencies>

@@ -84,7 +84,8 @@ public class AdminRuleAdminService {
      * default inclusion is not allowed.
      *
      * @return the matching rule or null if not found
-     * @throws BadRequestServiceEx if a wildcard type is used in filter
+     * @throws IllegalArgumentException if a wildcard type is used in filter or matches more than
+     *     one rule
      */
     public Optional<AdminRule> getRule(AdminRuleFilter filter) {
         return repository.findOne(filter);

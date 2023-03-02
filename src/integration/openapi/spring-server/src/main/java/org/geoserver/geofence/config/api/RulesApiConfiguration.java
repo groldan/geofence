@@ -16,15 +16,14 @@ import org.geoserver.geofence.config.domain.AdminRuleAdminServiceConfiguration;
 import org.geoserver.geofence.config.domain.RuleAdminServiceConfiguration;
 import org.geoserver.geofence.config.domain.UserAdminServiceConfiguration;
 import org.geoserver.geofence.rules.service.RuleAdminService;
-import org.openapitools.jackson.nullable.JsonNullableModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.web.context.request.NativeWebRequest;
 
 @Configuration(proxyBeanMethods = false)
 @Import({
+    JacksonObjectMapperConfiguration.class,
     RuleAdminServiceConfiguration.class,
     AdminRuleAdminServiceConfiguration.class,
     UserAdminServiceConfiguration.class
@@ -43,29 +42,19 @@ public class RulesApiConfiguration {
     }
 
     @Bean
-    JsonNullableModule jsonNullableModule() {
-        return new JsonNullableModule();
-    }
-
-    @Bean
     RulesApiDelegate rulesApiDelegate(
             RuleAdminService rules,
             RuleApiMapper mapper,
             LayerDetailsApiMapper layerDetailsMapper,
             RuleLimitsApiMapper limitsMapper,
-            EnumsApiMapper enumsMapper,
-            NativeWebRequest request) {
+            EnumsApiMapper enumsMapper) {
 
-        return new RulesApiImpl(
-                rules, mapper, layerDetailsMapper, limitsMapper, enumsMapper, request);
+        return new RulesApiImpl(rules, mapper, layerDetailsMapper, limitsMapper, enumsMapper);
     }
 
     @Bean
     AdminRulesApiDelegate adminRulesApiDelegate(
-            AdminRuleAdminService service,
-            AdminRuleApiMapper mapper,
-            EnumsApiMapper enumsMapper,
-            NativeWebRequest request) {
-        return new AdminRulesApiImpl(service, mapper, enumsMapper, request);
+            AdminRuleAdminService service, AdminRuleApiMapper mapper, EnumsApiMapper enumsMapper) {
+        return new AdminRulesApiImpl(service, mapper, enumsMapper);
     }
 }

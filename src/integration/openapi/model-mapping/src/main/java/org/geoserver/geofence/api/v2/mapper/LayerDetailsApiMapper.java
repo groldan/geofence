@@ -1,6 +1,7 @@
 package org.geoserver.geofence.api.v2.mapper;
 
 import org.geoserver.geofence.rules.model.LayerDetails;
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -10,6 +11,7 @@ import org.openapitools.jackson.nullable.JsonNullable;
 
 @Mapper(
         componentModel = "spring",
+        injectionStrategy = InjectionStrategy.CONSTRUCTOR,
         unmappedTargetPolicy = ReportingPolicy.ERROR,
         //        nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT,
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,

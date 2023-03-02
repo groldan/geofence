@@ -14,9 +14,7 @@ import org.geoserver.geofence.api.v2.model.AdminRule;
 import org.geoserver.geofence.api.v2.model.AdminRuleFilter;
 import org.geoserver.geofence.api.v2.model.InsertPosition;
 import org.geoserver.geofence.api.v2.server.AdminRulesApiDelegate;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -29,13 +27,8 @@ public class AdminRulesApiImpl implements AdminRulesApiDelegate {
     private final @NonNull AdminRuleAdminService service;
     private final @NonNull AdminRuleApiMapper mapper;
     private final @NonNull EnumsApiMapper enumsMapper;
-    private final NativeWebRequest request;
 
     private final RuleFilterApiMapper filterMapper = new RuleFilterApiMapper();
-
-    public @Override Optional<NativeWebRequest> getRequest() {
-        return Optional.of(request);
-    }
 
     public @Override ResponseEntity<Integer> countAllAdminRules() {
         return ResponseEntity.ok(service.getCountAll());
@@ -46,7 +39,7 @@ public class AdminRulesApiImpl implements AdminRulesApiDelegate {
     }
 
     public @Override ResponseEntity<AdminRule> createAdminRule(
-            InsertPosition position, AdminRule adminRule) {
+            AdminRule adminRule, InsertPosition position) {
 
         org.geoserver.geofence.adminrules.model.AdminRule rule;
         if (position == null) {
@@ -70,24 +63,21 @@ public class AdminRulesApiImpl implements AdminRulesApiDelegate {
         return ResponseEntity.ok(service.exists(id));
     }
 
-    public @Override ResponseEntity<List<AdminRule>> findAllAdminRules(Pageable pageable) {
+    public @Override ResponseEntity<List<AdminRule>> findAllAdminRules(Integer page, Integer size) {
 
         org.geoserver.geofence.adminrules.model.AdminRuleFilter filter = null;
-        Integer page = pageable.isPaged() ? pageable.getPageNumber() : null;
-        Integer entries = pageable.isPaged() ? pageable.getPageSize() : null;
         List<org.geoserver.geofence.adminrules.model.AdminRule> matches =
-                service.getList(filter, page, entries);
+                service.getList(filter, page, size);
         List<AdminRule> body = matches.stream().map(this::map).collect(Collectors.toList());
         return ResponseEntity.ok(body);
     }
 
     public @Override ResponseEntity<AdminRule> findFirstAdminRule(AdminRuleFilter adminRuleFilter) {
 
-        List<org.geoserver.geofence.adminrules.model.AdminRule> first;
-        first = service.getList(map(adminRuleFilter), 0, 1);
+        org.geoserver.geofence.adminrules.model.AdminRule match =
+                service.getFirstMatch(map(adminRuleFilter)).orElse(null);
 
-        return ResponseEntity.status(first.isEmpty() ? NOT_FOUND : OK)
-                .body(first.isEmpty() ? null : map(first.get(0)));
+        return ResponseEntity.status(null == match ? NOT_FOUND : OK).body(map(match));
     }
 
     public @Override ResponseEntity<AdminRule> findOneAdminRule(AdminRuleFilter adminRuleFilter) {
@@ -107,14 +97,12 @@ public class AdminRulesApiImpl implements AdminRulesApiDelegate {
     }
 
     public @Override ResponseEntity<List<AdminRule>> findAdminRules(
-            Pageable pageable, Long priorityOffset, AdminRuleFilter adminRuleFilter) {
+            Integer page, Integer size, Long priorityOffset, AdminRuleFilter adminRuleFilter) {
 
         org.geoserver.geofence.adminrules.model.AdminRuleFilter filter = map(adminRuleFilter);
 
-        Integer page = pageable.isPaged() ? pageable.getPageNumber() : null;
-        Integer pageSize = pageable.isPaged() ? pageable.getPageSize() : null;
         List<org.geoserver.geofence.adminrules.model.AdminRule> matches =
-                service.getList(filter, page, pageSize);
+                service.getList(filter, page, size);
         return ResponseEntity.ok(matches.stream().map(this::map).collect(Collectors.toList()));
     }
 
@@ -131,8 +119,7 @@ public class AdminRulesApiImpl implements AdminRulesApiDelegate {
         return ResponseEntity.ok(service.shift(priorityStart, offset));
     }
 
-    public @Override ResponseEntity<Void> swapAdminRulesById(
-            @NonNull String id, @NonNull String id2) {
+    public @Override ResponseEntity<Void> swapAdminRules(@NonNull String id, @NonNull String id2) {
         service.swap(id, id2);
         return ResponseEntity.status(OK).build();
     }

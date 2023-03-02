@@ -6,7 +6,6 @@
 package org.geoserver.geofence.rules.model;
 
 import lombok.Builder;
-import lombok.Builder.Default;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.With;
@@ -43,28 +42,29 @@ public class LayerDetails {
 
     private CatalogMode catalogMode;
 
-    @Default @NonNull private Set<String> allowedStyles = Set.of();
+    @NonNull private Set<String> allowedStyles;
 
-    @Default @NonNull private Set<LayerAttribute> attributes = Set.of();
+    @NonNull private Set<LayerAttribute> attributes;
 
-    public static class LayerDetailsBuilder {
+    public static class Builder {
         // define (effectively overriding lombok's generated ones) only the builder methods for the
         // collection attributes we want to ensure are immutable
-        @SuppressWarnings("unused")
         private Set<String> allowedStyles = Set.of();
-
-        @SuppressWarnings("unused")
         private Set<LayerAttribute> attributes = Set.of();
 
-        public LayerDetailsBuilder allowedStyles(Set<String> allowedStyles) {
-            if (allowedStyles != null && !allowedStyles.isEmpty()) {
+        public Builder allowedStyles(Set<String> allowedStyles) {
+            if (allowedStyles == null) {
+                this.allowedStyles = Set.of();
+            } else {
                 this.allowedStyles = Set.copyOf(allowedStyles);
             }
             return this;
         }
 
-        public LayerDetailsBuilder attributes(Set<LayerAttribute> attributes) {
-            if (attributes != null && !attributes.isEmpty()) {
+        public Builder attributes(Set<LayerAttribute> attributes) {
+            if (attributes == null) {
+                this.attributes = Set.of();
+            } else {
                 this.attributes = Set.copyOf(attributes);
             }
             return this;

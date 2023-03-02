@@ -55,4 +55,12 @@ public class AdminRule {
     public AdminRule withAddressRange(IPAddressRange addressRange) {
         return withIdentifier(identifier.withAddressRange(addressRange));
     }
+
+    public static AdminRule user() {
+        return AdminRule.builder().access(AdminGrantType.USER).build();
+    }
+
+    public static AdminRule admin() {
+        return AdminRule.builder().access(AdminGrantType.ADMIN).build();
+    }
 }

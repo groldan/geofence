@@ -8,6 +8,7 @@ package org.geoserver.geofence.rules.service;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import org.geoserver.geofence.rules.model.GrantType;
 import org.geoserver.geofence.rules.model.InsertPosition;
 import org.geoserver.geofence.rules.model.LayerDetails;
 import org.geoserver.geofence.rules.model.Rule;
@@ -15,10 +16,10 @@ import org.geoserver.geofence.rules.model.RuleFilter;
 import org.geoserver.geofence.rules.model.RuleIdentifier;
 import org.geoserver.geofence.rules.model.RuleLimits;
 import org.geoserver.geofence.rules.model.RuleQuery;
+import org.geoserver.geofence.rules.repository.RuleIdentifierConflictException;
 import org.geoserver.geofence.rules.repository.RuleRepository;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -42,20 +43,38 @@ public class RuleAdminService {
     // Basic operations
     // =========================================================================
 
-    public Rule insert(Rule rule) {
+    /**
+     * @throws RuleIdentifierConflictException if trying to insert a rule with the same {@link
+     *     RuleIdentifier} than an existing one
+     * @return the rule as created, with sanitized (converted to upper case) {@literal service} and
+     *     {@literal request} identifier property values.
+     */
+    public Rule insert(@NonNull Rule rule) {
         return insert(rule, InsertPosition.FIXED);
     }
 
-    public Rule insert(Rule rule, InsertPosition position) {
-        if (null != rule.getId()) {
+    /**
+     * @throws IllegalArgumentException if the rule has an {@link Rule#getId() id} set
+     * @throws RuleIdentifierConflictException if trying to insert a rule with the same {@link
+     *     RuleIdentifier} than an existing one
+     * @return the rule as created, with sanitized (converted to upper case) {@literal service} and
+     *     {@literal request} identifier property values.
+     */
+    public Rule insert(@NonNull Rule rule, @NonNull InsertPosition position) {
+        if (null != rule.getId())
             throw new IllegalArgumentException("a new Rule must not have id, got " + rule.getId());
-        }
 
         rule = sanitizeFields(rule);
         return ruleRepository.create(rule, position);
     }
 
-    public Rule update(Rule rule) {
+    /**
+     * @throws IllegalArgumentException if the rule has {@code null} {@link Rule#getId() id} or does
+     *     not exist
+     * @throws RuleIdentifierConflictException if trying to update a rule with the same {@link
+     *     RuleIdentifier} than an existing one
+     */
+    public Rule update(@NonNull Rule rule) {
         if (null == rule.getId()) {
             throw new IllegalArgumentException("Rule has no id");
         }
@@ -80,7 +99,11 @@ public class RuleAdminService {
         return ruleRepository.shift(priorityStart, offset);
     }
 
-    /** Swaps the priorities of two rules. */
+    /**
+     * Swaps the priorities of two rules.
+     *
+     * @throws IllegalArgumentException if either rules does not exist
+     */
     public void swapPriority(String id1, String id2) {
         ruleRepository.swap(id1, id2);
     }
@@ -91,6 +114,10 @@ public class RuleAdminService {
      * RuleReaderServiceImpl}.
      */
     protected Rule sanitizeFields(Rule rule) {
+        if (rule.getPriority() < 0)
+            throw new IllegalArgumentException(
+                    "Negative priority is not allowed: " + rule.getPriority());
+
         // read class' javadoc
         RuleIdentifier identifier = rule.getIdentifier();
         if (identifier.getService() != null) {
@@ -102,13 +129,13 @@ public class RuleAdminService {
         return rule.withIdentifier(identifier);
     }
 
-    public Optional<Rule> get(String id) {
+    public Optional<Rule> get(@NonNull String id) {
         return ruleRepository.findById(id);
     }
 
     // gr: used to return boolean but threw a NotFoundServiceEx, changed to return false instead for
     // consistency
-    public boolean delete(String id) {
+    public boolean delete(@NonNull String id) {
         return ruleRepository.delete(id);
     }
 
@@ -139,6 +166,10 @@ public class RuleAdminService {
     // REVISIT: return Stream?
     public List<Rule> getAll() {
         return ruleRepository.findAll().collect(Collectors.toList());
+    }
+
+    public List<Rule> getList(@NonNull RuleFilter filter) {
+        return getList(RuleQuery.of(filter));
     }
 
     /**
@@ -178,87 +209,29 @@ public class RuleAdminService {
      */
     public Optional<Rule> getRuleByPriority(long priority) throws IllegalArgumentException {
         return ruleRepository.findByPriority(priority);
-        // Search searchCriteria = new Search(Rule.class);
-        // searchCriteria.addFilter(Filter.equal("priority", priority));
-        // List<Rule> found = ruleDAO.search(searchCriteria);
-        // if (found.isEmpty())
-        // return null;
-        //
-        // if (found.size() > 1) {
-        // LOGGER.error("Unexpected rule count for priority " + priority + " : " + found);
-        // }
-        //
-        // return new ShortRule(found.get(0));
     }
-
-    // protected Search buildSearch(Integer page, Integer entries, RuleFilter filter)
-    // throws BadRequestServiceEx {
-    // Search searchCriteria = buildRuleSearch(filter);
-    // addPagingConstraints(searchCriteria, page, entries);
-    // searchCriteria.addSortAsc("priority");
-    // return searchCriteria;
-    // }
 
     public int getCountAll() {
         return ruleRepository.count();
     }
 
     /** Return the Rules count according to the filter. */
-    public int count(RuleFilter filter) {
+    public int count(@NonNull RuleFilter filter) {
         return ruleRepository.count(filter);
     }
-
-    // =========================================================================
-    // Search stuff
-
-    // private Search buildRuleSearch(RuleFilter filter) {
-    // Search searchCriteria = new Search(Rule.class);
-    //
-    // if (filter != null) {
-    // addStringCriteria(searchCriteria, "username", filter.getUser());
-    // addStringCriteria(searchCriteria, "rolename", filter.getRole());
-    // addCriteria(searchCriteria, "instance", filter.getInstance());
-    //
-    // addStringCriteria(searchCriteria, "service", filter.getService()); // see
-    // class'
-    // javadoc
-    // addStringCriteria(searchCriteria, "request", filter.getRequest()); // see
-    // class'
-    // javadoc
-    // addStringCriteria(searchCriteria, "workspace", filter.getWorkspace());
-    // addStringCriteria(searchCriteria, "layer", filter.getLayer());
-    // }
-    //
-    // return searchCriteria;
-    // }
-
-    // =========================================================================
-
-    // private Search buildFixedRuleSearch(RuleFilter filter) {
-    // Search searchCriteria = new Search(Rule.class);
-    //
-    // if (filter != null) {
-    // addFixedStringCriteria(searchCriteria, "username", filter.getUser());
-    // addFixedStringCriteria(searchCriteria, "rolename", filter.getRole());
-    // addFixedCriteria(searchCriteria, "instance", filter.getInstance());
-    //
-    // addFixedStringCriteria(searchCriteria, "service", filter.getService()); // see class'
-    // // javadoc
-    // addFixedStringCriteria(searchCriteria, "request", filter.getRequest()); // see class'
-    // // javadoc
-    // addFixedStringCriteria(searchCriteria, "workspace", filter.getWorkspace());
-    // addFixedStringCriteria(searchCriteria, "layer", filter.getLayer());
-    // }
-    //
-    // return searchCriteria;
-    // }
 
     // =========================================================================
     // Limits
     // =========================================================================
 
-    public void setLimits(String ruleId, RuleLimits limits)
-            throws IllegalArgumentException, NoSuchElementException {
+    /**
+     * @param ruleId
+     * @param limits
+     * @throws IllegalArgumentException if Rule does not exist or is not of {@link GrantType#LIMIT
+     *     LIMIT} type
+     */
+    public void setLimits(@NonNull String ruleId, RuleLimits limits)
+            throws IllegalArgumentException {
 
         ruleRepository.setLimits(ruleId, limits);
     }
@@ -267,6 +240,9 @@ public class RuleAdminService {
     // Details
     // =========================================================================
 
+    /**
+     * @see #getLayerDetails(String)
+     */
     public Optional<LayerDetails> getLayerDetails(@NonNull Rule rule) {
         Objects.requireNonNull(rule.getId());
         return getLayerDetails(rule.getId());
@@ -278,15 +254,16 @@ public class RuleAdminService {
      * @throws IllegalArgumentException if the rule does not exist or has no {@link
      *     RuleIdentifier#getLayer() layer} set
      */
-    public Optional<LayerDetails> getLayerDetails(String ruleId) {
+    public Optional<LayerDetails> getLayerDetails(@NonNull String ruleId) {
         return ruleRepository.findLayerDetailsByRuleId(ruleId);
     }
 
     /**
-     * @throws IllegalArgumentException if the rule does not exist or has no {@link
-     *     RuleIdentifier#getLayer() layer set}
+     * @throws IllegalArgumentException if the rule does not exist, or {@code detailsNew} is not
+     *     null but the Rule's {@link RuleIdentifier#getAccess() access} is not {@link
+     *     GrantType#ALLOW}
      */
-    public void setLayerDetails(String ruleId, LayerDetails detailsNew) {
+    public void setLayerDetails(@NonNull String ruleId, LayerDetails detailsNew) {
         ruleRepository.setLayerDetails(ruleId, detailsNew);
     }
 
@@ -294,7 +271,7 @@ public class RuleAdminService {
      * @throws IllegalArgumentException if the rule does not exist or has no {@link
      *     RuleIdentifier#getLayer() layer} set
      */
-    public void setAllowedStyles(String ruleId, Set<String> styles) {
+    public void setAllowedStyles(@NonNull String ruleId, Set<String> styles) {
         ruleRepository.setAllowedStyles(ruleId, styles);
     }
 
@@ -304,7 +281,7 @@ public class RuleAdminService {
      * @throws IllegalArgumentException if the rule does not exist or has no {@link
      *     RuleIdentifier#getLayer() layer} set
      */
-    public Set<String> getAllowedStyles(String ruleId) {
+    public Set<String> getAllowedStyles(@NonNull String ruleId) {
         return getLayerDetails(ruleId).map(LayerDetails::getAllowedStyles).orElse(Set.of());
     }
 

@@ -1,6 +1,7 @@
 package org.geoserver.geofence.jpa.repository;
 
 import org.geoserver.geofence.jpa.model.Rule;
+import org.geoserver.geofence.jpa.model.RuleIdentifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -13,18 +14,24 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @TransactionSupported
 public interface JpaRuleRepository
-        extends JpaRepository<Rule, Long>, QuerydslPredicateExecutor<Rule> {
+        extends JpaRepository<Rule, Long>,
+                QuerydslPredicateExecutor<Rule>,
+                PriorityRepository<Rule> {
 
-    Sort naturalOrder = Sort.by("identifier.instance.id", "priority");
+    Sort naturalOrder = Sort.by("priority");
 
-    boolean deleteById(long id);
+    @TransactionRequired
+    @Modifying
+    @Query("delete from Rule r where r.id=:id")
+    int deleteById(@Param("id") long id);
 
-    @Query("SELECT r FROM Rule r ORDER BY identifier.instance.id, priority")
+    @Query("SELECT r FROM Rule r ORDER BY priority")
     List<Rule> findAllNaturalOrder();
 
     default List<Rule> findAllNaturalOrder(com.querydsl.core.types.Predicate predicate) {
@@ -36,7 +43,7 @@ public interface JpaRuleRepository
         return StreamSupport.stream(matches.spliterator(), false).collect(Collectors.toList());
     }
 
-    @Query("SELECT r FROM Rule r ORDER BY identifier.instance.id, priority")
+    @Query("SELECT r FROM Rule r ORDER BY priority")
     Page<Rule> findAllNaturalOrder(Pageable pageable);
 
     default Page<Rule> findAllNaturalOrder(
@@ -56,8 +63,29 @@ public interface JpaRuleRepository
         return new PageImpl<>(contents);
     }
 
+    @Override
+    Optional<Rule> findOneByPriority(long priority);
+
+    @Override
     @TransactionRequired
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Rule SET priority = priority + :offset WHERE priority >= :priorityStart")
     int shiftPriority(@Param("priorityStart") long priorityStart, @Param("offset") long offset);
+
+    @Override
+    @TransactionRequired
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("UPDATE Rule SET priority = priority + :offset WHERE priority BETWEEN :min AND :max")
+    void shiftPrioritiesBetween(
+            @Param("min") long min, @Param("max") long max, @Param("offset") long offset);
+
+    @Override
+    @Query("SELECT MAX(r.priority) FROM Rule r")
+    Optional<Long> findMaxPriority();
+
+    @Override
+    @Query("SELECT MIN(r.priority) FROM Rule r")
+    Optional<Long> findMinPriority();
+
+    List<Rule> findAllByIdentifier(RuleIdentifier identifier);
 }

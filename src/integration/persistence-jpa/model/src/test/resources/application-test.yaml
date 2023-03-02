@@ -18,7 +18,7 @@ geofence:
 logging:
   level:
     root: warn
-    '[org.geoserver.geofence]': info
-    '[org.springframework.boot.autoconfigure]': info
-    '[org.springframework.boot.test.context]': info
+    '[org.geoserver.geofence]': warn
+    '[org.springframework.boot.autoconfigure]': warn
+    '[org.springframework.boot.test.context]': warn
     '[org.testcontainers]': info

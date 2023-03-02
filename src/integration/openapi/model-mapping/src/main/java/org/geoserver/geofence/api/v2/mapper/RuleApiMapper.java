@@ -4,6 +4,7 @@ import org.geoserver.geofence.rules.model.LayerDetails;
 import org.geoserver.geofence.rules.model.Rule;
 import org.geoserver.geofence.rules.model.RuleIdentifier;
 import org.geoserver.geofence.rules.model.RuleLimits;
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -16,6 +17,7 @@ import javax.validation.Valid;
 
 @Mapper(
         componentModel = "spring",
+        injectionStrategy = InjectionStrategy.CONSTRUCTOR,
         unmappedTargetPolicy = ReportingPolicy.ERROR,
         //        nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT,
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
@@ -29,10 +31,10 @@ public abstract class RuleApiMapper {
     private @Autowired RuleLimitsApiMapper limitsMapper;
     private @Autowired LayerDetailsApiMapper detailsMapper;
 
-    @Mapping(target = "identifier.instanceName", source = "instancename")
+    @Mapping(target = "identifier.instanceName", source = "instance")
     @Mapping(target = "identifier.access", source = "access")
-    @Mapping(target = "identifier.username", source = "userName")
-    @Mapping(target = "identifier.rolename", source = "roleName")
+    @Mapping(target = "identifier.username", source = "user")
+    @Mapping(target = "identifier.rolename", source = "role")
     @Mapping(target = "identifier.service", source = "service")
     @Mapping(target = "identifier.request", source = "request")
     @Mapping(target = "identifier.subfield", source = "subfield")
@@ -43,10 +45,10 @@ public abstract class RuleApiMapper {
     public abstract org.geoserver.geofence.rules.model.Rule toModel(
             org.geoserver.geofence.api.v2.model.Rule rule);
 
-    @Mapping(target = "instancename", source = "identifier.instanceName")
+    @Mapping(target = "instance", source = "identifier.instanceName")
     @Mapping(target = "access", source = "identifier.access")
-    @Mapping(target = "userName", source = "identifier.username")
-    @Mapping(target = "roleName", source = "identifier.rolename")
+    @Mapping(target = "user", source = "identifier.username")
+    @Mapping(target = "role", source = "identifier.rolename")
     @Mapping(target = "service", source = "identifier.service")
     @Mapping(target = "request", source = "identifier.request")
     @Mapping(target = "subfield", source = "identifier.subfield")
@@ -98,9 +100,9 @@ public abstract class RuleApiMapper {
     abstract Rule updateEntity(
             @MappingTarget Rule.Builder entity, org.geoserver.geofence.api.v2.model.Rule dto);
 
-    @Mapping(target = "instanceName", source = "instancename")
-    @Mapping(target = "username", source = "userName")
-    @Mapping(target = "rolename", source = "roleName")
+    @Mapping(target = "instanceName", source = "instance")
+    @Mapping(target = "username", source = "user")
+    @Mapping(target = "rolename", source = "role")
     abstract RuleIdentifier updateIdentifier(
             @MappingTarget RuleIdentifier.Builder entity,
             org.geoserver.geofence.api.v2.model.Rule dto);

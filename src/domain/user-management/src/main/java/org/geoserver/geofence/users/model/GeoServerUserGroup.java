@@ -6,6 +6,7 @@
 package org.geoserver.geofence.users.model;
 
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.With;
@@ -40,5 +41,5 @@ public class GeoServerUserGroup {
     private LocalDateTime createdDate;
 
     /** Whether the group is enabled or not */
-    private boolean enabled;
+    @Default private boolean enabled = true;
 }

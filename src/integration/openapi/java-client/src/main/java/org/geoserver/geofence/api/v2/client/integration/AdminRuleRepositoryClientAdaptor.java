@@ -10,7 +10,6 @@ import org.geoserver.geofence.api.v2.client.AdminRulesApi;
 import org.geoserver.geofence.api.v2.mapper.AdminRuleApiMapper;
 import org.geoserver.geofence.api.v2.mapper.EnumsApiMapper;
 import org.geoserver.geofence.api.v2.mapper.RuleFilterApiMapper;
-import org.geoserver.geofence.api.v2.model.Pageable;
 import org.geoserver.geofence.rules.model.InsertPosition;
 import org.geoserver.geofence.rules.model.RuleQuery;
 import org.springframework.web.client.HttpClientErrorException;
@@ -32,7 +31,7 @@ public class AdminRuleRepositoryClientAdaptor implements AdminRuleRepository {
     public AdminRule create(AdminRule rule, InsertPosition position) {
         if (null != rule.getId()) throw new IllegalArgumentException("AdminRule must have no id");
         org.geoserver.geofence.api.v2.model.AdminRule result =
-                apiClient.createAdminRule(map(position), map(rule));
+                apiClient.createAdminRule(map(rule), map(position));
         return mapper.map(result);
     }
 
@@ -68,27 +67,31 @@ public class AdminRuleRepositoryClientAdaptor implements AdminRuleRepository {
 
     @Override
     public List<AdminRule> findAll() {
-        return apiClient.findAllAdminRules(null).stream()
+        Integer page = null;
+        Integer size = null;
+        return apiClient.findAllAdminRules(page, size).stream()
                 .map(this::map)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<AdminRule> findAll(AdminRuleFilter filter) {
-        Pageable pageable = null;
+        Integer page = null;
+        Integer size = null;
         Long priorityOffset = null;
-        return apiClient.findAdminRules(pageable, priorityOffset, map(filter)).stream()
+        return apiClient.findAdminRules(page, size, priorityOffset, map(filter)).stream()
                 .map(this::map)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<AdminRule> findAll(RuleQuery<AdminRuleFilter> query) {
-        org.geoserver.geofence.api.v2.model.Pageable pageable;
         org.geoserver.geofence.api.v2.model.AdminRuleFilter filter;
+
+        Integer page = query.getPageNumber();
+        Integer size = query.getPageSize();
         Long priorityOffset;
 
-        pageable = this.filterMapper.extractPageable(query);
         filter = query.getFilter().map(filterMapper::map).orElse(null);
         priorityOffset =
                 query.getPriorityOffset().isPresent()
@@ -97,7 +100,7 @@ public class AdminRuleRepositoryClientAdaptor implements AdminRuleRepository {
 
         List<org.geoserver.geofence.api.v2.model.AdminRule> rules;
 
-        rules = apiClient.findAdminRules(pageable, priorityOffset, filter);
+        rules = apiClient.findAdminRules(page, size, priorityOffset, filter);
 
         return rules.stream().map(this::map).collect(Collectors.toList());
     }
@@ -132,7 +135,7 @@ public class AdminRuleRepositoryClientAdaptor implements AdminRuleRepository {
 
     @Override
     public void swap(@NonNull String id1, @NonNull String id2) {
-        apiClient.swapAdminRulesById(id1, id2);
+        apiClient.swapAdminRules(id1, id2);
     }
 
     @Override

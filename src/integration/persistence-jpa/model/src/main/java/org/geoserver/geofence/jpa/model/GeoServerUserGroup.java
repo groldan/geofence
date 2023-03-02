@@ -13,7 +13,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -53,10 +52,6 @@ public class GeoServerUserGroup extends Auditable implements Serializable {
     /** The name. */
     @Column(nullable = false, updatable = true, unique = true)
     private String name;
-
-    /** The date creation. */
-    @Column(updatable = false)
-    private LocalDateTime createdDate;
 
     /** The enabled. */
     @Column(nullable = false)

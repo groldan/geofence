@@ -1,6 +1,7 @@
 package org.geoserver.geofence.api.v2.client.integration;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -11,13 +12,13 @@ import org.geoserver.geofence.api.v2.mapper.LayerDetailsApiMapper;
 import org.geoserver.geofence.api.v2.mapper.RuleApiMapper;
 import org.geoserver.geofence.api.v2.mapper.RuleFilterApiMapper;
 import org.geoserver.geofence.api.v2.mapper.RuleLimitsApiMapper;
-import org.geoserver.geofence.api.v2.model.Pageable;
 import org.geoserver.geofence.rules.model.InsertPosition;
 import org.geoserver.geofence.rules.model.LayerDetails;
 import org.geoserver.geofence.rules.model.Rule;
 import org.geoserver.geofence.rules.model.RuleFilter;
 import org.geoserver.geofence.rules.model.RuleLimits;
 import org.geoserver.geofence.rules.model.RuleQuery;
+import org.geoserver.geofence.rules.repository.RuleIdentifierConflictException;
 import org.geoserver.geofence.rules.repository.RuleRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,17 +50,36 @@ public class RuleRepositoryClientAdaptor implements RuleRepository {
     @Override
     public Rule save(Rule rule) {
         Objects.requireNonNull(rule.getId(), "Rule has no id");
-        org.geoserver.geofence.api.v2.model.Rule response;
-        response = apiClient.updateRuleById(rule.getId(), map(rule));
-        return map(response);
+        try {
+            org.geoserver.geofence.api.v2.model.Rule response;
+            response = apiClient.updateRuleById(rule.getId(), map(rule));
+            return map(response);
+        } catch (HttpClientErrorException.Conflict e) {
+            throw new RuleIdentifierConflictException(reason(e), e);
+        } catch (HttpClientErrorException.BadRequest | HttpClientErrorException.NotFound e) {
+            throw new IllegalArgumentException(reason(e), e);
+        }
     }
 
     @Override
     public Rule create(Rule rule, InsertPosition position) {
         if (null != rule.getId()) throw new IllegalArgumentException("Rule must have no id");
         org.geoserver.geofence.api.v2.model.Rule response;
-        response = apiClient.createRule(enumsMapper.map(position), map(rule));
+        try {
+            response = apiClient.createRule(map(rule), enumsMapper.map(position));
+        } catch (HttpClientErrorException.Conflict c) {
+            throw new RuleIdentifierConflictException(reason(c), c);
+        }
         return map(response);
+    }
+
+    private String reason(HttpClientErrorException e) {
+        return reason(e, e.getMessage());
+    }
+
+    private String reason(HttpClientErrorException e, String defaultValue) {
+        String reason = e.getResponseHeaders().getFirst("X-Reason");
+        return reason == null ? defaultValue : reason;
     }
 
     @Override
@@ -84,19 +104,19 @@ public class RuleRepositoryClientAdaptor implements RuleRepository {
 
     @Override
     public Stream<Rule> findAll() {
-        Pageable pageable = new Pageable();
-        List<org.geoserver.geofence.api.v2.model.Rule> rules = apiClient.getRules(pageable);
+        Integer page = null;
+        Integer size = null;
+        List<org.geoserver.geofence.api.v2.model.Rule> rules = apiClient.getRules(page, size);
         return rules.stream().map(this::map);
     }
 
     @Override
     public Stream<Rule> query(RuleQuery<RuleFilter> query) {
-        org.geoserver.geofence.api.v2.model.Pageable pageable;
+
         org.geoserver.geofence.api.v2.model.RuleFilter filter;
         Long priorityOffset;
 
-        pageable = this.filterMapper.extractPageable(query);
-        filter = query.getFilter().map(filterMapper::map).orElse(null);
+        filter = query.getFilter().map(filterMapper::toApi).orElse(null);
         priorityOffset =
                 query.getPriorityOffset().isPresent()
                         ? query.getPriorityOffset().getAsLong()
@@ -104,7 +124,9 @@ public class RuleRepositoryClientAdaptor implements RuleRepository {
 
         List<org.geoserver.geofence.api.v2.model.Rule> rules;
 
-        rules = apiClient.queryRules(pageable, priorityOffset, filter);
+        Integer page = query.getPageNumber();
+        Integer size = query.getPageSize();
+        rules = apiClient.queryRules(page, size, priorityOffset, filter);
 
         return rules.stream().map(this::map);
     }
@@ -133,41 +155,49 @@ public class RuleRepositoryClientAdaptor implements RuleRepository {
         return Optional.ofNullable(rule).map(this::map);
     }
 
-    private org.geoserver.geofence.api.v2.model.RuleFilter map(RuleFilter filter) {
-        return filterMapper.map(filter);
-    }
-
-    private org.geoserver.geofence.api.v2.model.Rule map(Rule rule) {
-        return mapper.toApi(rule);
-    }
-
-    private Rule map(org.geoserver.geofence.api.v2.model.Rule rule) {
-        return mapper.toModel(rule);
-    }
-
     @Override
     public int shift(long priorityStart, long offset) {
-        return apiClient.shiftRulesByPriority(priorityStart, offset);
+        try {
+            return apiClient.shiftRulesByPriority(priorityStart, offset);
+        } catch (HttpClientErrorException.BadRequest e) {
+            throw new IllegalArgumentException(reason(e), e);
+        }
     }
 
     @Override
     public void swap(@NonNull String id1, @NonNull String id2) {
-        apiClient.swapRulesById(id1, id2);
+        try {
+            apiClient.swapRules(id1, id2);
+        } catch (HttpClientErrorException.BadRequest e) {
+            throw new IllegalArgumentException(reason(e), e);
+        }
     }
 
     @Override
     public void setAllowedStyles(@NonNull String ruleId, Set<String> styles) {
-        apiClient.setRuleAllowedStyles(ruleId, styles);
+        try {
+            apiClient.setRuleAllowedStyles(ruleId, styles);
+        } catch (HttpClientErrorException.BadRequest e) {
+            throw new IllegalArgumentException(reason(e), e);
+        }
     }
 
     @Override
     public void setLimits(@NonNull String ruleId, RuleLimits limits) {
-        apiClient.setRuleLimits(ruleId, limitsMapper.toApi(limits));
+        try {
+            apiClient.setRuleLimits(ruleId, limitsMapper.toApi(limits));
+        } catch (HttpClientErrorException.BadRequest | HttpClientErrorException.NotFound e) {
+            throw new IllegalArgumentException(reason(e), e);
+        }
     }
 
     @Override
     public void setLayerDetails(@NonNull String ruleId, LayerDetails detailsNew) {
-        apiClient.setRuleLayerDetails(ruleId, detailsMapper.map(detailsNew));
+        try {
+            apiClient.setRuleLayerDetails(ruleId, detailsMapper.map(detailsNew));
+        } catch (HttpClientErrorException.BadRequest e) {
+            throw new IllegalArgumentException(reason(e), e);
+        }
     }
 
     @Override
@@ -178,7 +208,7 @@ public class RuleRepositoryClientAdaptor implements RuleRepository {
         } catch (HttpClientErrorException.NotFound e) {
             throw new IllegalArgumentException("Rule does not exist", e);
         } catch (HttpClientErrorException.BadRequest e) {
-            throw new IllegalArgumentException("Rule has no layer set", e);
+            throw new IllegalArgumentException(reason(e), e);
         } catch (RestClientResponseException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
@@ -190,5 +220,17 @@ public class RuleRepositoryClientAdaptor implements RuleRepository {
             return Optional.empty();
         }
         throw new IllegalStateException("Unexpected response status code: " + statusCode);
+    }
+
+    private org.geoserver.geofence.api.v2.model.RuleFilter map(RuleFilter filter) {
+        return filterMapper.toApi(filter);
+    }
+
+    private org.geoserver.geofence.api.v2.model.Rule map(Rule rule) {
+        return mapper.toApi(rule);
+    }
+
+    private Rule map(org.geoserver.geofence.api.v2.model.Rule rule) {
+        return mapper.toModel(rule);
     }
 }

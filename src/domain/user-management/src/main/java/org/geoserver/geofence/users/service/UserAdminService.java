@@ -58,6 +58,10 @@ public class UserAdminService {
         return repository.countByNameLike(nameLike);
     }
 
+    public List<GeoServerUser> getAll() {
+        return repository.findAll().stream().map(this::pwdDecode).collect(Collectors.toList());
+    }
+
     public List<GeoServerUser> getList(String nameLike, Integer page, Integer entries) {
         return repository.findAllByNameLike(nameLike, page, entries).stream()
                 .map(this::pwdDecode)

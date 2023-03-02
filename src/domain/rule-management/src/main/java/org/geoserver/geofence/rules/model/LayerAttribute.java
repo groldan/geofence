@@ -34,4 +34,16 @@ public class LayerAttribute {
     private String dataType; // should be an enum?
 
     private AccessType access;
+
+    public static LayerAttribute none() {
+        return LayerAttribute.builder().access(AccessType.NONE).build();
+    }
+
+    public static LayerAttribute read() {
+        return LayerAttribute.builder().access(AccessType.READONLY).build();
+    }
+
+    public static LayerAttribute write() {
+        return LayerAttribute.builder().access(AccessType.READWRITE).build();
+    }
 }

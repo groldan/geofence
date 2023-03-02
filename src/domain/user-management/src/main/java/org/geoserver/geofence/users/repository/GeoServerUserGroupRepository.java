@@ -31,4 +31,6 @@ public interface GeoServerUserGroupRepository {
     List<GeoServerUserGroup> findAllByNameLike(String nameLike);
 
     List<GeoServerUserGroup> findAllByNameLike(String nameLike, int page, int entries);
+
+    List<GeoServerUserGroup> findAll();
 }

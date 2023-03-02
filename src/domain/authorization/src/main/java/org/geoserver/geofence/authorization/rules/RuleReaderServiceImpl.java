@@ -29,6 +29,7 @@ import org.geoserver.geofence.rules.service.RuleAdminService;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -45,6 +46,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * <B>Note:</B> <TT>service</TT> and <TT>request</TT> params are usually set by the client, and by
@@ -59,14 +61,30 @@ public class RuleReaderServiceImpl implements RuleReaderService {
 
     // private final static Logger LOGGER = LogManager.getLogger(RuleReaderServiceImpl.class);
 
-    private final AdminRuleAdminService adminRulesRepo;
-    private final RuleAdminService rulesRepo;
+    private final AdminRuleAdminService adminRuleService;
+    private final RuleAdminService ruleService;
     private final Function<String, Set<String>> userRolesResolver;
+
+    /**
+     * <B>TODO: REFACTOR</B>
+     *
+     * @param filter
+     * @return a plain List of the grouped matching Rules.
+     */
+    @Override
+    public List<Rule> getMatchingRules(RuleFilter filter) {
+        Map<String, List<Rule>> found = getMatchingRulesByRole(filter);
+
+        return found.values().stream()
+                .flatMap(List::stream)
+                .sorted((r1, r2) -> Long.compare(r1.getPriority(), r2.getPriority()))
+                .collect(Collectors.toList());
+    }
 
     @Override
     public AccessInfo getAccessInfo(RuleFilter filter) {
         log.info("Requesting access for {}", filter);
-        Map<String, List<Rule>> groupedRules = getRules(filter);
+        Map<String, List<Rule>> groupedRules = getMatchingRulesByRole(filter);
 
         AccessInfo currAccessInfo = null;
 
@@ -146,10 +164,10 @@ public class RuleReaderServiceImpl implements RuleReaderService {
     // on not allowed geometries
     private void setAllowedAreas(
             AccessInfo baseAccess, AccessInfo moreAccess, AccessInfo.Builder ret) {
-        final Geometry baseIntersects = org.geolatte.geom.jts.JTS.to(baseAccess.getArea());
-        final Geometry baseClip = org.geolatte.geom.jts.JTS.to(baseAccess.getClipArea());
-        final Geometry moreIntersects = org.geolatte.geom.jts.JTS.to(moreAccess.getArea());
-        final Geometry moreClip = org.geolatte.geom.jts.JTS.to(moreAccess.getClipArea());
+        final Geometry baseIntersects = toJTS(baseAccess.getArea());
+        final Geometry baseClip = toJTS(baseAccess.getClipArea());
+        final Geometry moreIntersects = toJTS(moreAccess.getArea());
+        final Geometry moreClip = toJTS(moreAccess.getClipArea());
         final Geometry unionIntersects = unionGeometry(baseIntersects, moreIntersects);
         final Geometry unionClip = unionGeometry(baseClip, moreClip);
         if (unionIntersects == null) {
@@ -170,6 +188,10 @@ public class RuleReaderServiceImpl implements RuleReaderService {
         } else {
             ret.clipArea(org.geolatte.geom.jts.JTS.from(unionClip));
         }
+    }
+
+    private Geometry toJTS(org.geolatte.geom.Geometry<?> geom) {
+        return geom == null ? null : org.geolatte.geom.jts.JTS.to(geom);
     }
 
     private String unionCQL(String c1, String c2) {
@@ -328,7 +350,7 @@ public class RuleReaderServiceImpl implements RuleReaderService {
             SpatialFilterType spatialFilterType = getSpatialFilterType(rule, details);
             atLeastOneClip = spatialFilterType.equals(SpatialFilterType.CLIP);
 
-            area = intersect(area, org.geolatte.geom.jts.JTS.to(details.getArea()));
+            area = intersect(area, toJTS(details.getArea()));
 
             cmode = getStricter(cmode, details.getCatalogMode());
 
@@ -357,7 +379,7 @@ public class RuleReaderServiceImpl implements RuleReaderService {
     private LayerDetails getLayerDetails(Rule rule) {
         final boolean hasLayer = null != rule.getIdentifier().getLayer();
         if (hasLayer) {
-            return rulesRepo.getLayerDetails(rule.getId()).orElse(null);
+            return ruleService.getLayerDetails(rule.getId()).orElse(null);
         }
         return null;
     }
@@ -379,7 +401,7 @@ public class RuleReaderServiceImpl implements RuleReaderService {
         org.locationtech.jts.geom.Geometry g = null;
         for (RuleLimits limit : limits) {
             org.locationtech.jts.geom.MultiPolygon area =
-                    org.geolatte.geom.jts.JTS.to(limit.getAllowedArea());
+                    (MultiPolygon) toJTS(limit.getAllowedArea());
             if (area != null) {
                 if (g == null) {
                     g = area;
@@ -471,7 +493,8 @@ public class RuleReaderServiceImpl implements RuleReaderService {
      * @return a Map having role names as keys, and the list of matching Rules as values. The NULL
      *     key holds the rules for the DEFAULT group.
      */
-    protected Map<String, List<Rule>> getRules(RuleFilter filter) throws IllegalArgumentException {
+    protected Map<String, List<Rule>> getMatchingRulesByRole(RuleFilter filter)
+            throws IllegalArgumentException {
 
         Set<String> finalRoleFilter = validateUserRoles(filter);
 
@@ -487,7 +510,7 @@ public class RuleReaderServiceImpl implements RuleReaderService {
             // filter.getRole().isIncludeDefault());
             // List<Rule> found = getRuleAux(filter, roleFilter);
 
-            List<Rule> found = rulesRepo.getList(RuleQuery.of(filter));
+            List<Rule> found = ruleService.getList(filter);
             ret.put(null, found);
         } else {
             for (String role : finalRoleFilter) {
@@ -526,7 +549,7 @@ public class RuleReaderServiceImpl implements RuleReaderService {
         filter = filter.clone();
         filter.setRole(role);
         filter.getRole().setIncludeDefault(true);
-        return rulesRepo.getList(RuleQuery.of(filter));
+        return ruleService.getList(RuleQuery.of(filter));
     }
 
     /**
@@ -667,66 +690,22 @@ public class RuleReaderServiceImpl implements RuleReaderService {
             return false;
         }
 
-        boolean isAdmin = false;
-
         AdminRuleFilter adminRuleFilter = AdminRuleFilter.of(filter);
 
         if (finalRoleFilter.isEmpty()) {
-            // AdminRule rule = getAdminAuthAux(filter, filter.getRole());
-            // isAdmin = rule == null ? false : rule.getAccess() == AdminGrantType.ADMIN;
-            isAdmin =
-                    adminRulesRepo
-                            .getRule(adminRuleFilter)
-                            .map(AdminRule::getAccess)
-                            .map(AdminGrantType.ADMIN::equals)
-                            .orElse(false);
-        } else {
-
-            adminRuleFilter.setRole(RuleFilter.asTextValue(finalRoleFilter));
-            adminRuleFilter.getRole().setIncludeDefault(true);
-            adminRuleFilter.setGrantType(AdminGrantType.ADMIN);
-            Optional<AdminRule> found = adminRulesRepo.getFirstMatch(adminRuleFilter);
-            isAdmin = found.isPresent();
-
-            // for (String role : finalRoleFilter) {
-            // TextFilter roleFilter = new TextFilter(role);
-            // roleFilter.setIncludeDefault(true);
-            // AdminRule rule = getAdminAuthAux(filter, roleFilter);
-            // // if it's admin in at least one group, the admin auth is granted
-            // if (rule != null && rule.getAccess() == AdminGrantType.ADMIN) {
-            // isAdmin = true;
-            // }
-            // }
+            return adminRuleService
+                    .getFirstMatch(adminRuleFilter)
+                    .map(AdminRule::getAccess)
+                    .map(AdminGrantType.ADMIN::equals)
+                    .orElse(false);
         }
 
-        return isAdmin;
+        adminRuleFilter.setRole(RuleFilter.asTextValue(finalRoleFilter));
+        adminRuleFilter.getRole().setIncludeDefault(true);
+        adminRuleFilter.setGrantType(AdminGrantType.ADMIN);
+        Optional<AdminRule> found = adminRuleService.getFirstMatch(adminRuleFilter);
+        return found.isPresent();
     }
-
-    // protected AdminRule getAdminAuthAux(RuleFilter filter, TextFilter roleFilter) {
-    //
-    // Search searchCriteria = new Search(AdminRule.class);
-    // searchCriteria.addSortAsc("priority");
-    // addStringCriteria(searchCriteria, "username", filter.getUser());
-    // addStringCriteria(searchCriteria, "rolename", roleFilter);
-    // addCriteria(searchCriteria, "instance", filter.getInstance());
-    // addStringCriteria(searchCriteria, "workspace", filter.getWorkspace());
-    //
-    // // we only need the first match, no need to aggregate (no LIMIT rules here)
-    // searchCriteria.setMaxResults(1);
-    //
-    // List<AdminRule> found = adminRulesRepo.search(searchCriteria);
-    // found = filterByAddress(filter, found);
-    //
-    // switch (found.size()) {
-    // case 0:
-    // return null;
-    // case 1:
-    // return found.get(0);
-    // default:
-    // // should not happen
-    // throw new IllegalStateException("Too many admin auth rules");
-    // }
-    // }
 
     private Geometry reprojectGeometry(int targetSRID, Geometry geom) {
         if (targetSRID == geom.getSRID()) return geom;

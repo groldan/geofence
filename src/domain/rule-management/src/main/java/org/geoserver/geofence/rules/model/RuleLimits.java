@@ -25,4 +25,12 @@ public class RuleLimits {
     @Default private SpatialFilterType spatialFilterType = SpatialFilterType.INTERSECT;
 
     @Default private CatalogMode catalogMode = CatalogMode.HIDE;
+
+    public static RuleLimits clip() {
+        return RuleLimits.builder().spatialFilterType(SpatialFilterType.CLIP).build();
+    }
+
+    public static RuleLimits intersect() {
+        return RuleLimits.builder().spatialFilterType(SpatialFilterType.INTERSECT).build();
+    }
 }

@@ -20,6 +20,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.geoserver.geofence.integration.openapi</groupId>
+      <artifactId>geofence-api-model-mapper</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.geoserver.geofence.integration</groupId>
       <artifactId>geofence-domain-spring-integration</artifactId>
       <version>${project.version}</version>
@@ -40,28 +45,18 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.dataformat</groupId>
-      <artifactId>jackson-dataformat-smile</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.geoserver.geofence.domain</groupId>
-      <artifactId>geofence-rule-management</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.geoserver.geofence.domain</groupId>
-      <artifactId>geofence-adminrule-management</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.geoserver.geofence.domain</groupId>
       <artifactId>geofence-authorization</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.geoserver.geofence.integration.openapi</groupId>
-      <artifactId>geofence-api-model-mapper</artifactId>
-      <version>${project.version}</version>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-smile</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -74,4 +69,13 @@
     </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+      </plugin>
+
+    </plugins>
+  </build>
 </project>

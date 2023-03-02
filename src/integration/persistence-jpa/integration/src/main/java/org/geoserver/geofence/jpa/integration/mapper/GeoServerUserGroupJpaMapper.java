@@ -26,6 +26,6 @@ public interface GeoServerUserGroupJpaMapper {
     }
 
     static Long decodeId(String id) {
-        return id == null ? null : Long.decode(id);
+        return id == null ? null : Long.decode("0x" + id);
     }
 }

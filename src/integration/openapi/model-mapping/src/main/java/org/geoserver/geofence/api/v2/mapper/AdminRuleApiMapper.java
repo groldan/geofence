@@ -26,17 +26,17 @@ public abstract class AdminRuleApiMapper {
 
     protected @Autowired EnumsApiMapper enums;
 
-    @Mapping(target = "identifier.instanceName", source = "instancename")
-    @Mapping(target = "identifier.username", source = "userName")
-    @Mapping(target = "identifier.rolename", source = "roleName")
+    @Mapping(target = "identifier.instanceName", source = "instance")
+    @Mapping(target = "identifier.username", source = "user")
+    @Mapping(target = "identifier.rolename", source = "role")
     @Mapping(target = "identifier.workspace", source = "workspace")
     @Mapping(target = "identifier.addressRange", source = "addressRange")
     public abstract org.geoserver.geofence.adminrules.model.AdminRule map(
             org.geoserver.geofence.api.v2.model.AdminRule rule);
 
-    @Mapping(target = "instancename", source = "identifier.instanceName")
-    @Mapping(target = "userName", source = "identifier.username")
-    @Mapping(target = "roleName", source = "identifier.rolename")
+    @Mapping(target = "instance", source = "identifier.instanceName")
+    @Mapping(target = "user", source = "identifier.username")
+    @Mapping(target = "role", source = "identifier.rolename")
     @Mapping(target = "workspace", source = "identifier.workspace")
     @Mapping(target = "addressRange", source = "identifier.addressRange")
     public abstract org.geoserver.geofence.api.v2.model.AdminRule map(
@@ -47,11 +47,11 @@ public abstract class AdminRuleApiMapper {
             @MappingTarget AdminRule.AdminRuleBuilder entity,
             org.geoserver.geofence.api.v2.model.AdminRule dto);
 
-    @Mapping(target = "instanceName", source = "instancename")
-    @Mapping(target = "username", source = "userName")
-    @Mapping(target = "rolename", source = "roleName")
+    @Mapping(target = "instanceName", source = "instance")
+    @Mapping(target = "username", source = "user")
+    @Mapping(target = "rolename", source = "role")
     abstract AdminRuleIdentifier updateIdentifier(
-            @MappingTarget AdminRuleIdentifier.AdminRuleIdentifierBuilder entity,
+            @MappingTarget AdminRuleIdentifier.Builder entity,
             org.geoserver.geofence.api.v2.model.AdminRule dto);
 
     public AdminRule patch(

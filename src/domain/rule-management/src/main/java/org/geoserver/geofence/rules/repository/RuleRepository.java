@@ -17,6 +17,12 @@ public interface RuleRepository {
 
     boolean existsById(String id);
 
+    /**
+     * @throws RuleIdentifierConflictException if trying to insert a rule with the same {@link
+     *     RuleIdentifier} than an existing one
+     * @return the rule as created, with sanitized (converted to upper case) {@literal service} and
+     *     {@literal request} identifier property values.
+     */
     Rule create(Rule rule, InsertPosition position);
 
     Rule save(Rule rule);
@@ -26,14 +32,14 @@ public interface RuleRepository {
     int count();
 
     /**
-     * @return all rules in natural order (instance/priority)
+     * @return all rules in natural order (priority)
      */
     Stream<Rule> findAll();
 
     int count(RuleFilter filter);
 
     /**
-     * @return all rules matching the query in natural order (instance/priority)
+     * @return all rules matching the query in natural order (priority)
      */
     Stream<Rule> query(RuleQuery<RuleFilter> query);
 

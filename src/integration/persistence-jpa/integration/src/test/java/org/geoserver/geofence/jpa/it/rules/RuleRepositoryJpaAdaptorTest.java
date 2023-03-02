@@ -1,14 +1,19 @@
-package org.geoserver.geofence.jpa.integration;
+package org.geoserver.geofence.jpa.it.rules;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.geoserver.geofence.jpa.config.GeoFenceJPAIntegrationConfiguration;
 import org.geoserver.geofence.jpa.model.GeoServerInstance;
 import org.geoserver.geofence.jpa.repository.JpaGeoServerInstanceRepository;
+import org.geoserver.geofence.jpa.repository.JpaRuleRepository;
 import org.geoserver.geofence.rules.model.GrantType;
+import org.geoserver.geofence.rules.model.IPAddressRange;
 import org.geoserver.geofence.rules.model.InsertPosition;
 import org.geoserver.geofence.rules.model.Rule;
+import org.geoserver.geofence.rules.repository.RuleIdentifierConflictException;
 import org.geoserver.geofence.rules.repository.RuleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,11 +34,15 @@ class RuleRepositoryJpaAdaptorTest {
     private @Autowired JpaGeoServerInstanceRepository jpaInstances;
 
     private @Autowired RuleRepository repo;
+    private @Autowired JpaRuleRepository jpaRepo;
 
     private String geoserverInstanceName;
 
     @BeforeEach
     void setup() {
+        jpaRepo.deleteAll();
+        jpaInstances.deleteAll();
+
         GeoServerInstance jpaGs =
                 new GeoServerInstance()
                         .setName("defaultInstance")
@@ -42,6 +51,44 @@ class RuleRepositoryJpaAdaptorTest {
                         .setPassword("gs");
         jpaInstances.saveAndFlush(jpaGs);
         this.geoserverInstanceName = jpaGs.getName();
+    }
+
+    @Test
+    void create_fixedPriorityPosition() {
+        Rule r1 = Rule.allow().withPriority(1).withInstanceName(geoserverInstanceName);
+
+        Rule r1Created = repo.create(r1, InsertPosition.FIXED);
+        assertThat(repo.count()).isOne();
+        assertThat(r1Created).isNotNull();
+        assertThat(r1Created.getId()).isNotNull();
+        assertThat(r1Created.withId(null)).isEqualTo(r1);
+    }
+
+    @Test
+    void create_duplicateKey() {
+        Rule r = Rule.allow();
+        testCreateDuplicateIdentifier(r);
+        testCreateDuplicateIdentifier(
+                r = r.withPriority(1).withInstanceName(geoserverInstanceName));
+        testCreateDuplicateIdentifier(r = r.withPriority(2).withUsername("user"));
+        testCreateDuplicateIdentifier(r = r.withPriority(3).withRolename("role"));
+        testCreateDuplicateIdentifier(r = r.withPriority(4).withService("WMS"));
+        testCreateDuplicateIdentifier(r = r.withPriority(5).withRequest("GetCapabilities"));
+        testCreateDuplicateIdentifier(
+                r =
+                        r.withPriority(6)
+                                .withAddressRange(IPAddressRange.fromCidrSignature("10.0.0.1/24")));
+        testCreateDuplicateIdentifier(r = r.withPriority(7).withSubfield("subfield"));
+        testCreateDuplicateIdentifier(r = r.withPriority(8).withWorkspace("ws"));
+        testCreateDuplicateIdentifier(r = r.withPriority(9).withLayer("layer"));
+        testCreateDuplicateIdentifier(r = r.withPriority(10).withAccess(GrantType.DENY));
+    }
+
+    private void testCreateDuplicateIdentifier(Rule r1) {
+        assertNotNull(repo.create(r1, InsertPosition.FIXED));
+
+        assertThrows(
+                RuleIdentifierConflictException.class, () -> repo.create(r1, InsertPosition.FIXED));
     }
 
     @Test

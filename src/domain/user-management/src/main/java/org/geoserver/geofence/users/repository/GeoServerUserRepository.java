@@ -24,4 +24,6 @@ public interface GeoServerUserRepository {
     List<GeoServerUser> findAllByNameLike(String nameLike);
 
     List<GeoServerUser> findAllByNameLike(@NonNull String nameLike, int page, int entries);
+
+    List<GeoServerUser> findAll();
 }

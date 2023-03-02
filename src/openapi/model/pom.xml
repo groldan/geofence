@@ -16,6 +16,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
     </dependency>
@@ -36,6 +41,10 @@
     <dependency>
       <groupId>org.openapitools</groupId>
       <artifactId>jackson-databind-nullable</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
     </dependency>
     <dependency>
       <!-- @javax.annotation.Generated annotation -->
@@ -75,7 +84,7 @@
         <executions>
           <execution>
             <?m2e ignore?>
-            <id>generate-shread-java-model</id>
+            <id>generate-shread-java-rules-model</id>
             <goals>
               <goal>generate</goal>
             </goals>
@@ -94,7 +103,39 @@
               <generateModelDocumentation>false</generateModelDocumentation>
               <enablePostProcessFile>true</enablePostProcessFile>
               <configOptions>
-                <dateLibrary>java8</dateLibrary>
+                <dateLibrary>java8-localdatetime</dateLibrary>
+                <openApiNullable>true</openApiNullable>
+                <serializationLibrary>jackson</serializationLibrary>
+                <addCompileSourceRoot>true</addCompileSourceRoot>
+                <validateSpec>true</validateSpec>
+                <useRuntimeException>true</useRuntimeException>
+                <useBeanValidation>true</useBeanValidation>
+                <performBeanValidation>false</performBeanValidation>
+              </configOptions>
+            </configuration>
+          </execution>
+          <execution>
+            <?m2e ignore?>
+            <id>generate-shread-java-users-model</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <!-- see https://openapi-generator.tech/docs/generators/java/ -->
+              <generatorName>spring</generatorName>
+              <inputSpec>${project.basedir}/../geofence-user-management.yaml</inputSpec>
+              <modelPackage>org.geoserver.geofence.api.v2.model</modelPackage>
+              <generateModels>true</generateModels>
+              <generateApis>false</generateApis>
+              <generateSupportingFiles>true</generateSupportingFiles>
+              <supportingFilesToGenerate>pom.xml</supportingFilesToGenerate>
+              <generateModelTests>false</generateModelTests>
+              <generateApiTests>false</generateApiTests>
+              <generateApiDocumentation>false</generateApiDocumentation>
+              <generateModelDocumentation>false</generateModelDocumentation>
+              <enablePostProcessFile>true</enablePostProcessFile>
+              <configOptions>
+                <dateLibrary>java8-localdatetime</dateLibrary>
                 <openApiNullable>true</openApiNullable>
                 <serializationLibrary>jackson</serializationLibrary>
                 <addCompileSourceRoot>true</addCompileSourceRoot>

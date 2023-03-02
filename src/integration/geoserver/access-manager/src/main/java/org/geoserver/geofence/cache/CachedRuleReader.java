@@ -17,9 +17,11 @@ import org.geoserver.geofence.authorization.users.AuthUser;
 import org.geoserver.geofence.authorization.users.AuthorizationException;
 import org.geoserver.geofence.authorization.users.AuthorizationService;
 import org.geoserver.geofence.config.GeoFenceConfigurationManager;
+import org.geoserver.geofence.rules.model.Rule;
 import org.geoserver.geofence.rules.model.RuleFilter;
 import org.geotools.util.logging.Logging;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -226,6 +228,11 @@ public class CachedRuleReader implements RuleReaderService {
         } catch (ExecutionException ex) {
             throw new RuntimeException(ex); // fixme: handle me
         }
+    }
+
+    @Override
+    public List<Rule> getMatchingRules(RuleFilter filter) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     // --------------------------------------------------------------------------

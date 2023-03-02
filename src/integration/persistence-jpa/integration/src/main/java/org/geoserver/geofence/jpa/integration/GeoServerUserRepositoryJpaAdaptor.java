@@ -96,4 +96,9 @@ public class GeoServerUserRepositoryJpaAdaptor implements GeoServerUserRepositor
         BooleanExpression predicate = QGeoServerUser.geoServerUser.name.likeIgnoreCase(nameLike);
         return predicate;
     }
+
+    @Override
+    public List<GeoServerUser> findAll() {
+        return jpaRepository.findAll().stream().map(mapper::map).collect(Collectors.toList());
+    }
 }

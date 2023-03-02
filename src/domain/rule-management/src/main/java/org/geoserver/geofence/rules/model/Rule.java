@@ -26,6 +26,10 @@ public class Rule {
 
     private RuleLimits ruleLimits;
 
+    public IPAddressRange ipAddressRange() {
+        return getIdentifier().getAddressRange();
+    }
+
     public Rule withInstanceName(String instanceName) {
         return withIdentifier(identifier.withInstanceName(instanceName));
     }

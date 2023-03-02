@@ -29,18 +29,22 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-commons</artifactId>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-smile</artifactId>
-    </dependency>
-    <dependency>
-      <!--SpringDoc dependencies -->
-      <groupId>org.springdoc</groupId>
-      <artifactId>springdoc-openapi-ui</artifactId>
-      <version>${springdoc.version}</version>
     </dependency>
     <dependency>
       <!-- @javax.annotation.Generated annotation -->
@@ -75,13 +79,51 @@
         <executions>
           <execution>
             <?m2e ignore?>
-            <id>generate-spring-server-stub</id>
+            <id>generate-rules-spring-server-stub</id>
             <goals>
               <goal>generate</goal>
             </goals>
             <configuration>
               <!-- see https://openapi-generator.tech/docs/generators/spring -->
               <inputSpec>${project.basedir}/../geofence-api.yaml</inputSpec>
+              <generatorName>spring</generatorName>
+              <modelPackage>org.geoserver.geofence.api.v2.model</modelPackage>
+              <apiPackage>org.geoserver.geofence.api.v2.server</apiPackage>
+              <invokerPackage>org.geoserver.geofence.api.v2.server</invokerPackage>
+              <generateApis>true</generateApis>
+              <generateModels>false</generateModels>
+              <generateSupportingFiles>true</generateSupportingFiles>
+              <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
+              <generateApiTests>false</generateApiTests>
+              <generateModelTests>false</generateModelTests>
+              <configOptions>
+                <library>spring-boot</library>
+                <useTags>true</useTags>
+                <reactive>false</reactive>
+                <delegatePattern>true</delegatePattern>
+                <interfaceOnly>false</interfaceOnly>
+                <annotationLibrary>swagger2</annotationLibrary>
+                <openApiNullable>true</openApiNullable>
+                <dateLibrary>java8</dateLibrary>
+                <useBeanValidation>true</useBeanValidation>
+                <performBeanValidation>false</performBeanValidation>
+                <withXml>false</withXml>
+              </configOptions>
+              <importMappings>
+                <importMapping>Rule=org.geoserver.geofence.api.v2.model.Rule</importMapping>
+                <importMapping>LayerAttribute=org.geoserver.geofence.api.v2.model.LayerAttribute</importMapping>
+              </importMappings>
+            </configuration>
+          </execution>
+          <execution>
+            <?m2e ignore?>
+            <id>generate-users-spring-server-stub</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <!-- see https://openapi-generator.tech/docs/generators/spring -->
+              <inputSpec>${project.basedir}/../geofence-user-management.yaml</inputSpec>
               <generatorName>spring</generatorName>
               <modelPackage>org.geoserver.geofence.api.v2.model</modelPackage>
               <apiPackage>org.geoserver.geofence.api.v2.server</apiPackage>

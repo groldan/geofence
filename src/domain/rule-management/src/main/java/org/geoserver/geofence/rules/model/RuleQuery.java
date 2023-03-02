@@ -33,11 +33,11 @@ public class RuleQuery<F extends RuleFilter> {
         return ofNullable(filter);
     }
 
-    public OptionalInt getPageNumber() {
+    public OptionalInt pageNumber() {
         return pageNumber == null ? OptionalInt.empty() : OptionalInt.of(pageNumber);
     }
 
-    public OptionalInt getPageSize() {
+    public OptionalInt pageSize() {
         return pageSize == null ? OptionalInt.empty() : OptionalInt.of(pageSize);
     }
 

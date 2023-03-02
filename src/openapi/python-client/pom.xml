@@ -22,13 +22,31 @@
         <executions>
           <execution>
             <?m2e ignore?>
-            <id>generate-python-client</id>
+            <id>generate-rules-python-client</id>
             <goals>
               <goal>generate</goal>
             </goals>
             <configuration>
               <!-- see https://openapi-generator.tech/docs/generators/python -->
               <inputSpec>${project.basedir}/../geofence-api.yaml</inputSpec>
+              <generatorName>python-legacy</generatorName>
+              <packageName>geofence_client</packageName>
+              <configOptions>
+                <projectName>geofence-api</projectName>
+                <library>urllib3</library>
+                <generateSourceCodeOnly>false</generateSourceCodeOnly>
+              </configOptions>
+            </configuration>
+          </execution>
+          <execution>
+            <?m2e ignore?>
+            <id>generate-users-python-client</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <!-- see https://openapi-generator.tech/docs/generators/python -->
+              <inputSpec>${project.basedir}/../geofence-user-management.yaml</inputSpec>
               <generatorName>python-legacy</generatorName>
               <packageName>geofence_client</packageName>
               <configOptions>

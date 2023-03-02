@@ -42,6 +42,11 @@ public class RuleIdentifier implements Serializable, Cloneable {
 
     public static final String ANY = "*";
 
+    @NonNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "grant_type", nullable = false)
+    private GrantType access = GrantType.DENY;
+
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(
             insertable = true,
@@ -87,11 +92,6 @@ public class RuleIdentifier implements Serializable, Cloneable {
     @Column(nullable = false)
     private String layer = ANY;
 
-    @NonNull
-    @Enumerated(EnumType.STRING)
-    @Column(name = "grant_type", nullable = false)
-    private GrantType access = GrantType.DENY;
-
     public @Override RuleIdentifier clone() {
         RuleIdentifier clone;
         try {
@@ -129,5 +129,27 @@ public class RuleIdentifier implements Serializable, Cloneable {
 
     public String layer() {
         return ANY.equals(layer) ? null : layer;
+    }
+
+    public String toShortString() {
+        StringBuilder builder = new StringBuilder();
+        addNonNull(builder, "access", access);
+        addNonNull(builder, "instanceName", instance == null ? null : instance.getName());
+        addNonNull(builder, "username", username);
+        addNonNull(builder, "rolename", rolename);
+        addNonNull(builder, "addressRange", addressRange);
+        addNonNull(builder, "service", service);
+        addNonNull(builder, "request", request);
+        addNonNull(builder, "subfield", subfield);
+        addNonNull(builder, "workspace", workspace);
+        addNonNull(builder, "layer", layer);
+        return builder.toString();
+    }
+
+    private void addNonNull(StringBuilder builder, String prop, Object value) {
+        if (null != value) {
+            if (builder.length() > 0) builder.append(", ");
+            builder.append(prop).append(": ").append(value);
+        }
     }
 }

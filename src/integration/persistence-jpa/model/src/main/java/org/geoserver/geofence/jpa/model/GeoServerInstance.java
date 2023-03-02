@@ -54,7 +54,7 @@ public class GeoServerInstance extends Auditable implements Serializable, Clonea
     @Id @GeneratedValue @Column private Long id;
 
     /** The name. */
-    @Column(nullable = false, updatable = true)
+    @Column(nullable = false, updatable = true, unique = true)
     private String name;
 
     /** The description. */

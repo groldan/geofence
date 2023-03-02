@@ -22,13 +22,30 @@
         <executions>
           <execution>
             <?m2e ignore?>
-            <id>generate-js-client</id>
+            <id>generate-rules-js-client</id>
             <goals>
               <goal>generate</goal>
             </goals>
             <configuration>
               <!-- https://openapi-generator.tech/docs/generators/javascript/ -->
               <inputSpec>${project.basedir}/../geofence-api.yaml</inputSpec>
+              <generatorName>javascript</generatorName>
+              <configOptions>
+                <apiPackage>GeoFence</apiPackage>
+                <emitJSDoc>true</emitJSDoc>
+                <projectName>geofence-js-client</projectName>
+              </configOptions>
+            </configuration>
+          </execution>
+          <execution>
+            <?m2e ignore?>
+            <id>generate-users-js-client</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <!-- https://openapi-generator.tech/docs/generators/javascript/ -->
+              <inputSpec>${project.basedir}/../geofence-user-management.yaml</inputSpec>
               <generatorName>javascript</generatorName>
               <configOptions>
                 <apiPackage>GeoFence</apiPackage>
