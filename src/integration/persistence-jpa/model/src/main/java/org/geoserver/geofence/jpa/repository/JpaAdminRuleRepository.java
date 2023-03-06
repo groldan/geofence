@@ -1,6 +1,7 @@
 package org.geoserver.geofence.jpa.repository;
 
 import org.geoserver.geofence.jpa.model.AdminRule;
+import org.geoserver.geofence.jpa.model.AdminRuleIdentifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -88,4 +89,6 @@ public interface JpaAdminRuleRepository
     @Override
     @Query("SELECT MIN(r.priority) FROM AdminRule r")
     Optional<Long> findMinPriority();
+
+    List<AdminRule> findAllByIdentifier(AdminRuleIdentifier identifier);
 }

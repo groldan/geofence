@@ -24,10 +24,11 @@ import org.geoserver.geofence.authorization.rules.AccessInfo;
 import org.geoserver.geofence.authorization.rules.RuleReaderService;
 import org.geoserver.geofence.config.GeoFenceConfiguration;
 import org.geoserver.geofence.config.GeoFenceConfigurationManager;
+import org.geoserver.geofence.filter.RuleFilter;
+import org.geoserver.geofence.filter.predicate.SpecialFilterType;
 import org.geoserver.geofence.rules.model.GrantType;
 import org.geoserver.geofence.rules.model.LayerAttribute;
 import org.geoserver.geofence.rules.model.LayerAttribute.AccessType;
-import org.geoserver.geofence.rules.model.RuleFilter;
 import org.geoserver.geofence.util.AccessInfoUtils;
 import org.geoserver.geofence.util.GeomHelper;
 import org.geoserver.geofence.wpscommon.WPSHelper;
@@ -197,7 +198,7 @@ public class GeofenceAccessManager
     private boolean isWorkspaceAdmin(Authentication user, String workspaceName) {
         LOGGER.log(Level.FINE, "Getting admin auth for Workspace {0}", workspaceName);
 
-        RuleFilter ruleFilter = new RuleFilter(RuleFilter.SpecialFilterType.DEFAULT);
+        RuleFilter ruleFilter = new RuleFilter(SpecialFilterType.DEFAULT);
         setRuleFilterUserAndRole(user, ruleFilter);
         ruleFilter.setInstance(configurationManager.getConfiguration().getInstanceName());
         ruleFilter.setWorkspace(workspaceName);
@@ -538,20 +539,20 @@ public class GeofenceAccessManager
                 LOGGER.log(Level.FINE, "Setting role for filter: {0}", new Object[] {joinedRoles});
                 ruleFilter.setRole(joinedRoles);
             } else {
-                ruleFilter.setRole(RuleFilter.SpecialFilterType.ANY);
+                ruleFilter.setRole(SpecialFilterType.ANY);
             }
 
             String username = user.getName();
             if (StringUtils.isEmpty(username)) {
                 LOGGER.log(Level.WARNING, "Username is null for user: {0}", new Object[] {user});
-                ruleFilter.setUser(RuleFilter.SpecialFilterType.DEFAULT);
+                ruleFilter.setUser(SpecialFilterType.DEFAULT);
             } else {
                 LOGGER.log(Level.FINE, "Setting user for filter: {0}", new Object[] {username});
                 ruleFilter.setUser(username);
             }
         } else {
             LOGGER.log(Level.WARNING, "No user given");
-            ruleFilter.setUser(RuleFilter.SpecialFilterType.DEFAULT);
+            ruleFilter.setUser(SpecialFilterType.DEFAULT);
         }
     }
 
@@ -908,7 +909,7 @@ public class GeofenceAccessManager
             ResourceInfo resource = layer.getResource();
 
             // get the rule, it contains default and allowed styles
-            RuleFilter ruleFilter = new RuleFilter(RuleFilter.SpecialFilterType.DEFAULT);
+            RuleFilter ruleFilter = new RuleFilter(SpecialFilterType.DEFAULT);
             setRuleFilterUserAndRole(user, ruleFilter);
             ruleFilter.setInstance(configurationManager.getConfiguration().getInstanceName());
             ruleFilter.setService(service);
@@ -976,7 +977,7 @@ public class GeofenceAccessManager
             }
 
             // get the rule, it contains default and allowed styles
-            RuleFilter ruleFilter = new RuleFilter(RuleFilter.SpecialFilterType.DEFAULT);
+            RuleFilter ruleFilter = new RuleFilter(SpecialFilterType.DEFAULT);
 
             setRuleFilterUserAndRole(user, ruleFilter);
             ruleFilter.setInstance(configurationManager.getConfiguration().getInstanceName());
@@ -986,8 +987,8 @@ public class GeofenceAccessManager
                 ruleFilter.setWorkspace(info.getStore().getWorkspace().getName());
                 ruleFilter.setLayer(info.getName());
             } else {
-                ruleFilter.setWorkspace(RuleFilter.SpecialFilterType.DEFAULT);
-                ruleFilter.setLayer(RuleFilter.SpecialFilterType.DEFAULT);
+                ruleFilter.setWorkspace(SpecialFilterType.DEFAULT);
+                ruleFilter.setLayer(SpecialFilterType.DEFAULT);
             }
 
             LOGGER.log(Level.FINE, "Getting access limits for getMap", ruleFilter);

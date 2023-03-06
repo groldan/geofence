@@ -3,11 +3,11 @@
  * under the GPL 2.0 license, available at the root application directory.
  */
 
-package org.geoserver.geofence.rules.model;
+package org.geoserver.geofence.filter.predicate;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.geoserver.geofence.rules.model.RuleFilter.TextFilter;
+import org.geoserver.geofence.rules.model.IPAddressRange;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -25,9 +25,9 @@ class FilterUtils {
      * such results by hand.
      */
     public static <T> Predicate<T> filterByAddress(
-            TextFilter addressFilter, Function<T, IPAddressRange> addrRangeExtractor) {
+            IPAddressRangeFilter addressFilter, Function<T, IPAddressRange> addrRangeExtractor) {
 
-        final RuleFilter.FilterType type = addressFilter.getType();
+        final FilterType type = addressFilter.getType();
 
         switch (type) {
             case ANY:
@@ -43,7 +43,7 @@ class FilterUtils {
     }
 
     private static <T> Predicate<T> nameValueFilter(
-            TextFilter filter, Function<T, IPAddressRange> addrRangeExtractor) {
+            IPAddressRangeFilter filter, Function<T, IPAddressRange> addrRangeExtractor) {
 
         final String ipvalue = filter.getText();
         if (!IPUtils.isAddressValid(ipvalue)) {

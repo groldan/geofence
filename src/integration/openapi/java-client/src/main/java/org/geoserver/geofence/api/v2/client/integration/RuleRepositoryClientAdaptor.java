@@ -1,5 +1,6 @@
 package org.geoserver.geofence.api.v2.client.integration;
 
+import static org.geoserver.geofence.api.v2.client.integration.ClientExceptionHelper.reason;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -12,12 +13,12 @@ import org.geoserver.geofence.api.v2.mapper.LayerDetailsApiMapper;
 import org.geoserver.geofence.api.v2.mapper.RuleApiMapper;
 import org.geoserver.geofence.api.v2.mapper.RuleFilterApiMapper;
 import org.geoserver.geofence.api.v2.mapper.RuleLimitsApiMapper;
+import org.geoserver.geofence.filter.RuleFilter;
+import org.geoserver.geofence.filter.RuleQuery;
 import org.geoserver.geofence.rules.model.InsertPosition;
 import org.geoserver.geofence.rules.model.LayerDetails;
 import org.geoserver.geofence.rules.model.Rule;
-import org.geoserver.geofence.rules.model.RuleFilter;
 import org.geoserver.geofence.rules.model.RuleLimits;
-import org.geoserver.geofence.rules.model.RuleQuery;
 import org.geoserver.geofence.rules.repository.RuleIdentifierConflictException;
 import org.geoserver.geofence.rules.repository.RuleRepository;
 import org.springframework.http.HttpStatus;
@@ -71,15 +72,6 @@ public class RuleRepositoryClientAdaptor implements RuleRepository {
             throw new RuleIdentifierConflictException(reason(c), c);
         }
         return map(response);
-    }
-
-    private String reason(HttpClientErrorException e) {
-        return reason(e, e.getMessage());
-    }
-
-    private String reason(HttpClientErrorException e, String defaultValue) {
-        String reason = e.getResponseHeaders().getFirst("X-Reason");
-        return reason == null ? defaultValue : reason;
     }
 
     @Override

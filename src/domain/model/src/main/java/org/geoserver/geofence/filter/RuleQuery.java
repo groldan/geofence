@@ -1,4 +1,4 @@
-package org.geoserver.geofence.rules.model;
+package org.geoserver.geofence.filter;
 
 import static java.util.Optional.ofNullable;
 
@@ -11,7 +11,7 @@ import java.util.OptionalLong;
 
 @Data
 @Accessors(chain = true)
-public class RuleQuery<F extends RuleFilter> {
+public class RuleQuery<F extends Filter> {
 
     private F filter;
 
@@ -21,12 +21,16 @@ public class RuleQuery<F extends RuleFilter> {
     /** If present, return the rules with priority greater or equal to this value */
     private Long priorityOffset;
 
-    public static <RF extends RuleFilter> RuleQuery<RF> of(RF filter) {
+    public static <RF extends Filter> RuleQuery<RF> of(RF filter) {
         return new RuleQuery<RF>().setFilter(filter);
     }
 
-    public static <RF extends RuleFilter> RuleQuery<RF> of() {
+    public static <RF extends Filter> RuleQuery<RF> of() {
         return new RuleQuery<RF>();
+    }
+
+    public static <RF extends Filter> RuleQuery<RF> of(Integer pageNumber, Integer pageSize) {
+        return new RuleQuery<RF>().setPageNumber(pageNumber).setPageSize(pageSize);
     }
 
     public Optional<F> getFilter() {

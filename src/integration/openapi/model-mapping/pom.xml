@@ -22,17 +22,7 @@
     </dependency>
     <dependency>
       <groupId>org.geoserver.geofence.domain</groupId>
-      <artifactId>geofence-rule-management</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.geoserver.geofence.domain</groupId>
-      <artifactId>geofence-adminrule-management</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.geoserver.geofence.domain</groupId>
-      <artifactId>geofence-user-management</artifactId>
+      <artifactId>geofence-object-model</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

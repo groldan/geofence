@@ -1,17 +1,20 @@
 package org.geoserver.geofence.api.v2.client.integration;
 
+import static org.geoserver.geofence.api.v2.client.integration.ClientExceptionHelper.reason;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import org.geoserver.geofence.adminrules.model.AdminRule;
-import org.geoserver.geofence.adminrules.model.AdminRuleFilter;
+import org.geoserver.geofence.adminrules.repository.AdminRuleIdentifierConflictException;
 import org.geoserver.geofence.adminrules.repository.AdminRuleRepository;
 import org.geoserver.geofence.api.v2.client.AdminRulesApi;
 import org.geoserver.geofence.api.v2.mapper.AdminRuleApiMapper;
 import org.geoserver.geofence.api.v2.mapper.EnumsApiMapper;
 import org.geoserver.geofence.api.v2.mapper.RuleFilterApiMapper;
+import org.geoserver.geofence.filter.AdminRuleFilter;
+import org.geoserver.geofence.filter.RuleQuery;
 import org.geoserver.geofence.rules.model.InsertPosition;
-import org.geoserver.geofence.rules.model.RuleQuery;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
@@ -30,17 +33,26 @@ public class AdminRuleRepositoryClientAdaptor implements AdminRuleRepository {
     @Override
     public AdminRule create(AdminRule rule, InsertPosition position) {
         if (null != rule.getId()) throw new IllegalArgumentException("AdminRule must have no id");
-        org.geoserver.geofence.api.v2.model.AdminRule result =
-                apiClient.createAdminRule(map(rule), map(position));
-        return mapper.map(result);
+
+        try {
+            org.geoserver.geofence.api.v2.model.AdminRule result =
+                    apiClient.createAdminRule(map(rule), map(position));
+            return mapper.map(result);
+        } catch (HttpClientErrorException.Conflict c) {
+            throw new AdminRuleIdentifierConflictException(reason(c), c);
+        }
     }
 
     @Override
     public AdminRule save(AdminRule rule) {
         Objects.requireNonNull(rule.getId(), "AdminRule has no id");
-        org.geoserver.geofence.api.v2.model.AdminRule response;
-        response = apiClient.updateAdminRule(rule.getId(), mapper.map(rule));
-        return mapper.map(response);
+        try {
+            org.geoserver.geofence.api.v2.model.AdminRule response;
+            response = apiClient.updateAdminRule(rule.getId(), mapper.map(rule));
+            return mapper.map(response);
+        } catch (HttpClientErrorException.Conflict c) {
+            throw new AdminRuleIdentifierConflictException(reason(c), c);
+        }
     }
 
     @Override

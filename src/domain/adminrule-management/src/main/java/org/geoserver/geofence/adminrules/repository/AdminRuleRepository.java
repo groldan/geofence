@@ -1,21 +1,25 @@
 package org.geoserver.geofence.adminrules.repository;
 
 import org.geoserver.geofence.adminrules.model.AdminRule;
-import org.geoserver.geofence.adminrules.model.AdminRuleFilter;
+import org.geoserver.geofence.filter.AdminRuleFilter;
+import org.geoserver.geofence.filter.RuleQuery;
 import org.geoserver.geofence.rules.model.InsertPosition;
-import org.geoserver.geofence.rules.model.RuleQuery;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface AdminRuleRepository {
 
+    /**
+     * @throws AdminRuleIdentifierConflictException
+     */
     AdminRule create(AdminRule rule, InsertPosition position);
 
     /**
      * @param rule
      * @return
      * @throws IllegalArgumentException if the rule does not exist
+     * @throws AdminRuleIdentifierConflictException
      */
     AdminRule save(AdminRule rule);
 

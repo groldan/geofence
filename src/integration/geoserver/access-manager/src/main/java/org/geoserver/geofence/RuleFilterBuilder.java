@@ -6,7 +6,8 @@ package org.geoserver.geofence;
 
 import org.apache.commons.lang.StringUtils;
 import org.geoserver.geofence.config.GeoFenceConfiguration;
-import org.geoserver.geofence.rules.model.RuleFilter;
+import org.geoserver.geofence.filter.RuleFilter;
+import org.geoserver.geofence.filter.predicate.SpecialFilterType;
 import org.geoserver.ows.Request;
 import org.geotools.util.logging.Logging;
 import org.springframework.security.core.Authentication;
@@ -96,7 +97,7 @@ class RuleFilterBuilder {
      * @return a {@link RuleFilter} instance.
      */
     RuleFilter build() {
-        RuleFilter ruleFilter = new RuleFilter(RuleFilter.SpecialFilterType.ANY);
+        RuleFilter ruleFilter = new RuleFilter(SpecialFilterType.ANY);
         setRuleFilterUserAndRole(ruleFilter);
         ruleFilter.setInstance(config.getInstanceName());
         // get info from the current request
@@ -108,22 +109,22 @@ class RuleFilterBuilder {
         }
         if (service != null) {
             if ("*".equals(service)) {
-                ruleFilter.setService(RuleFilter.SpecialFilterType.ANY);
+                ruleFilter.setService(SpecialFilterType.ANY);
             } else {
                 ruleFilter.setService(service);
             }
         } else {
-            ruleFilter.setService(RuleFilter.SpecialFilterType.DEFAULT);
+            ruleFilter.setService(SpecialFilterType.DEFAULT);
         }
 
         if (request != null) {
             if ("*".equals(request)) {
-                ruleFilter.setRequest(RuleFilter.SpecialFilterType.ANY);
+                ruleFilter.setRequest(SpecialFilterType.ANY);
             } else {
                 ruleFilter.setRequest(request);
             }
         } else {
-            ruleFilter.setRequest(RuleFilter.SpecialFilterType.DEFAULT);
+            ruleFilter.setRequest(SpecialFilterType.DEFAULT);
         }
         ruleFilter.setWorkspace(workspace);
         ruleFilter.setLayer(layer);
@@ -132,7 +133,7 @@ class RuleFilterBuilder {
             ruleFilter.setSourceAddress(sourceAddress);
         } else {
             LOGGER.log(Level.WARNING, "No source IP address found");
-            ruleFilter.setSourceAddress(RuleFilter.SpecialFilterType.DEFAULT);
+            ruleFilter.setSourceAddress(SpecialFilterType.DEFAULT);
         }
 
         LOGGER.log(Level.FINE, "ResourceInfo filter: {0}", ruleFilter);
@@ -146,14 +147,14 @@ class RuleFilterBuilder {
             String username = user.getName();
             if (StringUtils.isEmpty(username)) {
                 LOGGER.log(Level.WARNING, "Username is null for user: {0}", new Object[] {user});
-                ruleFilter.setUser(RuleFilter.SpecialFilterType.DEFAULT);
+                ruleFilter.setUser(SpecialFilterType.DEFAULT);
             } else {
                 LOGGER.log(Level.FINE, "Setting user for filter: {0}", new Object[] {username});
                 ruleFilter.setUser(username);
             }
         } else {
             LOGGER.log(Level.WARNING, "No user given");
-            ruleFilter.setUser(RuleFilter.SpecialFilterType.DEFAULT);
+            ruleFilter.setUser(SpecialFilterType.DEFAULT);
         }
     }
 

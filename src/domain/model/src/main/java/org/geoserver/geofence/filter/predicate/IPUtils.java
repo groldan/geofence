@@ -3,14 +3,14 @@
  * application directory.
  */
 
-package org.geoserver.geofence.rules.model;
+package org.geoserver.geofence.filter.predicate;
 
 import java.util.regex.Pattern;
 
 /**
  * @author ETj (etj at geo-solutions.it)
  */
-public class IPUtils {
+class IPUtils {
     private static final String IPV4_ADDRESS = "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})";
     private static final String IPV6_STANDARD_ADDRESS = "(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}";
     private static final String IPV6_COMPRESSED_ADDRESS =

@@ -12,16 +12,15 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.geoserver.geofence.adminrules.model.AdminRule;
+import org.geoserver.geofence.filter.RuleFilter;
+import org.geoserver.geofence.filter.predicate.SpecialFilterType;
 import org.geoserver.geofence.rules.model.GrantType;
 import org.geoserver.geofence.rules.model.IPAddressRange;
 import org.geoserver.geofence.rules.model.LayerAttribute;
 import org.geoserver.geofence.rules.model.LayerDetails;
 import org.geoserver.geofence.rules.model.Rule;
-import org.geoserver.geofence.rules.model.RuleFilter;
-import org.geoserver.geofence.rules.model.RuleFilter.SpecialFilterType;
 import org.geoserver.geofence.users.model.GeoServerUser;
 import org.geoserver.geofence.users.model.GeoServerUserGroup;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.net.UnknownHostException;
@@ -115,7 +114,7 @@ public abstract class AbstractRuleReaderServiceImplTest extends ServiceTestBase 
 
     private static RuleFilter createFilter(String userName, String groupName, String service) {
         RuleFilter filter;
-        filter = new RuleFilter(RuleFilter.SpecialFilterType.ANY);
+        filter = new RuleFilter(SpecialFilterType.ANY);
         if (userName != null) filter.setUser(userName);
         if (groupName != null) filter.setRole(groupName);
         if (service != null) filter.setService(service);
@@ -186,7 +185,7 @@ public abstract class AbstractRuleReaderServiceImplTest extends ServiceTestBase 
     public void testGetInfo() {
         GeoServerUserGroup p0 = createRole("p0");
         createUser("u0", p0);
-        assertEquals(0, ruleAdminService.count(new RuleFilter(RuleFilter.SpecialFilterType.ANY)));
+        assertEquals(0, ruleAdminService.count(new RuleFilter(SpecialFilterType.ANY)));
 
         List<Rule> rules = new ArrayList<>();
 
@@ -211,14 +210,14 @@ public abstract class AbstractRuleReaderServiceImplTest extends ServiceTestBase 
                                 .withLayer("l3")));
         rules.add(ruleAdminService.insert(Rule.deny().withPriority(100 + rules.size())));
 
-        assertEquals(4, ruleAdminService.count(new RuleFilter(RuleFilter.SpecialFilterType.ANY)));
+        assertEquals(4, ruleAdminService.count(new RuleFilter(SpecialFilterType.ANY)));
 
-        RuleFilter baseFilter = new RuleFilter(RuleFilter.SpecialFilterType.ANY);
+        RuleFilter baseFilter = new RuleFilter(SpecialFilterType.ANY);
         baseFilter.setUser("u0");
         baseFilter.setRole("p0");
         baseFilter.setInstance("i0");
         baseFilter.setService("WCS");
-        baseFilter.setRequest(RuleFilter.SpecialFilterType.ANY);
+        baseFilter.setRequest(SpecialFilterType.ANY);
         baseFilter.setWorkspace("W0");
         baseFilter.setLayer("l0");
 
@@ -277,20 +276,16 @@ public abstract class AbstractRuleReaderServiceImplTest extends ServiceTestBase 
         LayerDetails details = LayerDetails.builder().build();
         ruleAdminService.setLayerDetails(rules.get(1).getId(), details);
 
-        assertEquals(2, ruleAdminService.count(new RuleFilter(RuleFilter.SpecialFilterType.ANY)));
+        assertEquals(2, ruleAdminService.count(new RuleFilter(SpecialFilterType.ANY)));
 
         AccessInfo accessInfo;
 
         {
-            RuleFilter ruleFilter = new RuleFilter(RuleFilter.SpecialFilterType.ANY);
+            RuleFilter ruleFilter = new RuleFilter(SpecialFilterType.ANY);
             ruleFilter.setService("s1");
             ruleFilter.setLayer("l2");
 
-            assertEquals(
-                    2,
-                    ruleAdminService
-                            .getList(new RuleFilter(RuleFilter.SpecialFilterType.ANY))
-                            .size());
+            assertEquals(2, ruleAdminService.getList(new RuleFilter(SpecialFilterType.ANY)).size());
             List<Rule> matchingRules = ruleReaderService.getMatchingRules(ruleFilter);
             // LOGGER.info("Matching rules: " + matchingRules);
             assertEquals(1, matchingRules.size());
@@ -363,7 +358,7 @@ public abstract class AbstractRuleReaderServiceImplTest extends ServiceTestBase 
 
         {
             RuleFilter filter;
-            filter = new RuleFilter(RuleFilter.SpecialFilterType.ANY);
+            filter = new RuleFilter(SpecialFilterType.ANY);
             filter.setUser(u1.getName());
             assertEquals(2, ruleReaderService.getMatchingRules(filter).size());
             filter.setService("s1");
@@ -377,7 +372,7 @@ public abstract class AbstractRuleReaderServiceImplTest extends ServiceTestBase 
 
         {
             RuleFilter filter;
-            filter = new RuleFilter(RuleFilter.SpecialFilterType.ANY);
+            filter = new RuleFilter(SpecialFilterType.ANY);
             filter.setUser(u2.getName());
             assertEquals(0, ruleReaderService.getMatchingRules(filter).size());
             assertEquals(GrantType.DENY, ruleReaderService.getAccessInfo(filter).getGrant());
@@ -407,10 +402,10 @@ public abstract class AbstractRuleReaderServiceImplTest extends ServiceTestBase 
 
         assertEquals(rules.size(), ruleAdminService.getCountAll());
 
-        RuleFilter filterU1 = new RuleFilter(RuleFilter.SpecialFilterType.ANY);
+        RuleFilter filterU1 = new RuleFilter(SpecialFilterType.ANY);
         filterU1.setUser(u1.getName());
 
-        RuleFilter filterU2 = new RuleFilter(RuleFilter.SpecialFilterType.ANY);
+        RuleFilter filterU2 = new RuleFilter(SpecialFilterType.ANY);
         filterU2.setUser(u2.getName());
 
         assertEquals(1, ruleReaderService.getMatchingRules(filterU1).size());
@@ -444,11 +439,11 @@ public abstract class AbstractRuleReaderServiceImplTest extends ServiceTestBase 
         assertEquals(rules.size(), ruleAdminService.getCountAll());
 
         RuleFilter filterU1;
-        filterU1 = new RuleFilter(RuleFilter.SpecialFilterType.ANY);
+        filterU1 = new RuleFilter(SpecialFilterType.ANY);
         filterU1.setUser(u1.getName());
 
         RuleFilter filterU2;
-        filterU2 = new RuleFilter(RuleFilter.SpecialFilterType.ANY);
+        filterU2 = new RuleFilter(SpecialFilterType.ANY);
         filterU2.setUser(u2.getName());
 
         assertEquals(1, ruleReaderService.getMatchingRules(filterU1).size());
@@ -531,7 +526,7 @@ public abstract class AbstractRuleReaderServiceImplTest extends ServiceTestBase 
         // TEST u1
         {
             RuleFilter filterU1;
-            filterU1 = new RuleFilter(RuleFilter.SpecialFilterType.ANY);
+            filterU1 = new RuleFilter(SpecialFilterType.ANY);
             filterU1.setUser("u1");
 
             // LOGGER.info("getMatchingRules ========================================");
@@ -545,7 +540,7 @@ public abstract class AbstractRuleReaderServiceImplTest extends ServiceTestBase 
         // TEST u2
         {
             RuleFilter filter;
-            filter = new RuleFilter(RuleFilter.SpecialFilterType.ANY);
+            filter = new RuleFilter(SpecialFilterType.ANY);
             filter.setUser("u2");
             filter.setLayer("l1");
 
@@ -570,7 +565,7 @@ public abstract class AbstractRuleReaderServiceImplTest extends ServiceTestBase 
         // merging styles
         {
             RuleFilter filter;
-            filter = new RuleFilter(RuleFilter.SpecialFilterType.ANY);
+            filter = new RuleFilter(SpecialFilterType.ANY);
             filter.setUser("u12");
             filter.setLayer("l1");
 
@@ -596,7 +591,7 @@ public abstract class AbstractRuleReaderServiceImplTest extends ServiceTestBase 
 
         {
             RuleFilter filter;
-            filter = new RuleFilter(RuleFilter.SpecialFilterType.ANY);
+            filter = new RuleFilter(SpecialFilterType.ANY);
             filter.setUser("u13");
             filter.setLayer("l1");
 
@@ -656,7 +651,7 @@ public abstract class AbstractRuleReaderServiceImplTest extends ServiceTestBase 
         // TEST u1
         {
             RuleFilter filterU1;
-            filterU1 = new RuleFilter(RuleFilter.SpecialFilterType.ANY);
+            filterU1 = new RuleFilter(SpecialFilterType.ANY);
             filterU1.setUser("u1");
 
             // LOGGER.info("getMatchingRules ========================================");
@@ -673,7 +668,7 @@ public abstract class AbstractRuleReaderServiceImplTest extends ServiceTestBase 
     @Test
     public void testIPAddress() {
 
-        RuleFilter filter = new RuleFilter(RuleFilter.SpecialFilterType.ANY);
+        RuleFilter filter = new RuleFilter(SpecialFilterType.ANY);
         assertEquals(0, ruleAdminService.count(filter));
 
         createRole("g1");
@@ -838,7 +833,7 @@ public abstract class AbstractRuleReaderServiceImplTest extends ServiceTestBase 
         assertTrue(accessInfo.isAdminRights());
     }
 
-    @Disabled
+    //    @Disabled
     @Test
     public void testMultiRoles() {
         assertEquals(0, ruleAdminService.getCountAll());

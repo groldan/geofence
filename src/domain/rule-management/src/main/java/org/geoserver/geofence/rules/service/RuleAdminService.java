@@ -8,14 +8,14 @@ package org.geoserver.geofence.rules.service;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import org.geoserver.geofence.filter.RuleFilter;
+import org.geoserver.geofence.filter.RuleQuery;
 import org.geoserver.geofence.rules.model.GrantType;
 import org.geoserver.geofence.rules.model.InsertPosition;
 import org.geoserver.geofence.rules.model.LayerDetails;
 import org.geoserver.geofence.rules.model.Rule;
-import org.geoserver.geofence.rules.model.RuleFilter;
 import org.geoserver.geofence.rules.model.RuleIdentifier;
 import org.geoserver.geofence.rules.model.RuleLimits;
-import org.geoserver.geofence.rules.model.RuleQuery;
 import org.geoserver.geofence.rules.repository.RuleIdentifierConflictException;
 import org.geoserver.geofence.rules.repository.RuleRepository;
 

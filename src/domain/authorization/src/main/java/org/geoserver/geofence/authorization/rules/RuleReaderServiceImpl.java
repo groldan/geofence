@@ -10,20 +10,22 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.geoserver.geofence.adminrules.model.AdminGrantType;
 import org.geoserver.geofence.adminrules.model.AdminRule;
-import org.geoserver.geofence.adminrules.model.AdminRuleFilter;
 import org.geoserver.geofence.adminrules.service.AdminRuleAdminService;
+import org.geoserver.geofence.filter.AdminRuleFilter;
+import org.geoserver.geofence.filter.RuleFilter;
+import org.geoserver.geofence.filter.RuleQuery;
+import org.geoserver.geofence.filter.predicate.FilterType;
+import org.geoserver.geofence.filter.predicate.IdNameFilter;
+import org.geoserver.geofence.filter.predicate.InSetPredicate;
+import org.geoserver.geofence.filter.predicate.SpecialFilterType;
+import org.geoserver.geofence.filter.predicate.TextFilter;
 import org.geoserver.geofence.rules.model.CatalogMode;
 import org.geoserver.geofence.rules.model.GrantType;
 import org.geoserver.geofence.rules.model.LayerAttribute;
 import org.geoserver.geofence.rules.model.LayerAttribute.AccessType;
 import org.geoserver.geofence.rules.model.LayerDetails;
 import org.geoserver.geofence.rules.model.Rule;
-import org.geoserver.geofence.rules.model.RuleFilter;
-import org.geoserver.geofence.rules.model.RuleFilter.IdNameFilter;
-import org.geoserver.geofence.rules.model.RuleFilter.SpecialFilterType;
-import org.geoserver.geofence.rules.model.RuleFilter.TextFilter;
 import org.geoserver.geofence.rules.model.RuleLimits;
-import org.geoserver.geofence.rules.model.RuleQuery;
 import org.geoserver.geofence.rules.model.SpatialFilterType;
 import org.geoserver.geofence.rules.service.RuleAdminService;
 import org.geotools.geometry.jts.JTS;
@@ -44,7 +46,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -316,13 +317,12 @@ public class RuleReaderServiceImpl implements RuleReaderService {
         }
     }
 
-    private SortedSet<String> validateRolenames(TextFilter filter) {
+    private Set<String> validateRolenames(InSetPredicate<String> filter) {
 
         switch (filter.getType()) {
             case NAMEVALUE:
-                String names = filter.getText();
-                SortedSet<String> roles = RuleFilter.asCollectionValue(names);
-                if (roles.isEmpty()) {
+                Set<String> roles = filter.getValues();
+                if (roles == null || roles.isEmpty()) {
                     throw new IllegalArgumentException("Blank role name");
                 }
                 return roles;
@@ -505,11 +505,10 @@ public class RuleReaderServiceImpl implements RuleReaderService {
         Map<String, List<Rule>> ret = new HashMap<>();
 
         if (finalRoleFilter.isEmpty()) {
-            // TextFilter roleFilter =
-            // new TextFilter(filter.getRole().getType(),
-            // filter.getRole().isIncludeDefault());
-            // List<Rule> found = getRuleAux(filter, roleFilter);
-
+            if (filter.getRole().getType() != FilterType.ANY) {
+                filter = filter.clone();
+                filter.getRole().setType(SpecialFilterType.DEFAULT);
+            }
             List<Rule> found = ruleService.getList(filter);
             ret.put(null, found);
         } else {
@@ -518,30 +517,6 @@ public class RuleReaderServiceImpl implements RuleReaderService {
                 ret.put(role, found);
             }
         }
-
-        // for (String role : finalRoleFilter) {
-        // TextFilter roleFilter = new TextFilter(role);
-        // roleFilter.setIncludeDefault(true);
-        // List<Rule> found = getRuleAux(filter, roleFilter);
-        // ret.put(role, found);
-        // }
-
-        // if (LOGGER.isDebugEnabled()) {
-        // LOGGER.debug("Filter " + filter + " is matching the following Rules:");
-        // boolean ruleFound = false;
-        // for (Entry<String, List<Rule>> entry : ret.entrySet()) {
-        // String role = entry.getKey();
-        // LOGGER.debug(" Role:" + role);
-        // for (Rule rule : entry.getValue()) {
-        // LOGGER.debug(" Role:" + role + " ---> " + rule);
-        // ruleFound = true;
-        // }
-        // }
-        // if (!ruleFound)
-        // LOGGER.debug("No rules matching filter " + filter);
-        //
-        // }
-
         return ret;
     }
 
@@ -553,7 +528,7 @@ public class RuleReaderServiceImpl implements RuleReaderService {
     }
 
     /**
-     * Check requested user and group fileter. <br>
+     * Check requested user and group filter. <br>
      * The input filter <b>may be altered</b> for fixing some request inconsistencies.
      *
      * @param filter
@@ -582,11 +557,11 @@ public class RuleReaderServiceImpl implements RuleReaderService {
                         if (userRoles.contains(role)) {
                             finalRoleFilter.add(role);
                         } else {
-                            // LOGGER.warn("User does not belong to role
-                            // [User:" + filter.getUser()
-                            // + "] [Role:" + role + "]
-                            // [ResolvedRoles:" + resolvedRoles
-                            // + "]");
+                            log.debug(
+                                    "User does not belong to role [User:{}] [Role:{}] [ResolvedRoles:{}]",
+                                    filter.getUser(),
+                                    role,
+                                    userRoles);
                         }
                     }
                 } else {
@@ -614,72 +589,6 @@ public class RuleReaderServiceImpl implements RuleReaderService {
 
         return finalRoleFilter;
     }
-
-    // protected List<Rule> getRuleAux(RuleFilter filter, TextFilter roleFilter) {
-    //
-    // Search searchCriteria = new Search(Rule.class);
-    // searchCriteria.addSortAsc("priority");
-    // addStringCriteria(searchCriteria, "username", filter.getUser());
-    // addStringCriteria(searchCriteria, "rolename", roleFilter);
-    // addCriteria(searchCriteria, "instance", filter.getInstance());
-    // addStringCriteria(searchCriteria, "service", filter.getService()); // see class'
-    // javadoc
-    // addStringCriteria(searchCriteria, "request", filter.getRequest()); // see class'
-    // javadoc
-    // addStringCriteria(searchCriteria, "subfield", filter.getSubfield());
-    // addStringCriteria(searchCriteria, "workspace", filter.getWorkspace());
-    // addStringCriteria(searchCriteria, "layer", filter.getLayer());
-    //
-    // List<Rule> found = ruleDAO.search(searchCriteria);
-    // found = filterByAddress(filter, found);
-    //
-    // return found;
-    // }
-    //
-    // private void addCriteria(Search searchCriteria, String fieldName, IdNameFilter filter) {
-    // switch (filter.getType()) {
-    // case ANY:
-    // break; // no filtering
-    //
-    // case DEFAULT:
-    // searchCriteria.addFilterNull(fieldName);
-    // break;
-    //
-    // case IDVALUE:
-    // searchCriteria.addFilterOr(Filter.isNull(fieldName),
-    // Filter.equal(fieldName + ".id", filter.getId()));
-    // break;
-    //
-    // case NAMEVALUE:
-    // searchCriteria.addFilterOr(Filter.isNull(fieldName),
-    // Filter.equal(fieldName + ".name", filter.getName()));
-    // break;
-    //
-    // default:
-    // throw new AssertionError();
-    // }
-    // }
-    //
-    // private void addStringCriteria(Search searchCriteria, String fieldName, TextFilter filter)
-    // {
-    // switch (filter.getType()) {
-    // case ANY:
-    // break; // no filtering
-    //
-    // case DEFAULT:
-    // searchCriteria.addFilterNull(fieldName);
-    // break;
-    //
-    // case NAMEVALUE:
-    // searchCriteria.addFilterOr(Filter.isNull(fieldName),
-    // Filter.equal(fieldName, filter.getText()));
-    // break;
-    //
-    // case IDVALUE:
-    // default:
-    // throw new AssertionError();
-    // }
-    // }
 
     // ==========================================================================
 

@@ -7,17 +7,17 @@ import com.querydsl.core.types.Predicate;
 import lombok.NonNull;
 
 import org.geoserver.geofence.adminrules.model.AdminRule;
-import org.geoserver.geofence.adminrules.model.AdminRuleFilter;
+import org.geoserver.geofence.adminrules.repository.AdminRuleIdentifierConflictException;
 import org.geoserver.geofence.adminrules.repository.AdminRuleRepository;
+import org.geoserver.geofence.filter.AdminRuleFilter;
+import org.geoserver.geofence.filter.RuleQuery;
+import org.geoserver.geofence.filter.predicate.IPAddressRangeFilter;
 import org.geoserver.geofence.jpa.integration.mapper.AdminRuleJpaMapper;
 import org.geoserver.geofence.jpa.model.QAdminRule;
 import org.geoserver.geofence.jpa.repository.JpaAdminRuleRepository;
 import org.geoserver.geofence.jpa.repository.TransactionRequired;
 import org.geoserver.geofence.jpa.repository.TransactionSupported;
 import org.geoserver.geofence.rules.model.InsertPosition;
-import org.geoserver.geofence.rules.model.RuleFilter.TextFilter;
-import org.geoserver.geofence.rules.model.RuleQuery;
-import org.geoserver.geofence.rules.repository.RuleIdentifierConflictException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
@@ -73,8 +73,8 @@ public class AdminRuleRepositoryJpaAdaptor implements AdminRuleRepository {
             jparepo.flush();
             saved = jparepo.saveAndFlush(entity);
         } catch (DataIntegrityViolationException e) {
-            throw new RuleIdentifierConflictException(
-                    "A Rule with the same identifier already exists: "
+            throw new AdminRuleIdentifierConflictException(
+                    "An AdminRule with the same identifier already exists: "
                             + rule.getIdentifier().toShortString(),
                     e);
         }
@@ -151,9 +151,16 @@ public class AdminRuleRepositoryJpaAdaptor implements AdminRuleRepository {
         modelMapper.updateEntity(entity, rule);
         entity.setPriority(finalPriority);
 
-        org.geoserver.geofence.jpa.model.AdminRule saved = jparepo.save(entity);
-        jparepo.flush();
-        return modelMapper.toModel(saved);
+        try {
+            jparepo.flush();
+            org.geoserver.geofence.jpa.model.AdminRule saved = jparepo.saveAndFlush(entity);
+            return modelMapper.toModel(saved);
+        } catch (DataIntegrityViolationException e) {
+            throw new AdminRuleIdentifierConflictException(
+                    "An AdminRule with the same identifier already exists: "
+                            + rule.getIdentifier().toShortString(),
+                    e);
+        }
     }
 
     @Override
@@ -192,9 +199,9 @@ public class AdminRuleRepositoryJpaAdaptor implements AdminRuleRepository {
     private java.util.function.Predicate<? super AdminRule> filterByAddress(
             Optional<AdminRuleFilter> filter) {
         if (filter.isEmpty()) return r -> true;
-        TextFilter textFilter = filter.get().getSourceAddress();
+        IPAddressRangeFilter ipFilter = filter.get().getSourceAddress();
 
-        return textFilter.toIPAddressPredicate(r -> r.getIdentifier().getAddressRange());
+        return ipFilter.toIPAddressPredicate(r -> r.getIdentifier().getAddressRange());
     }
 
     @Override

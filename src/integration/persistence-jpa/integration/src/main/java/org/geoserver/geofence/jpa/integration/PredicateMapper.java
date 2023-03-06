@@ -9,24 +9,26 @@ import com.querydsl.core.types.dsl.StringPath;
 import lombok.extern.slf4j.Slf4j;
 
 import org.geoserver.geofence.adminrules.model.AdminGrantType;
-import org.geoserver.geofence.adminrules.model.AdminRuleFilter;
+import org.geoserver.geofence.filter.AdminRuleFilter;
+import org.geoserver.geofence.filter.Filter;
+import org.geoserver.geofence.filter.RuleFilter;
+import org.geoserver.geofence.filter.RuleQuery;
+import org.geoserver.geofence.filter.predicate.FilterType;
+import org.geoserver.geofence.filter.predicate.IdNameFilter;
+import org.geoserver.geofence.filter.predicate.InSetPredicate;
+import org.geoserver.geofence.filter.predicate.TextFilter;
 import org.geoserver.geofence.jpa.model.GeoServerInstance;
 import org.geoserver.geofence.jpa.model.QAdminRule;
 import org.geoserver.geofence.jpa.model.QAdminRuleIdentifier;
 import org.geoserver.geofence.jpa.model.QGeoServerInstance;
 import org.geoserver.geofence.jpa.model.QRule;
 import org.geoserver.geofence.jpa.model.QRuleIdentifier;
-import org.geoserver.geofence.rules.model.RuleFilter;
-import org.geoserver.geofence.rules.model.RuleFilter.FilterType;
-import org.geoserver.geofence.rules.model.RuleFilter.IdNameFilter;
-import org.geoserver.geofence.rules.model.RuleFilter.TextFilter;
-import org.geoserver.geofence.rules.model.RuleQuery;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.SortedSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -135,10 +137,13 @@ class PredicateMapper {
         }
     }
 
+    Optional<Predicate> toPredicate(Filter filter) {
+        if (filter instanceof RuleFilter) return toPredicate((RuleFilter) filter);
+        if (filter instanceof AdminRuleFilter) return toPredicate((AdminRuleFilter) filter);
+        return Optional.empty();
+    }
+
     public Optional<Predicate> toPredicate(RuleFilter filter) {
-        if (filter instanceof AdminRuleFilter) {
-            return toPredicate((AdminRuleFilter) filter);
-        }
         if (RuleFilter.any().equals(filter)) {
             return Optional.empty();
         }
@@ -191,17 +196,47 @@ class PredicateMapper {
             case NAMEVALUE:
                 {
                     final String text = filter.getText();
-                    SortedSet<String> values = RuleFilter.asCollectionValue(text);
-                    if (values.isEmpty())
+                    if (text == null)
                         throw new IllegalArgumentException(
                                 "Can't map TextFilter with empty value " + text);
+
+                    if (includeDefault) {
+                        return propertyPath.in("*", text);
+                    }
+                    return propertyPath.eq(text);
+                }
+            case IDVALUE:
+            default:
+                throw new IllegalArgumentException(
+                        "Unknown or unexpected FilterType for TextFilter: " + type);
+        }
+    }
+
+    Predicate map(InSetPredicate<String> filter, StringPath propertyPath) {
+        if (null == filter) return null;
+
+        final FilterType type = filter.getType();
+
+        final boolean includeDefault = filter.isIncludeDefault();
+
+        switch (type) {
+            case ANY:
+                return null;
+            case DEFAULT:
+                return propertyPath.eq("*");
+            case NAMEVALUE:
+                {
+                    final Set<String> values = filter.getValues();
+                    if (values == null || values.isEmpty())
+                        throw new IllegalArgumentException(
+                                "Can't map TextFilter with empty value " + values);
 
                     if (includeDefault) {
                         return propertyPath.in(
                                 Stream.concat(Stream.of("*"), values.stream())
                                         .collect(Collectors.toList()));
                     }
-                    return 1 == values.size() ? propertyPath.eq(text) : propertyPath.in(values);
+                    return propertyPath.in(values);
                 }
             case IDVALUE:
             default:

@@ -6,6 +6,9 @@ import com.querydsl.core.types.Predicate;
 
 import lombok.NonNull;
 
+import org.geoserver.geofence.filter.RuleFilter;
+import org.geoserver.geofence.filter.RuleQuery;
+import org.geoserver.geofence.filter.predicate.IPAddressRangeFilter;
 import org.geoserver.geofence.jpa.integration.mapper.RuleJpaMapper;
 import org.geoserver.geofence.jpa.model.GrantType;
 import org.geoserver.geofence.jpa.model.LayerDetails;
@@ -17,10 +20,7 @@ import org.geoserver.geofence.jpa.repository.TransactionRequired;
 import org.geoserver.geofence.jpa.repository.TransactionSupported;
 import org.geoserver.geofence.rules.model.InsertPosition;
 import org.geoserver.geofence.rules.model.Rule;
-import org.geoserver.geofence.rules.model.RuleFilter;
-import org.geoserver.geofence.rules.model.RuleFilter.TextFilter;
 import org.geoserver.geofence.rules.model.RuleLimits;
-import org.geoserver.geofence.rules.model.RuleQuery;
 import org.geoserver.geofence.rules.repository.RuleIdentifierConflictException;
 import org.geoserver.geofence.rules.repository.RuleRepository;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -105,9 +105,9 @@ public class RuleRepositoryJpaAdaptor implements RuleRepository {
     private java.util.function.Predicate<? super Rule> filterByAddress(
             Optional<RuleFilter> filter) {
         if (filter.isEmpty()) return r -> true;
-        TextFilter textFilter = filter.get().getSourceAddress();
+        IPAddressRangeFilter ipFilter = filter.get().getSourceAddress();
 
-        return textFilter.toIPAddressPredicate(r -> r.getIdentifier().getAddressRange());
+        return ipFilter.toIPAddressPredicate(r -> r.getIdentifier().getAddressRange());
     }
 
     @Override

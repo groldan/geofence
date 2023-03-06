@@ -6,8 +6,8 @@ package org.geoserver.geofence.wpscommon;
 
 import org.geoserver.geofence.authorization.rules.AccessInfo;
 import org.geoserver.geofence.authorization.rules.RuleReaderService;
+import org.geoserver.geofence.filter.RuleFilter;
 import org.geoserver.geofence.rules.model.GrantType;
-import org.geoserver.geofence.rules.model.RuleFilter;
 import org.geoserver.geofence.util.AccessInfoUtils;
 import org.geoserver.ows.Request;
 import org.geotools.util.logging.Logging;

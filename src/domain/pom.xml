@@ -18,6 +18,7 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>model</module>
     <module>rule-management</module>
     <module>adminrule-management</module>
     <module>user-management</module>

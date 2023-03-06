@@ -9,9 +9,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import org.geoserver.geofence.rules.model.RuleFilter;
-import org.geoserver.geofence.rules.model.RuleFilter.FilterType;
-import org.geoserver.geofence.rules.model.RuleFilter.SpecialFilterType;
+import org.geoserver.geofence.filter.RuleFilter;
+import org.geoserver.geofence.filter.predicate.FilterType;
+import org.geoserver.geofence.filter.predicate.SpecialFilterType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

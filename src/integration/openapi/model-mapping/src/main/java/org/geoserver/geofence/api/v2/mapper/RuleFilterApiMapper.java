@@ -1,15 +1,15 @@
 package org.geoserver.geofence.api.v2.mapper;
 
-import org.geoserver.geofence.adminrules.model.AdminRuleFilter;
 import org.geoserver.geofence.api.v2.model.AddressRangeFilter;
 import org.geoserver.geofence.api.v2.model.AdminGrantType;
 import org.geoserver.geofence.api.v2.model.IdName;
 import org.geoserver.geofence.api.v2.model.SetFilter;
 import org.geoserver.geofence.api.v2.model.TextFilter;
-import org.geoserver.geofence.rules.model.RuleFilter;
-import org.geoserver.geofence.rules.model.RuleFilter.FilterType;
-import org.geoserver.geofence.rules.model.RuleFilter.IdNameFilter;
-import org.geoserver.geofence.rules.model.RuleFilter.SpecialFilterType;
+import org.geoserver.geofence.filter.AdminRuleFilter;
+import org.geoserver.geofence.filter.RuleFilter;
+import org.geoserver.geofence.filter.predicate.FilterType;
+import org.geoserver.geofence.filter.predicate.IdNameFilter;
+import org.geoserver.geofence.filter.predicate.SpecialFilterType;
 import org.openapitools.jackson.nullable.JsonNullable;
 
 import java.util.Set;
@@ -107,26 +107,28 @@ public class RuleFilterApiMapper {
     }
 
     private JsonNullable<org.geoserver.geofence.api.v2.model.SetFilter> setFilterToApi(
-            RuleFilter.TextFilter filter) {
-        JsonNullable<TextFilter> f = textFilterToApi(filter);
-        if (!f.isPresent()) {
-            return JsonNullable.undefined();
+            org.geoserver.geofence.filter.predicate.InSetPredicate<String> filter) {
+
+        switch (filter.getType()) {
+            case DEFAULT:
+                return JsonNullable.undefined();
+            case ANY:
+                return JsonNullable.of(new SetFilter().values(Set.of("*")));
+            case NAMEVALUE:
+                SetFilter value = new SetFilter().values(filter.getValues());
+                if (!filter.isIncludeDefault()) {
+                    value.includeDefault(filter.isIncludeDefault());
+                }
+                return JsonNullable.of(value);
+            case IDVALUE:
+            default:
+                throw new IllegalArgumentException(
+                        "Unexpected value type for TextFilter: " + filter.getType());
         }
-        TextFilter textFilter = f.get();
-        SetFilter setf = new SetFilter();
-        if (textFilter.getIncludeDefault().isPresent()) {
-            setf.includeDefault(textFilter.getIncludeDefault().get());
-        }
-        if (textFilter.getValue().isPresent() && null != textFilter.getValue().get()) {
-            String values = textFilter.getValue().get();
-            Set<String> set = RuleFilter.asCollectionValue(values);
-            setf.setValues(JsonNullable.of(set));
-        }
-        return JsonNullable.of(setf);
     }
 
     private void setFilterToModel(
-            RuleFilter.TextFilter target,
+            org.geoserver.geofence.filter.predicate.InSetPredicate<String> target,
             JsonNullable<org.geoserver.geofence.api.v2.model.SetFilter> source) {
 
         if (!source.isPresent() || source.get() == null) return;
@@ -141,13 +143,13 @@ public class RuleFilterApiMapper {
             if (values.contains("*")) {
                 target.setType(SpecialFilterType.ANY);
             } else if (!values.isEmpty()) {
-                target.setText(RuleFilter.asTextValue(values));
+                target.setValues(values);
             }
         }
     }
 
     private JsonNullable<org.geoserver.geofence.api.v2.model.TextFilter> textFilterToApi(
-            RuleFilter.TextFilter filter) {
+            org.geoserver.geofence.filter.predicate.TextFilter filter) {
 
         switch (filter.getType()) {
             case DEFAULT:
@@ -168,13 +170,13 @@ public class RuleFilterApiMapper {
     }
 
     private void textFilterToModel(
-            RuleFilter.TextFilter target,
+            org.geoserver.geofence.filter.predicate.TextFilter target,
             JsonNullable<org.geoserver.geofence.api.v2.model.TextFilter> source) {
 
         if (source.isPresent() && source.get() != null) {
-            TextFilter idName = source.get();
-            JsonNullable<Boolean> includeDefault = idName.getIncludeDefault();
-            JsonNullable<String> value = idName.getValue();
+            TextFilter textFilter = source.get();
+            JsonNullable<Boolean> includeDefault = textFilter.getIncludeDefault();
+            JsonNullable<String> value = textFilter.getValue();
 
             if (value.isPresent() && value.get() != null) {
                 target.setHeuristically(value.get());
@@ -191,27 +193,47 @@ public class RuleFilterApiMapper {
     }
 
     private JsonNullable<org.geoserver.geofence.api.v2.model.AddressRangeFilter> addressRangeToApi(
-            RuleFilter.TextFilter filter) {
+            org.geoserver.geofence.filter.predicate.IPAddressRangeFilter filter) {
 
-        JsonNullable<TextFilter> textFilter = textFilterToApi(filter);
-        if (!textFilter.isPresent() || null == textFilter.get()) return JsonNullable.undefined();
-
-        TextFilter tf = textFilter.get();
-        AddressRangeFilter arf = new AddressRangeFilter();
-        arf.setIncludeDefault(tf.getIncludeDefault());
-        arf.setValue(tf.getValue());
-        return JsonNullable.of(arf);
+        switch (filter.getType()) {
+            case DEFAULT:
+                return JsonNullable.undefined();
+            case ANY:
+                return JsonNullable.of(new AddressRangeFilter().value("*"));
+            case NAMEVALUE:
+                AddressRangeFilter value = new AddressRangeFilter().value(filter.getText());
+                if (!filter.isIncludeDefault()) {
+                    value.includeDefault(filter.isIncludeDefault());
+                }
+                return JsonNullable.of(value);
+            case IDVALUE:
+            default:
+                throw new IllegalArgumentException(
+                        "Unexpected value type for TextFilter: " + filter.getType());
+        }
     }
 
     private void addressRangeToModel(
-            RuleFilter.TextFilter target,
+            org.geoserver.geofence.filter.predicate.IPAddressRangeFilter target,
             JsonNullable<org.geoserver.geofence.api.v2.model.AddressRangeFilter> source) {
-        if (!source.isPresent() || null == source.get()) return;
-        AddressRangeFilter adr = source.get();
-        TextFilter tf = new TextFilter();
-        tf.setIncludeDefault(adr.getIncludeDefault());
-        tf.setValue(adr.getValue());
-        textFilterToModel(target, JsonNullable.of(tf));
+
+        if (source.isPresent() && source.get() != null) {
+            AddressRangeFilter addrFilter = source.get();
+            JsonNullable<Boolean> includeDefault = addrFilter.getIncludeDefault();
+            JsonNullable<String> value = addrFilter.getValue();
+
+            if (value.isPresent() && value.get() != null) {
+                target.setHeuristically(value.get());
+                if (includeDefault.isPresent() && includeDefault.get() != null)
+                    target.setIncludeDefault(includeDefault.get());
+            } else {
+                if (includeDefault.isPresent()
+                        && includeDefault.get() != null
+                        && includeDefault.get().booleanValue())
+                    target.setType(SpecialFilterType.DEFAULT);
+                else target.setType(SpecialFilterType.ANY);
+            }
+        }
     }
 
     private JsonNullable<IdName> idNameToApi(IdNameFilter source) {

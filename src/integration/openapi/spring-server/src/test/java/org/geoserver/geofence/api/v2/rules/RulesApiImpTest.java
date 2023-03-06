@@ -30,10 +30,10 @@ import org.geoserver.geofence.api.v2.mapper.RuleApiMapper;
 import org.geoserver.geofence.api.v2.mapper.RuleApiMapperImpl;
 import org.geoserver.geofence.api.v2.mapper.RuleLimitsApiMapper;
 import org.geoserver.geofence.api.v2.mapper.RuleLimitsApiMapperImpl;
+import org.geoserver.geofence.filter.RuleFilter;
+import org.geoserver.geofence.filter.RuleQuery;
 import org.geoserver.geofence.rules.model.InsertPosition;
 import org.geoserver.geofence.rules.model.Rule;
-import org.geoserver.geofence.rules.model.RuleFilter;
-import org.geoserver.geofence.rules.model.RuleQuery;
 import org.geoserver.geofence.rules.repository.RuleIdentifierConflictException;
 import org.geoserver.geofence.rules.service.RuleAdminService;
 import org.junit.jupiter.api.BeforeEach;
@@ -123,7 +123,7 @@ class RulesApiImpTest {
 
     @Test
     void testGetRules() {
-        RuleQuery<RuleFilter> expectedQuery = RuleQuery.of().setPageNumber(1).setPageSize(10);
+        RuleQuery<RuleFilter> expectedQuery = RuleQuery.of(1, 10);
         List<Rule> expected = List.of(Rule.allow(), Rule.deny());
         when(service.getList(eq(expectedQuery))).thenReturn(expected);
 

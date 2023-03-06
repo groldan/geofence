@@ -17,8 +17,8 @@ import org.geoserver.geofence.authorization.users.AuthUser;
 import org.geoserver.geofence.authorization.users.AuthorizationException;
 import org.geoserver.geofence.authorization.users.AuthorizationService;
 import org.geoserver.geofence.config.GeoFenceConfigurationManager;
+import org.geoserver.geofence.filter.RuleFilter;
 import org.geoserver.geofence.rules.model.Rule;
-import org.geoserver.geofence.rules.model.RuleFilter;
 import org.geotools.util.logging.Logging;
 
 import java.util.List;

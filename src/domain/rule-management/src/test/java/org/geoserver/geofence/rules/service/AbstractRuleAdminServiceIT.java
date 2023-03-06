@@ -11,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.geolatte.geom.MultiPolygon;
 import org.geolatte.geom.codec.Wkt;
+import org.geoserver.geofence.filter.RuleFilter;
+import org.geoserver.geofence.filter.RuleQuery;
 import org.geoserver.geofence.rules.model.CatalogMode;
 import org.geoserver.geofence.rules.model.GrantType;
 import org.geoserver.geofence.rules.model.LayerAttribute;
@@ -18,9 +20,7 @@ import org.geoserver.geofence.rules.model.LayerAttribute.AccessType;
 import org.geoserver.geofence.rules.model.LayerDetails;
 import org.geoserver.geofence.rules.model.LayerDetails.LayerType;
 import org.geoserver.geofence.rules.model.Rule;
-import org.geoserver.geofence.rules.model.RuleFilter;
 import org.geoserver.geofence.rules.model.RuleLimits;
-import org.geoserver.geofence.rules.model.RuleQuery;
 import org.geoserver.geofence.rules.model.SpatialFilterType;
 import org.geoserver.geofence.rules.repository.RuleIdentifierConflictException;
 import org.junit.jupiter.api.Disabled;
@@ -210,7 +210,8 @@ public abstract class AbstractRuleAdminServiceIT {
 
         final int pageSize = 25;
         final int maxPages = all.size() / pageSize;
-        RuleQuery<RuleFilter> query = RuleQuery.of().setPageSize(pageSize);
+        RuleQuery<RuleFilter> query = RuleQuery.of();
+        query.setPageSize(pageSize);
         for (int page = 0; page < maxPages; page++) {
             query.setPageNumber(page);
             List<Rule> result = ruleAdminService.getList(query);

@@ -5,8 +5,8 @@
 
 package org.geoserver.geofence.authorization.rules;
 
+import org.geoserver.geofence.filter.RuleFilter;
 import org.geoserver.geofence.rules.model.Rule;
-import org.geoserver.geofence.rules.model.RuleFilter;
 
 import java.util.List;
 

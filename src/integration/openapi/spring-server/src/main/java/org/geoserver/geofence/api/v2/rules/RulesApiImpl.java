@@ -20,7 +20,7 @@ import org.geoserver.geofence.api.v2.model.Rule;
 import org.geoserver.geofence.api.v2.model.RuleFilter;
 import org.geoserver.geofence.api.v2.model.RuleLimits;
 import org.geoserver.geofence.api.v2.server.RulesApiDelegate;
-import org.geoserver.geofence.rules.model.RuleQuery;
+import org.geoserver.geofence.filter.RuleQuery;
 import org.geoserver.geofence.rules.repository.RuleIdentifierConflictException;
 import org.geoserver.geofence.rules.service.RuleAdminService;
 import org.springframework.http.HttpStatus;
@@ -73,7 +73,7 @@ public class RulesApiImpl implements RulesApiDelegate {
 
     @Override
     public ResponseEntity<List<Rule>> getRules(Integer page, Integer size) {
-        return query(RuleQuery.of().setPageNumber(page).setPageSize(size));
+        return query(RuleQuery.of(page, size));
     }
 
     @Override
@@ -83,9 +83,9 @@ public class RulesApiImpl implements RulesApiDelegate {
             @Nullable Long priorityOffset,
             @Nullable RuleFilter ruleFilter) {
 
-        org.geoserver.geofence.rules.model.RuleFilter filter = map(ruleFilter);
+        org.geoserver.geofence.filter.RuleFilter filter = map(ruleFilter);
 
-        RuleQuery<org.geoserver.geofence.rules.model.RuleFilter> query;
+        RuleQuery<org.geoserver.geofence.filter.RuleFilter> query;
         query = RuleQuery.of(filter).setPriorityOffset(priorityOffset);
 
         query.setPageNumber(page).setPageSize(size);
@@ -94,7 +94,7 @@ public class RulesApiImpl implements RulesApiDelegate {
     }
 
     private ResponseEntity<List<Rule>> query(
-            RuleQuery<org.geoserver.geofence.rules.model.RuleFilter> query) {
+            RuleQuery<org.geoserver.geofence.filter.RuleFilter> query) {
         List<org.geoserver.geofence.rules.model.Rule> list;
         try {
             list = service.getList(query);
@@ -234,7 +234,7 @@ public class RulesApiImpl implements RulesApiDelegate {
         }
     }
 
-    private org.geoserver.geofence.rules.model.RuleFilter map(RuleFilter ruleFilter) {
+    private org.geoserver.geofence.filter.RuleFilter map(RuleFilter ruleFilter) {
         return filterMapper.toModel(ruleFilter);
     }
 

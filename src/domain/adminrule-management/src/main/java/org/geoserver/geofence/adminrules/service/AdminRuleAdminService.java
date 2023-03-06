@@ -10,10 +10,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.geoserver.geofence.adminrules.model.AdminRule;
-import org.geoserver.geofence.adminrules.model.AdminRuleFilter;
+import org.geoserver.geofence.adminrules.repository.AdminRuleIdentifierConflictException;
 import org.geoserver.geofence.adminrules.repository.AdminRuleRepository;
+import org.geoserver.geofence.filter.AdminRuleFilter;
+import org.geoserver.geofence.filter.RuleQuery;
 import org.geoserver.geofence.rules.model.InsertPosition;
-import org.geoserver.geofence.rules.model.RuleQuery;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,10 +34,16 @@ public class AdminRuleAdminService {
     // Basic operations
     // =========================================================================
 
+    /**
+     * @throws AdminRuleIdentifierConflictException
+     */
     public AdminRule insert(AdminRule rule) {
         return insert(rule, InsertPosition.FIXED);
     }
 
+    /**
+     * @throws AdminRuleIdentifierConflictException
+     */
     public AdminRule insert(AdminRule rule, InsertPosition position) {
         try {
             return repository.create(rule, position);
@@ -45,6 +52,9 @@ public class AdminRuleAdminService {
         }
     }
 
+    /**
+     * @throws AdminRuleIdentifierConflictException
+     */
     public AdminRule update(AdminRule rule) {
         if (null == rule.getId()) {
             throw new IllegalArgumentException("AdminRule has no id");

@@ -11,10 +11,11 @@ import org.geolatte.geom.Geometry;
 import org.geolatte.geom.MultiPolygon;
 import org.geolatte.geom.codec.Wkt;
 import org.geolatte.geom.jts.JTS;
+import org.geoserver.geofence.filter.RuleFilter;
+import org.geoserver.geofence.filter.predicate.SpecialFilterType;
 import org.geoserver.geofence.rules.model.CatalogMode;
 import org.geoserver.geofence.rules.model.GrantType;
 import org.geoserver.geofence.rules.model.Rule;
-import org.geoserver.geofence.rules.model.RuleFilter;
 import org.geoserver.geofence.rules.model.RuleLimits;
 import org.geoserver.geofence.rules.model.SpatialFilterType;
 import org.geoserver.geofence.users.model.GeoServerUser;
@@ -80,7 +81,7 @@ public abstract class AbstractRuleReaderServiceImpl_GeomTest extends ServiceTest
         }
 
         {
-            RuleFilter filter = new RuleFilter(RuleFilter.SpecialFilterType.ANY, true);
+            RuleFilter filter = new RuleFilter(SpecialFilterType.ANY, true);
             filter.setWorkspace("w1");
             filter.setService("s1");
             filter.setRequest("r1");
@@ -170,7 +171,7 @@ public abstract class AbstractRuleReaderServiceImpl_GeomTest extends ServiceTest
         }
 
         {
-            RuleFilter filter = new RuleFilter(RuleFilter.SpecialFilterType.ANY, true);
+            RuleFilter filter = new RuleFilter(SpecialFilterType.ANY, true);
             filter.setWorkspace("w1");
             filter.setService("s1");
             filter.setRequest("r1");
@@ -259,7 +260,7 @@ public abstract class AbstractRuleReaderServiceImpl_GeomTest extends ServiceTest
                         .allowedArea(area2)
                         .build();
         ruleAdminService.setLimits(id2, limits2);
-        RuleFilter filter = new RuleFilter(RuleFilter.SpecialFilterType.ANY, true);
+        RuleFilter filter = new RuleFilter(SpecialFilterType.ANY, true);
         filter.setWorkspace("w11");
         filter.setLayer("l11");
 
@@ -359,7 +360,7 @@ public abstract class AbstractRuleReaderServiceImpl_GeomTest extends ServiceTest
                         .build();
 
         ruleAdminService.setLimits(id2, limits2);
-        RuleFilter filter = new RuleFilter(RuleFilter.SpecialFilterType.ANY, true);
+        RuleFilter filter = new RuleFilter(SpecialFilterType.ANY, true);
         filter.setWorkspace("w11");
         filter.setLayer("l11");
 
@@ -457,7 +458,7 @@ public abstract class AbstractRuleReaderServiceImpl_GeomTest extends ServiceTest
                         .allowedArea(area2)
                         .build();
         ruleAdminService.setLimits(id2, limits2);
-        RuleFilter filter = new RuleFilter(RuleFilter.SpecialFilterType.ANY, true);
+        RuleFilter filter = new RuleFilter(SpecialFilterType.ANY, true);
         filter.setWorkspace("w22");
         filter.setLayer("l22");
         filter.setUser(user.getName());
@@ -626,7 +627,7 @@ public abstract class AbstractRuleReaderServiceImpl_GeomTest extends ServiceTest
                         .build();
         ruleAdminService.setLimits(id4, limits4);
 
-        RuleFilter filter = new RuleFilter(RuleFilter.SpecialFilterType.ANY, true);
+        RuleFilter filter = new RuleFilter(SpecialFilterType.ANY, true);
         filter.setWorkspace("w22");
         filter.setLayer("l22");
         filter.setUser(user.getName());
@@ -768,7 +769,7 @@ public abstract class AbstractRuleReaderServiceImpl_GeomTest extends ServiceTest
                 RuleLimits.intersect().withCatalogMode(CatalogMode.HIDE).withAllowedArea(area4);
         ruleAdminService.setLimits(id4, limits4);
 
-        RuleFilter filter = new RuleFilter(RuleFilter.SpecialFilterType.ANY, true);
+        RuleFilter filter = new RuleFilter(SpecialFilterType.ANY, true);
         filter.setWorkspace("w22");
         filter.setLayer("l22");
         filter.setUser(user.getName());

@@ -3,12 +3,11 @@ package org.geoserver.geofence.adminrules.repository;
 import lombok.NonNull;
 
 import org.geoserver.geofence.adminrules.model.AdminRule;
-import org.geoserver.geofence.adminrules.model.AdminRuleFilter;
+import org.geoserver.geofence.filter.AdminRuleFilter;
+import org.geoserver.geofence.filter.RuleQuery;
 import org.geoserver.geofence.rules.model.InsertPosition;
-import org.geoserver.geofence.rules.model.RuleQuery;
 import org.geoserver.geofence.rules.repository.MemoryPriorityRepository;
 import org.geoserver.geofence.rules.repository.PriorityResolver;
-import org.geoserver.geofence.rules.repository.RuleIdentifierConflictException;
 
 import java.util.List;
 import java.util.Optional;
@@ -87,7 +86,7 @@ public class MemoryAdminRuleRepository extends MemoryPriorityRepository<AdminRul
     }
 
     /**
-     * @throws RuleIdentifierConflictException
+     * @throws AdminRuleIdentifierConflictException
      */
     private void checkNoDups(AdminRule rule) {
         rules.stream()
@@ -99,8 +98,8 @@ public class MemoryAdminRuleRepository extends MemoryPriorityRepository<AdminRul
                 .findFirst()
                 .ifPresent(
                         duplicate -> {
-                            throw new RuleIdentifierConflictException(
-                                    "A Rule with the same identifier already exists: "
+                            throw new AdminRuleIdentifierConflictException(
+                                    "An AdminRule with the same identifier already exists: "
                                             + rule.getIdentifier().toShortString());
                         });
     }

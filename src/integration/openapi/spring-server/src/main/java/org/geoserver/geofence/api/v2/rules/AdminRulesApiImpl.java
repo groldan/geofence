@@ -65,7 +65,7 @@ public class AdminRulesApiImpl implements AdminRulesApiDelegate {
 
     public @Override ResponseEntity<List<AdminRule>> findAllAdminRules(Integer page, Integer size) {
 
-        org.geoserver.geofence.adminrules.model.AdminRuleFilter filter = null;
+        org.geoserver.geofence.filter.AdminRuleFilter filter = null;
         List<org.geoserver.geofence.adminrules.model.AdminRule> matches =
                 service.getList(filter, page, size);
         List<AdminRule> body = matches.stream().map(this::map).collect(Collectors.toList());
@@ -99,7 +99,7 @@ public class AdminRulesApiImpl implements AdminRulesApiDelegate {
     public @Override ResponseEntity<List<AdminRule>> findAdminRules(
             Integer page, Integer size, Long priorityOffset, AdminRuleFilter adminRuleFilter) {
 
-        org.geoserver.geofence.adminrules.model.AdminRuleFilter filter = map(adminRuleFilter);
+        org.geoserver.geofence.filter.AdminRuleFilter filter = map(adminRuleFilter);
 
         List<org.geoserver.geofence.adminrules.model.AdminRule> matches =
                 service.getList(filter, page, size);
@@ -136,8 +136,7 @@ public class AdminRulesApiImpl implements AdminRulesApiDelegate {
         return ResponseEntity.status(OK).body(map(updated));
     }
 
-    private org.geoserver.geofence.adminrules.model.AdminRuleFilter map(
-            AdminRuleFilter adminRuleFilter) {
+    private org.geoserver.geofence.filter.AdminRuleFilter map(AdminRuleFilter adminRuleFilter) {
         return filterMapper.map(adminRuleFilter);
     }
 
