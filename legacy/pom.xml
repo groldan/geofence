@@ -29,6 +29,19 @@
    <name>Master GeoFence POM</name>
    <description>GeoFence is a java web application that handles authorization rules, integrating with GeoServer using the interface described in GSIP 57.</description>
    
+   <repositories>
+       <repository>
+           <id>geosolutions</id>
+           <name>GeoSolutions Repository</name>
+           <url>https://maven.geo-solutions.it/</url>
+           <snapshots>
+               <enabled>true</enabled>
+           </snapshots>
+           <releases>
+               <enabled>true</enabled>
+           </releases>
+       </repository>
+   </repositories>
    <modules>
       <module>services</module>
    </modules>
