@@ -4,6 +4,7 @@ import org.geoserver.geofence.api.v2.it.support.ClientContextSupport;
 import org.geoserver.geofence.api.v2.it.support.IntegrationTestsApplication;
 import org.geoserver.geofence.api.v2.it.support.ServerContextSupport;
 import org.geoserver.geofence.authorization.rules.AbstractRuleReaderServiceImpl_GeomTest;
+import org.geoserver.geofence.authorization.rules.RuleReaderService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,13 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 
+/**
+ * RuleReaderServiceImpl end to end integration test for {@link RuleReaderService#getAccessInfo}
+ * calls involving geometry operations.
+ *
+ * @see RuleReaderServiceImplApiIT
+ * @see AbstractRuleReaderServiceImpl_GeomTest
+ */
 @DirtiesContext
 @SpringBootTest(
         webEnvironment = WebEnvironment.RANDOM_PORT,
