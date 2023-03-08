@@ -13,14 +13,12 @@ import org.geoserver.geofence.rules.repository.RuleRepository;
 import org.geoserver.geofence.rules.service.RuleAdminService;
 import org.geoserver.geofence.users.repository.GeoServerUserGroupRepository;
 import org.geoserver.geofence.users.repository.GeoServerUserRepository;
-import org.geoserver.geofence.users.service.DefaultUserResolver;
+import org.geoserver.geofence.users.service.DefaultUserRolesResolver;
 import org.geoserver.geofence.users.service.UserAdminService;
 import org.geoserver.geofence.users.service.UserGroupAdminService;
+import org.geoserver.geofence.users.service.UserRolesResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.Set;
-import java.util.function.Function;
 
 @Configuration
 public class JpaIntegrationTestSupport {
@@ -54,7 +52,7 @@ public class JpaIntegrationTestSupport {
         userGroupAdminService = new UserGroupAdminService(userGropuRepository);
         userAdminService = new UserAdminService(userRepository);
 
-        Function<String, Set<String>> userRolesResolver = new DefaultUserResolver(userAdminService);
+        UserRolesResolver userRolesResolver = new DefaultUserRolesResolver(userAdminService);
 
         ruleReaderService =
                 new RuleReaderServiceImpl(

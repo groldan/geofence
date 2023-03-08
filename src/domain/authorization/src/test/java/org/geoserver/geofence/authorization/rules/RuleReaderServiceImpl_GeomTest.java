@@ -6,7 +6,7 @@ import org.geoserver.geofence.rules.repository.MemoryRuleRepository;
 import org.geoserver.geofence.rules.service.RuleAdminService;
 import org.geoserver.geofence.users.repository.MemoryGeoServerUserGroupRepository;
 import org.geoserver.geofence.users.repository.MemoryGeoServerUserRepository;
-import org.geoserver.geofence.users.service.DefaultUserResolver;
+import org.geoserver.geofence.users.service.DefaultUserRolesResolver;
 import org.geoserver.geofence.users.service.UserAdminService;
 import org.geoserver.geofence.users.service.UserGroupAdminService;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +25,6 @@ public class RuleReaderServiceImpl_GeomTest extends AbstractRuleReaderServiceImp
                 new RuleReaderServiceImpl(
                         adminruleAdminService,
                         ruleAdminService,
-                        new DefaultUserResolver(userAdminService));
+                        new DefaultUserRolesResolver(userAdminService));
     }
 }

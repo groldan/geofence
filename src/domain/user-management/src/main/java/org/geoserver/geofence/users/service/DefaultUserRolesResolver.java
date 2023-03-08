@@ -6,10 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.geoserver.geofence.users.model.GeoServerUser;
 
 import java.util.Set;
-import java.util.function.Function;
 
 @RequiredArgsConstructor
-public class DefaultUserResolver implements Function<String, Set<String>> {
+public class DefaultUserRolesResolver implements UserRolesResolver {
 
     private final @NonNull UserAdminService userAdminService;
 

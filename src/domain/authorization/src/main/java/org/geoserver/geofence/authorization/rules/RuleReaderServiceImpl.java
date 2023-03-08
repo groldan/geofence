@@ -28,6 +28,7 @@ import org.geoserver.geofence.rules.model.Rule;
 import org.geoserver.geofence.rules.model.RuleLimits;
 import org.geoserver.geofence.rules.model.SpatialFilterType;
 import org.geoserver.geofence.rules.service.RuleAdminService;
+import org.geoserver.geofence.users.service.UserRolesResolver;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Geometry;
@@ -46,7 +47,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -64,7 +64,7 @@ public class RuleReaderServiceImpl implements RuleReaderService {
 
     private final AdminRuleAdminService adminRuleService;
     private final RuleAdminService ruleService;
-    private final Function<String, Set<String>> userRolesResolver;
+    private final UserRolesResolver userRolesResolver;
 
     /**
      * <B>TODO: REFACTOR</B>

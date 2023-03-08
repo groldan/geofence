@@ -11,15 +11,13 @@ import org.geoserver.geofence.config.domain.AdminRuleAdminServiceConfiguration;
 import org.geoserver.geofence.config.domain.RuleAdminServiceConfiguration;
 import org.geoserver.geofence.config.domain.UserAdminServiceConfiguration;
 import org.geoserver.geofence.rules.service.RuleAdminService;
-import org.geoserver.geofence.users.service.DefaultUserResolver;
+import org.geoserver.geofence.users.service.DefaultUserRolesResolver;
 import org.geoserver.geofence.users.service.UserAdminService;
 import org.geoserver.geofence.users.service.UserGroupAdminService;
+import org.geoserver.geofence.users.service.UserRolesResolver;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.mock.env.MockEnvironment;
-
-import java.util.Set;
-import java.util.function.Function;
 
 public class ClientContextSupport {
 
@@ -97,8 +95,7 @@ public class ClientContextSupport {
     public RuleReaderServiceImpl getRuleReaderServiceImpl() {
         AdminRuleAdminService adminRuleService = getAdminRuleAdminServiceClient();
         RuleAdminService ruleService = getRuleAdminServiceClient();
-        Function<String, Set<String>> userResolver =
-                new DefaultUserResolver(getUserAdminServiceClient());
+        UserRolesResolver userResolver = new DefaultUserRolesResolver(getUserAdminServiceClient());
         return new RuleReaderServiceImpl(adminRuleService, ruleService, userResolver);
         // return clientContext.getBean(RuleReaderServiceImpl.class);
     }
