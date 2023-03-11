@@ -44,7 +44,7 @@ public abstract class AdminRuleApiMapper {
 
     @Mapping(target = "identifier", ignore = true)
     abstract AdminRule updateEntity(
-            @MappingTarget AdminRule.AdminRuleBuilder entity,
+            @MappingTarget AdminRule.Builder entity,
             org.geoserver.geofence.api.v2.model.AdminRule dto);
 
     @Mapping(target = "instanceName", source = "instance")

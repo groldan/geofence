@@ -24,7 +24,7 @@ import org.geoserver.geofence.rules.model.IPAddressRange;
  */
 @Value
 @With
-@Builder(toBuilder = true)
+@Builder(toBuilder = true, builderClassName = "Builder")
 public class AdminRule {
 
     private String id;

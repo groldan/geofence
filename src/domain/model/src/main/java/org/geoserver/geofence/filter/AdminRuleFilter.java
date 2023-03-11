@@ -50,6 +50,15 @@ public class AdminRuleFilter extends Filter implements Cloneable {
         workspace = new TextFilter(ft);
     }
 
+    public AdminRuleFilter setIncludeDefault(boolean includeDefault) {
+        user.setIncludeDefault(includeDefault);
+        role.setIncludeDefault(includeDefault);
+        instance.setIncludeDefault(includeDefault);
+        sourceAddress.setIncludeDefault(includeDefault);
+        workspace.setIncludeDefault(includeDefault);
+        return this;
+    }
+
     public AdminRuleFilter(AdminRuleFilter source) {
         grantType = source.getGrantType();
         try {
