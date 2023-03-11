@@ -20,6 +20,5 @@
     <module>domain</module>
     <module>persistence-jpa</module>
     <module>openapi</module>
-    <module>geoserver</module>
   </modules>
 </project>

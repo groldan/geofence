@@ -28,12 +28,6 @@ flowchart LR
         api-impl --> api-model-mapper & openapi-server & domain-spring-integration & rule-management & adminrule-management & user-management
         api-client --> api-model-mapper & openapi-client
     end
-    subgraph geoserver-integration
-        access-manager --> 
-          domain-spring-integration & authorization
-        restconfig --> api-impl & access-manager
-        webui --> access-manager
-    end
   end
   subgraph application
     rest-app --> api-impl & jpa-integration
